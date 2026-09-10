@@ -100,7 +100,7 @@ export default function DeliveryLayoutShell({
           </button>
 
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 sm:h-11 w-auto brightness-0 invert object-contain transition-all" />
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 sm:h-11 w-auto object-contain transition-all" />
           </Link>
 
           <span className="hidden sm:inline text-white/20 text-sm">|</span>
@@ -214,7 +214,7 @@ export default function DeliveryLayoutShell({
             <aside className="relative w-[280px] max-w-[85vw] bg-[#14151f]/95 backdrop-blur-3xl text-white flex flex-col h-full z-50 border-r border-white/20 shadow-2xl overflow-y-auto p-4 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-white/15">
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 invert object-contain" />
+                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto object-contain" />
                   <span className="text-xs font-extrabold text-white">Delivery Menu</span>
                 </div>
                 <button
