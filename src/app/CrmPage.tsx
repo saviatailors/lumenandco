@@ -3868,7 +3868,7 @@ export default function CrmPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-neutral-700 font-semibold mb-1">Email Address *</label>
                   <input
@@ -3893,7 +3893,7 @@ export default function CrmPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-neutral-700 font-semibold mb-1">Department</label>
                   <select

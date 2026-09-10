@@ -1395,7 +1395,7 @@ export default function WhatsAppMessengerView({
       {/* ========================================================================= */}
       {/* COLUMN 1: LEFTMOST NARROW VERTICAL ICON NAVBAR (#121318) */}
       {/* ========================================================================= */}
-      <div className="w-16 bg-[#121318] border-r border-white/5 flex flex-col items-center justify-between py-5 shrink-0 z-20">
+      <div className="hidden sm:flex w-16 bg-[#121318] border-r border-white/5 flex-col items-center justify-between py-5 shrink-0 z-20">
         <div className="flex flex-col items-center gap-6">
           {/* Brand Logo */}
           <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center border border-white/25 shadow-md cursor-pointer hover:bg-white/20 transition-all overflow-hidden" title="Lumen & Co">
@@ -1478,7 +1478,7 @@ export default function WhatsAppMessengerView({
       {/* ========================================================================= */}
       {/* COLUMN 2: CONVERSATION LIST SIDEBAR ("Chats") (#171821) */}
       {/* ========================================================================= */}
-      <div className="w-72 sm:w-80 bg-[#171821] border-r border-white/5 flex flex-col shrink-0 isolate">
+      <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-[#171821] border-r border-white/5 flex-col shrink-0 isolate`}>
         {/* Chats Header */}
         <div className="h-16 px-5 flex items-center justify-between border-b border-white/5 shrink-0">
           <h2 className="text-xl font-extrabold text-white tracking-tight">Chats</h2>
@@ -1653,12 +1653,20 @@ export default function WhatsAppMessengerView({
       {/* ========================================================================= */}
       {/* COLUMN 3: MAIN CHAT WINDOW (#1c1d27) */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex flex-col bg-[#1c1d27] overflow-hidden relative isolate">
+      <div className={`${!activeChannelId ? "hidden md:flex" : "flex"} flex-1 flex-col bg-[#1c1d27] overflow-hidden relative isolate`}>
         {activeChannel ? (
           <>
             {/* Chat Header */}
-            <div className="h-16 px-6 flex items-center justify-between border-b border-white/5 shrink-0 bg-[#1c1d27] z-10">
-              <div className="flex items-center gap-3.5">
+            <div className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-white/5 shrink-0 bg-[#1c1d27] z-10">
+              <div className="flex items-center gap-2 sm:gap-3.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveChannelId("")}
+                  className="md:hidden p-2 text-neutral-400 hover:text-white bg-white/10 rounded-xl cursor-pointer"
+                  title="Back to Chats"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
                 <div className="relative">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f83fe] to-[#ff5c8d] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#ff5c8d]/50 shadow-md">
                     {activeChannel.name.substring(0, 2).toUpperCase()}

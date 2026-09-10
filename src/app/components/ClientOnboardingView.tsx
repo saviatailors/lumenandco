@@ -310,10 +310,10 @@ export default function ClientOnboardingView() {
       {/* Main Tabbed Form & Onboarding Intake Spec */}
       <div className="bg-white rounded-3xl border border-neutral-200 shadow-xl overflow-hidden">
         {/* Navigation Tabs */}
-        <div className="bg-neutral-900 border-b border-neutral-800 p-2 flex flex-wrap items-center gap-1 text-xs">
+        <div className="bg-neutral-900 border-b border-neutral-800 p-2 flex items-center gap-1.5 text-xs overflow-x-auto scrollbar-none max-w-full">
           <button
             onClick={() => setActiveTab("general")}
-            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
               activeTab === "general"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
@@ -322,10 +322,11 @@ export default function ClientOnboardingView() {
             <Building2 className="h-4 w-4" />
             <span>1. Brand & Contract Specs</span>
           </button>
+
           <button
-            onClick={() => setActiveTab("contacts")}
-            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "contacts"
+            onClick={() => setActiveTab("leads")}
+            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              activeTab === "leads"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
@@ -333,10 +334,11 @@ export default function ClientOnboardingView() {
             <Phone className="h-4 w-4" />
             <span>2. Lead Ops & POCs</span>
           </button>
+
           <button
-            onClick={() => setActiveTab("credentials")}
-            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "credentials"
+            onClick={() => setActiveTab("creds")}
+            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              activeTab === "creds"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
@@ -344,26 +346,28 @@ export default function ClientOnboardingView() {
             <Key className="h-4 w-4" />
             <span>3. Platform Access & Creds</span>
           </button>
+
           <button
             onClick={() => setActiveTab("assets")}
-            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
               activeTab === "assets"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
           >
-            <CheckCircle2 className="h-4 w-4" />
+            <Lock className="h-4 w-4" />
             <span>4. Asset Checklist & Trademark</span>
           </button>
+
           <button
-            onClick={() => setActiveTab("sla")}
-            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "sla"
+            onClick={() => setActiveTab("lumen")}
+            className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              activeTab === "lumen"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
           >
-            <Award className="h-4 w-4" />
+            <Sparkles className="h-4 w-4 text-[#fed7aa]" />
             <span>5. Lumen & Co SLA Specs</span>
           </button>
         </div>
