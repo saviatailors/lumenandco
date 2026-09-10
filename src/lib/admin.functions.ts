@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAuth } from "@/lib/supabase.server";
 
 /** Reads the allowed admin addresses from the ADMIN_EMAILS setting (comma separated). */
 export function adminEmailList() {
@@ -13,7 +13,7 @@ export function adminEmailList() {
 
 /** Tells the browser whether the signed-in account may use the private dashboards. */
 export const checkAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     const email = (context.claims as { email?: string } | null)?.email?.toLowerCase() ?? "";

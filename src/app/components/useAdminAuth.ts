@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/lib/supabase-client";
 import { checkAdmin } from "@/lib/admin.functions";
 
 export type AdminState = "checking" | "signedOut" | "denied" | "ready";
 
-/** Google-only gate for the private dashboard screens. */
+/** Google-only gate for the private dashboard screens (your own Supabase auth). */
 export function useAdminAuth() {
   const [state, setState] = useState<AdminState>("checking");
   const [email, setEmail] = useState("");
@@ -36,21 +35,23 @@ export function useAdminAuth() {
 
   useEffect(() => {
     void evaluate();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => void evaluate());
+    return () => sub.subscription.unsubscribe();
   }, [evaluate]);
 
   const signIn = useCallback(async () => {
     setError("");
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { prompt: "select_account" },
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+        queryParams: { prompt: "select_account" },
+      },
     });
-    if (result.error) {
+    if (oauthError) {
       setError("Google sign-in didn't complete. Please try again.");
-      return;
     }
-    if (result.redirected) return;
-    await evaluate();
-  }, [evaluate]);
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();

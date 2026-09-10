@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronRight, Loader2, X } from "lucide-react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase-client";
 
 const OPEN_EVENT = "convix:open-lead-form";
 
