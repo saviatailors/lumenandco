@@ -142,6 +142,7 @@ export default function CrmPage() {
         email={admin.email}
         error={admin.error}
         onSignIn={() => void admin.signIn()}
+        onPasswordSignIn={admin.signInWithPassword}
         onSignOut={() => void admin.signOut()}
         title="Private CRM"
       />
