@@ -31,9 +31,8 @@ async function logEvent(
   await supabase.from("lead_events").insert({ lead_id, kind, detail, actor });
 }
 
-async function admin() {
-  const mod = await import("@/integrations/supabase/client.server");
-  return mod.supabaseAdmin;
+function admin() {
+  return supabaseAdmin();
 }
 
 export const listLeads = createServerFn({ method: "POST" })
@@ -41,7 +40,7 @@ export const listLeads = createServerFn({ method: "POST" })
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { data: rows, error } = await supabase
       .from("leads")
       .select("*")
@@ -65,7 +64,7 @@ export const updateLead = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const patch: { status?: string; notes?: string; next_steps?: string } = {};
     if (data.status) patch.status = data.status;
     if (typeof data.notes === "string") patch.notes = data.notes;
@@ -105,7 +104,7 @@ export const listLeadEvents = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { data: rows, error } = await supabase
       .from("lead_events")
       .select("id, kind, detail, actor, created_at")
@@ -124,7 +123,7 @@ export const logLeadOpened = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     await logEvent(supabase, data.id, "open", "Enquiry opened in the dashboard");
     return { ok: true };
   });
@@ -136,7 +135,7 @@ export const deleteLead = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { error } = await supabase.from("leads").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -149,7 +148,7 @@ export const listMedia = createServerFn({ method: "POST" })
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { data: rows, error } = await supabase
       .from("site_media")
       .select("*")
@@ -177,7 +176,7 @@ export const saveMedia = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const row = {
       kind: data.kind,
       src: data.src,
@@ -203,7 +202,7 @@ export const deleteMedia = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { error } = await supabase.from("site_media").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -223,7 +222,7 @@ export const createVideoUpload = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-80);
     const path = `${Date.now()}-${safe}`;
     const { data: ticket, error } = await supabase.storage
@@ -241,7 +240,7 @@ export const deleteVideoFile = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     requireAdmin(context.claims);
-    const supabase = await admin();
+    const supabase = admin();
     const { error } = await supabase.storage.from(VIDEO_BUCKET).remove([data.path]);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -256,7 +255,7 @@ export const getLeadPortal = createServerFn({ method: "POST" })
     z.object({ token: z.string().trim().min(16).max(80) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const supabase = await admin();
+    const supabase = admin();
     const { data: row, error } = await supabase
       .from("leads")
       .select(PORTAL_FIELDS)
