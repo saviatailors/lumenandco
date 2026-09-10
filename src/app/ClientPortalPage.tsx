@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { Loader2, LogOut } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase-client";
 import { getMyEnquiries } from "@/lib/client-portal.functions";
 import EnquiryDashboard, { type PortalLead } from "./components/EnquiryDashboard";
 

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAuth, supabaseAdmin } from "@/lib/supabase.server";
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
@@ -37,7 +37,7 @@ async function admin() {
 }
 
 export const listLeads = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     requireAdmin(context.claims);
@@ -52,7 +52,7 @@ export const listLeads = createServerFn({ method: "POST" })
   });
 
 export const updateLead = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z
       .object({
@@ -99,7 +99,7 @@ export const updateLead = createServerFn({ method: "POST" })
 
 /** Dashboard: the activity history for one enquiry. */
 export const listLeadEvents = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z.object({ id: z.string().uuid() }).parse(data),
   )
@@ -118,7 +118,7 @@ export const listLeadEvents = createServerFn({ method: "POST" })
 
 /** Dashboard: records that the team opened an enquiry. */
 export const logLeadOpened = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z.object({ id: z.string().uuid() }).parse(data),
   )
@@ -130,7 +130,7 @@ export const logLeadOpened = createServerFn({ method: "POST" })
   });
 
 export const deleteLead = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z.object({ id: z.string().uuid() }).parse(data),
   )
@@ -145,7 +145,7 @@ export const deleteLead = createServerFn({ method: "POST" })
 const KINDS = ["reel", "creative"] as const;
 
 export const listMedia = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     requireAdmin(context.claims);
@@ -161,7 +161,7 @@ export const listMedia = createServerFn({ method: "POST" })
   });
 
 export const saveMedia = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z
       .object({
@@ -197,7 +197,7 @@ export const saveMedia = createServerFn({ method: "POST" })
   });
 
 export const deleteMedia = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z.object({ id: z.string().uuid() }).parse(data),
   )
@@ -213,7 +213,7 @@ const VIDEO_BUCKET = "site-videos";
 
 /** Creates a one-off upload ticket so the dashboard can send a video file straight to storage. */
 export const createVideoUpload = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z
       .object({
@@ -235,7 +235,7 @@ export const createVideoUpload = createServerFn({ method: "POST" })
 
 /** Removes an uploaded video file from storage. */
 export const deleteVideoFile = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAuth])
   .inputValidator((data) =>
     z.object({ path: z.string().trim().min(1).max(400) }).parse(data),
   )
