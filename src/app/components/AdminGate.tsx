@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
 
@@ -11,6 +12,7 @@ export default function AdminGate({
   email,
   error,
   onSignIn,
+  onPasswordSignIn,
   onSignOut,
   title,
 }: {
@@ -18,9 +20,14 @@ export default function AdminGate({
   email: string;
   error: string;
   onSignIn: () => void;
+  onPasswordSignIn?: (email: string, password: string) => Promise<boolean>;
   onSignOut: () => void;
   title: string;
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [mail, setMail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
   return (
     <div
       className="flex min-h-screen w-full items-center justify-center bg-[#ededed] p-4"
