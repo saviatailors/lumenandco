@@ -5,12 +5,17 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
-/** Only these Google accounts may use the dashboard. */
-const ADMIN_EMAILS = ["sahitsai6@gmail.com"];
+/** Only the accounts listed in the ADMIN_EMAILS setting may use the dashboard. */
+function adminEmails() {
+  return (process.env["ADMIN_EMAILS"] ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 function requireAdmin(claims: unknown) {
   const email = (claims as { email?: string } | null)?.email?.toLowerCase() ?? "";
-  if (!email || !ADMIN_EMAILS.includes(email)) {
+  if (!email || !adminEmails().includes(email)) {
     throw new Error("Not an admin account");
   }
   return email;
