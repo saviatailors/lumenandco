@@ -2,20 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireAuth, supabaseAdmin } from "@/lib/supabase.server";
+import { isAdminEmail } from "@/lib/admin.functions";
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
-/** Only the accounts listed in the ADMIN_EMAILS setting may use the dashboard. */
-function adminEmails() {
-  return (process.env["ADMIN_EMAILS"] ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function requireAdmin(claims: unknown) {
+/** Only accounts with the admin role (database list or ADMIN_EMAILS) may use the dashboard. */
+async function requireAdmin(claims: unknown) {
   const email = (claims as { email?: string } | null)?.email?.toLowerCase() ?? "";
-  if (!email || !adminEmails().includes(email)) {
+  if (!(await isAdminEmail(email))) {
     throw new Error("Not an admin account");
   }
   return email;
