@@ -35,7 +35,7 @@ export default function AppSwitcher({ currentApp }: { currentApp: "crm" | "deliv
       <div className="bg-neutral-900 text-white border-b border-neutral-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 z-30">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto object-contain brightness-0 invert" />
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto object-contain" />
           </Link>
           <span className="text-neutral-600 hidden sm:inline">|</span>
           <span className="text-neutral-400 font-medium hidden sm:inline">Backend Suite</span>

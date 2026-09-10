@@ -660,7 +660,7 @@ export default function ClientPortalPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto brightness-0 invert" />
+                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto" />
                   <span className="text-white/30">•</span>
                   <h2 className="text-xl font-black text-white tracking-tight">
                     Mandatory Policy & Consent Gate
