@@ -73,3 +73,34 @@ export function supabaseAsUser(token: string) {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+/** Admin addresses from the ADMIN_EMAILS setting (comma separated). */
+export function adminEmailList() {
+  return (process.env["ADMIN_EMAILS"] ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/** True when the address holds the admin role in admin_users, or is in ADMIN_EMAILS. */
+export async function isAdminEmail(email: string) {
+  const mail = email.trim().toLowerCase();
+  if (!mail) return false;
+  if (adminEmailList().includes(mail)) return true;
+  try {
+    const client = supabaseAdmin() as unknown as {
+      from: (table: string) => {
+        select: (cols: string) => {
+          ilike: (
+            col: string,
+            value: string,
+          ) => { maybeSingle: () => Promise<{ data: { role?: string } | null }> };
+        };
+      };
+    };
+    const { data } = await client.from("admin_users").select("email, role").ilike("email", mail).maybeSingle();
+    return data?.role === "admin";
+  } catch {
+    return false;
+  }
+}
