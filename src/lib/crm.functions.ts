@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireAuth, supabaseAdmin } from "@/lib/supabase.server";
-import { isAdminEmail } from "@/lib/admin.functions";
+import { requireAuth, supabaseAdmin, isAdminEmail } from "@/lib/supabase.server";
+
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
