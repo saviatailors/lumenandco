@@ -62,7 +62,7 @@ export default function AdminGate({
           </>
         ) : (
           <>
-            <p className="mt-1 text-sm text-neutral-500">Sign in with your Google account.</p>
+            <p className="mt-1 text-sm text-neutral-500">Sign in with your admin account.</p>
             <button
               onClick={onSignIn}
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white"
@@ -70,6 +70,53 @@ export default function AdminGate({
             >
               Continue with Google
             </button>
+
+            {onPasswordSignIn ? (
+              showPassword ? (
+                <form
+                  className="mt-4 space-y-2 text-left"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    setBusy(true);
+                    await onPasswordSignIn(mail, password);
+                    setBusy(false);
+                  }}
+                >
+                  <input
+                    type="email"
+                    required
+                    value={mail}
+                    onChange={(event) => setMail(event.target.value)}
+                    placeholder="Email"
+                    autoComplete="username"
+                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                  />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                  />
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full rounded-xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  >
+                    {busy ? "Signing in…" : "Sign in"}
+                  </button>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setShowPassword(true)}
+                  className="mt-3 text-xs text-neutral-500 underline hover:text-neutral-700"
+                >
+                  Use email and password instead
+                </button>
+              )
+            ) : null}
           </>
         )}
 
