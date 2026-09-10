@@ -53,6 +53,23 @@ export function useAdminAuth() {
     }
   }, []);
 
+  /** Backup sign-in that works even when Google is unavailable. */
+  const signInWithPassword = useCallback(
+    async (mail: string, password: string) => {
+      setError("");
+      const { error: passwordError } = await supabase.auth.signInWithPassword({
+        email: mail.trim(),
+        password,
+      });
+      if (passwordError) {
+        setError("That email and password didn't match.");
+        return false;
+      }
+      return await evaluate();
+    },
+    [evaluate],
+  );
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setState("signedOut");
