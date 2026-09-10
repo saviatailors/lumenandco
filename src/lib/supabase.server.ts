@@ -4,14 +4,36 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, keyAwareFetch } from "./supabase-client";
+
+const SUPABASE_URL = "https://ufgucizbwhsoctkvexvw.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_1KvW2POsLGSC-Q2I-9_v2A__C_E_iuj";
+
+function isOpaqueKey(value: string): boolean {
+  return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
+}
+
+/** Opaque sb_* keys must travel in the apikey header, not as a bearer token. */
+function keyAwareFetch(key: string, extra?: HeadersInit): typeof fetch {
+  return (input, init) => {
+    const headers = new Headers(
+      typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+    );
+    if (init?.headers) new Headers(init.headers).forEach((v, k) => headers.set(k, v));
+    if (extra) new Headers(extra).forEach((v, k) => headers.set(k, v));
+    if (isOpaqueKey(key) && headers.get("Authorization") === `Bearer ${key}`) {
+      headers.delete("Authorization");
+    }
+    headers.set("apikey", key);
+    return fetch(input, { ...init, headers });
+  };
+}
 
 /** Privileged client — bypasses row level security. Server handlers only. */
 export function supabaseAdmin() {
-  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  const key = process.env["EXTERNAL_SUPABASE_SERVICE_KEY"];
   if (!key) {
     throw new Error(
-      "Missing SUPABASE_SERVICE_ROLE_KEY secret. Add the service key from your Supabase project settings.",
+      "Missing EXTERNAL_SUPABASE_SERVICE_KEY secret. Add the service key from your Supabase project settings.",
     );
   }
   return createClient<Database>(SUPABASE_URL, key, {
