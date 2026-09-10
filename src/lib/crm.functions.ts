@@ -39,7 +39,7 @@ export const listLeads = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { data: rows, error } = await supabase
       .from("leads")
@@ -63,7 +63,7 @@ export const updateLead = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const patch: { status?: string; notes?: string; next_steps?: string } = {};
     if (data.status) patch.status = data.status;
@@ -103,7 +103,7 @@ export const listLeadEvents = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { data: rows, error } = await supabase
       .from("lead_events")
@@ -122,7 +122,7 @@ export const logLeadOpened = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     await logEvent(supabase, data.id, "open", "Enquiry opened in the dashboard");
     return { ok: true };
@@ -134,7 +134,7 @@ export const deleteLead = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { error } = await supabase.from("leads").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -147,7 +147,7 @@ export const listMedia = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { data: rows, error } = await supabase
       .from("site_media")
@@ -175,7 +175,7 @@ export const saveMedia = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const row = {
       kind: data.kind,
@@ -201,7 +201,7 @@ export const deleteMedia = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { error } = await supabase.from("site_media").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -221,7 +221,7 @@ export const createVideoUpload = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-80);
     const path = `${Date.now()}-${safe}`;
@@ -239,7 +239,7 @@ export const deleteVideoFile = createServerFn({ method: "POST" })
     z.object({ path: z.string().trim().min(1).max(400) }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    requireAdmin(context.claims);
+    await requireAdmin(context.claims);
     const supabase = admin();
     const { error } = await supabase.storage.from(VIDEO_BUCKET).remove([data.path]);
     if (error) throw new Error(error.message);
