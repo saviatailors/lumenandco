@@ -1,0 +1,7 @@
+/*
+ * Fonts used by the hero: Inter (400/500/600/700) and Instrument Serif
+ * (regular + italic).
+ *
+ * They are loaded over the network with <link> tags in src/routes/__root.tsx,
+ * because the CSS build resolves @import from the filesystem only.
+ */
