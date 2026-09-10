@@ -76,5 +76,5 @@ export function useAdminAuth() {
     setEmail("");
   }, []);
 
-  return { state, email, error, signIn, signOut, refresh: evaluate };
+  return { state, email, error, signIn, signInWithPassword, signOut, refresh: evaluate };
 }
