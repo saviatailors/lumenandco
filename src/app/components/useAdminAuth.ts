@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-
-export const ADMIN_EMAILS = ["sahitsai6@gmail.com"];
+import { checkAdmin } from "@/lib/admin.functions";
 
 export type AdminState = "checking" | "signedOut" | "denied" | "ready";
 
@@ -21,12 +20,18 @@ export function useAdminAuth() {
       setState("signedOut");
       return false;
     }
-    if (!ADMIN_EMAILS.includes(mail)) {
+    try {
+      const result = await checkAdmin({ data: {} });
+      if (!result.isAdmin) {
+        setState("denied");
+        return false;
+      }
+      setState("ready");
+      return true;
+    } catch {
       setState("denied");
       return false;
     }
-    setState("ready");
-    return true;
   }, []);
 
   useEffect(() => {
