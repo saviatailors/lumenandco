@@ -169,6 +169,7 @@ export default function VideoLibraryPage() {
         email={admin.email}
         error={admin.error}
         onSignIn={() => void admin.signIn()}
+        onPasswordSignIn={admin.signInWithPassword}
         onSignOut={() => void admin.signOut()}
         title="Video library"
       />
