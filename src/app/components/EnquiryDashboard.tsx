@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ShieldAlert, MessageSquare, Building2, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 export type PortalLead = {
   id: string;
@@ -35,9 +36,11 @@ export const STATUS_LABEL: Record<string, string> = {
 export default function EnquiryDashboard({
   enquiries,
   initialId,
+  isSuspended = false,
 }: {
   enquiries: PortalLead[];
   initialId?: string;
+  isSuspended?: boolean;
 }) {
   const [activeId, setActiveId] = useState(initialId ?? enquiries[0]?.id ?? "");
   const lead = useMemo(
@@ -62,7 +65,62 @@ export default function EnquiryDashboard({
   const active = enquiries.filter((e) => e.status !== "lost" && e.status !== "won").length;
 
   return (
-    <div className="space-y-3 pb-10">
+    <div className="space-y-4 pb-10">
+      {/* Access Suspended / Revoked Payment Clearance Banner */}
+      {isSuspended && (
+        <div className="rounded-3xl bg-red-50 border-2 border-red-300 p-6 text-red-950 space-y-3 shadow-md">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm uppercase tracking-wide">
+              <ShieldAlert className="h-5 w-5 text-red-600 animate-pulse" />
+              <span>Portal & Campaign Access Suspended</span>
+            </div>
+            <span className="bg-red-600 text-white font-bold text-[10px] px-3 py-1 rounded-full uppercase">
+              Retainer Clearance Past Due
+            </span>
+          </div>
+
+          <p className="text-xs font-semibold leading-relaxed text-red-900">
+            Official Notice: Master portal access and active performance marketing campaign execution for your account have been <strong>TEMPORARILY SUSPENDED</strong> due to pending monthly retainer payment clearance.
+          </p>
+
+          <div className="bg-white p-4 rounded-2xl border border-red-200 text-xs font-medium space-y-2 text-neutral-800">
+            <span className="font-extrabold text-red-800 text-xs block">Bank Transfer & Immediate Payment Clearance Details:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-neutral-900">
+              <div>
+                <span className="text-neutral-500 block text-[10px]">Corporate Account Name:</span>
+                <span>Lumen & Co Media Solutions LLP</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 block text-[10px]">Axis Bank A/C Number:</span>
+                <span className="font-mono font-bold text-neutral-900">924020018472910</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 block text-[10px]">Bank IFSC Code:</span>
+                <span>UTIB0000284 (Axis Bank, Jubilee Hills, Hyd)</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 block text-[10px]">Instant UPI ID:</span>
+                <span className="font-bold text-[#ef4d23] font-mono">lumenandco@axisbank</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-red-200 text-xs">
+            <span className="text-red-800 font-semibold text-[11px]">
+              Once transferred, please submit your payment screenshot to Accounts for 15-minute reactivation.
+            </span>
+            <a
+              href="https://wa.me/919849000000?text=Hi%20Lumen%20%26%20Co%2C%20here%20is%20my%20payment%20clearance%20receipt%20for%20retainer%20reactivation."
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+            >
+              <MessageSquare className="h-4 w-4" /> Send Payment Receipt on WhatsApp
+            </a>
+          </div>
+        </div>
+      )}
+
       <section className="rounded-3xl bg-white p-6">
         <span
           className="inline-flex items-center gap-2 rounded-full bg-[#f5f2ee] px-4 py-1.5"

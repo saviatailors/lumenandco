@@ -1,197 +1,1888 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Loader2, LogOut } from "lucide-react";
+import {
+  Loader2,
+  LogOut,
+  MessageSquare,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  FileText,
+  Receipt,
+  Download,
+  PhoneCall,
+  ExternalLink,
+  ShieldCheck,
+  Building2,
+  Sparkles,
+  Zap,
+  Play,
+  ThumbsUp,
+  RotateCcw,
+  UserCheck,
+  Users,
+  Search,
+  Filter,
+  Phone,
+  Flame,
+  Snowflake,
+  CheckSquare,
+  ArrowUpRight,
+  Video,
+  Copy,
+  FolderDown,
+  Layers,
+  FileCode,
+  Image as ImageIcon,
+  BarChart3,
+  Lock,
+  X,
+  FileCheck,
+  History,
+  Send,
+  Eye,
+  Mail,
+  Calendar,
+  KeyRound,
+  ShieldAlert,
+  HelpCircle,
+  Check,
+} from "lucide-react";
 
-import { supabase } from "@/lib/supabase-client";
-import { getMyEnquiries } from "@/lib/client-portal.functions";
-import EnquiryDashboard, { type PortalLead } from "./components/EnquiryDashboard";
+import { getMyEnquiries, generateLeadsCsv, buildConsentAuditRecord, buildLoginHistoryRecord } from "@/lib/client-portal.functions";
+import ClientLayoutShell, { ClientTab } from "./components/ClientLayoutShell";
+import RigidGlassMetricCard from "./components/ui/RigidGlassMetricCard";
+import { useToast } from "./components/ui/Toast";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "./components/ui/Table";
+import { Badge } from "./components/ui/Badge";
+import { Button } from "./components/ui/Button";
+
+import {
+  ClientBusinessLead,
+  INITIAL_CLIENT_BUSINESS_LEADS,
+  CURRENT_POLICY_VERSION,
+  LUMEN_POLICY_CONTENT_V1,
+  UserConsentRecord,
+  UserLoginHistoryEntry,
+  INITIAL_USER_CONSENT_RECORDS,
+  INITIAL_USER_LOGIN_HISTORY,
+  CreativeApprovalItem,
+  INITIAL_CREATIVE_APPROVALS,
+} from "@/lib/lumenandco.types";
 
 export default function ClientPortalPage() {
   const fetchMine = useServerFn(getMyEnquiries);
+  const toast = useToast();
 
+  // Auth State
   const [checking, setChecking] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [currentTab, setCurrentTab] = useState<ClientTab>("overview");
   const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [enquiries, setEnquiries] = useState<PortalLead[]>([]);
+  const [emailInput, setEmailInput] = useState("mark@northbeam.io");
+  const [passwordInput, setPasswordInput] = useState("••••••••••••");
+  const [otpInput, setOtpInput] = useState("123456");
 
-  const load = async () => {
-    try {
-      const res = await fetchMine({ data: undefined });
-      setEnquiries(res.enquiries as PortalLead[]);
-      setSignedIn(true);
-    } catch {
-      setError("We couldn't load your enquiries. Please sign in again.");
-      setSignedIn(false);
+  // Client Identity State
+  const [userId, setUserId] = useState("user-mark-101");
+  const [clientId, setClientId] = useState("client-101");
+  const [clientName, setClientName] = useState("Mark Davis");
+  const [clientCompany, setClientCompany] = useState("Northbeam E-Commerce");
+  const [userEmail, setUserEmail] = useState("mark@northbeam.io");
+
+  // Consent Audit & Login History State
+  const [consentRecords, setConsentRecords] = useState<UserConsentRecord[]>(INITIAL_USER_CONSENT_RECORDS);
+  const [loginHistory, setLoginHistory] = useState<UserLoginHistoryEntry[]>(INITIAL_USER_LOGIN_HISTORY);
+  
+  // Consent Gate Form State (Multi-Doc Sequential Reading Process)
+  const [privacyChecked, setPrivacyChecked] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [hasScrolledPrivacy, setHasScrolledPrivacy] = useState(false);
+  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
+  const [consentTab, setConsentTab] = useState<"privacy" | "terms">("privacy");
+
+  // Scroll detection handler for policy document reader
+  const handleDocumentScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Unlocks when user scrolls near the bottom (within 40px of bottom)
+    if (scrollHeight - scrollTop - clientHeight < 40) {
+      if (consentTab === "privacy") {
+        setHasScrolledPrivacy(true);
+      } else if (consentTab === "terms") {
+        setHasScrolledTerms(true);
+      }
     }
   };
 
+  // Modals for Footer Policy View
+  const [viewPolicyModal, setViewPolicyModal] = useState<"privacy" | "terms" | null>(null);
+
+  // Creative Approvals State
+  const [creativeApprovals, setCreativeApprovals] = useState<CreativeApprovalItem[]>(INITIAL_CREATIVE_APPROVALS);
+  const [rejectModalItem, setRejectModalItem] = useState<CreativeApprovalItem | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [historyModalItem, setHistoryModalItem] = useState<CreativeApprovalItem | null>(null);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+
+  // Business Leads State
+  const [businessLeads, setBusinessLeads] = useState<ClientBusinessLead[]>([
+    ...INITIAL_CLIENT_BUSINESS_LEADS,
+    {
+      id: "clead-103",
+      client_id: "client-101",
+      client_name: "Northbeam E-Commerce",
+      lead_name: "Rohan Kapoor",
+      phone: "+91 99887 76655",
+      email: "rohan.k@techcorp.in",
+      city: "Mumbai",
+      campaign_source: "Instagram Reel - Q4 Festival Offer",
+      temperature: "hot",
+      assigned_telecaller: "Sahit Sai (Sales Lead)",
+      estimated_deal_value_rupees: 85000,
+      last_contacted_at: "2026-09-10T11:00:00Z",
+      created_at: "2026-09-10T08:30:00Z",
+      notes: "High intent corporate buyer. Wants custom pricing for 500 units.",
+      call_history: [],
+    },
+  ]);
+  const [leadSearchQuery, setLeadSearchQuery] = useState("");
+  const [leadFilterTemp, setLeadFilterTemp] = useState<string>("all");
+  const [leadFilterDate, setLeadFilterDate] = useState<string>("all");
+
+  // Profile Password Change State
+  const [currPass, setCurrPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+
+  // Support Request State
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportCategory, setSupportCategory] = useState("dpdp_data_request");
+  const [supportMessage, setSupportMessage] = useState("");
+
+  // Notifications Feed State
+  const [notifications, setNotifications] = useState([
+    {
+      id: "notif-1",
+      title: "New High-Intent Business Lead Received",
+      desc: "Rohan Kapoor (+91 99887 76655) submitted lead form via Instagram Reel - Q4 Festival Offer.",
+      time: "10 mins ago",
+      type: "lead",
+      read: false,
+    },
+    {
+      id: "notif-2",
+      title: "Creative Revision Resubmitted for Approval",
+      desc: "v2 cut of 'Q4 Festive Season UGC Unboxing Reel (Hook A)' is ready for your review.",
+      time: "2 hours ago",
+      type: "approval",
+      read: false,
+    },
+    {
+      id: "notif-3",
+      title: "Privacy Policy v1.0 Consent Verified",
+      desc: "Your consent record for DPDP Act 2023 compliance is active under version 1.0.",
+      time: "1 day ago",
+      type: "policy",
+      read: true,
+    },
+  ]);
+
+  // Handle Initial Load and Dev Auto Login
   useEffect(() => {
-    let alive = true;
-    void (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!alive) return;
-      if (data.session) await load();
-      if (alive) setChecking(false);
-    })();
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      // Check if current user email has accepted consent record
+      const existingConsent = consentRecords.find(
+        (r) => r.user_email.toLowerCase() === userEmail.toLowerCase() && r.policy_version === CURRENT_POLICY_VERSION
+      );
+      setSignedIn(true);
+      setConsentAccepted(!!existingConsent);
+      setChecking(false);
+    }, 400);
+    return () => clearTimeout(timer);
   }, []);
 
-  const sendCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: true },
+  // Demo Login Quick Switcher Handler
+  const handleSelectDemoAccount = (account: {
+    userId: string;
+    clientId: string;
+    name: string;
+    company: string;
+    email: string;
+  }) => {
+    setUserId(account.userId);
+    setClientId(account.clientId);
+    setClientName(account.name);
+    setClientCompany(account.company);
+    setUserEmail(account.email);
+    setEmailInput(account.email);
+
+    // Check if demo account has accepted consent for CURRENT_POLICY_VERSION
+    const hasAccepted = consentRecords.some(
+      (r) => r.user_email.toLowerCase() === account.email.toLowerCase() && r.policy_version === CURRENT_POLICY_VERSION
+    );
+
+    setSignedIn(true);
+    setConsentAccepted(hasAccepted);
+    setPrivacyChecked(false);
+    setTermsChecked(false);
+    setConsentTab("privacy");
+
+    // Log Login Attempt
+    const newLog = buildLoginHistoryRecord({
+      userId: account.userId,
+      userEmail: account.email,
+      status: hasAccepted ? "success" : "consent_pending",
     });
-    setBusy(false);
-    if (err) setError("We couldn't send the code. Check the email address and try again.");
-    else setStep("code");
+    setLoginHistory((prev) => [newLog, ...prev]);
+
+    if (hasAccepted) {
+      toast.show(`Welcome back, ${account.name}! Logged into ${account.company}.`, "success");
+    } else {
+      toast.show(`Logged in as ${account.name}. Please complete mandatory consent gate to proceed.`, "info");
+    }
   };
 
-  const verify = async (e: React.FormEvent) => {
+  // Sign In Submission
+  const handlePerformSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
-    setError("");
-    const { error: err } = await supabase.auth.verifyOtp({
-      email: email.trim().toLowerCase(),
-      token: code.trim(),
-      type: "email",
-    });
-    if (err) {
-      setBusy(false);
-      setError("That code didn't work. Ask for a new one and try again.");
+    if (!emailInput) {
+      toast.show("Please enter a valid account email address.", "error");
       return;
     }
-    await load();
-    setBusy(false);
+
+    // Default to Mark Davis if custom email isn't in pre-seeded demo
+    const emailLower = emailInput.trim().toLowerCase();
+    let selectedAcc = {
+      userId: "user-mark-101",
+      clientId: "client-101",
+      name: "Mark Davis",
+      company: "Northbeam E-Commerce",
+      email: emailInput,
+    };
+
+    if (emailLower.includes("bloom")) {
+      selectedAcc = {
+        userId: "user-ananya-102",
+        clientId: "client-102",
+        name: "Ananya Roy",
+        company: "Bloom Skincare",
+        email: emailInput,
+      };
+    } else if (emailLower.includes("fit")) {
+      selectedAcc = {
+        userId: "user-rahul-104",
+        clientId: "client-104",
+        name: "Rahul Verma",
+        company: "UrbanFit Fitness",
+        email: emailInput,
+      };
+    }
+
+    handleSelectDemoAccount(selectedAcc);
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  // Accept Consent Gate Action
+  const handleAcceptConsentGate = () => {
+    if (!privacyChecked || !termsChecked) {
+      toast.show("Please read and acknowledge both Privacy Policy and Terms of Service to continue.", "error");
+      return;
+    }
+
+    // Create consent record
+    const newRecord = buildConsentAuditRecord({
+      userId,
+      clientId,
+      userEmail,
+      policyVersion: CURRENT_POLICY_VERSION,
+    });
+
+    setConsentRecords((prev) => [newRecord, ...prev]);
+    setConsentAccepted(true);
+
+    // Add login success history record
+    const loginRecord = buildLoginHistoryRecord({
+      userId,
+      userEmail,
+      status: "success",
+    });
+    setLoginHistory((prev) => [loginRecord, ...prev]);
+
+    toast.show("Consent audit record saved (v1.0). Both policies verified. Dashboard unlocked!", "success");
+  };
+
+  // Reject Consent / Logout Action
+  const handleRejectConsentAndLogout = () => {
     setSignedIn(false);
-    setEnquiries([]);
-    setStep("email");
-    setCode("");
+    setConsentAccepted(false);
+    setPrivacyChecked(false);
+    setTermsChecked(false);
+    setConsentTab("privacy");
+    toast.show("Session terminated. You must accept both Privacy Policy & Terms of Service to access the portal.", "info");
   };
 
-  return (
-    <div
-      className="min-h-screen w-full bg-[#ededed] p-3 sm:p-5"
-      style={{ fontFamily: "Inter, sans-serif" }}
-    >
-      <div className="mx-auto max-w-5xl">
-        <header className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white px-5 py-4">
-          <div>
-            <p className="text-[11px] uppercase tracking-widest text-neutral-400">
-              lumen&co
-            </p>
-            <h1
-              className="text-2xl text-neutral-900"
-              style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
-            >
-              Client sign in
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {signedIn ? (
-              <button
-                onClick={() => void signOut()}
-                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-              >
-                <LogOut className="h-3.5 w-3.5" /> Sign out
-              </button>
-            ) : null}
-            <Link
-              to="/"
-              className="rounded-full bg-[#ef4d23] px-4 py-2 text-xs font-semibold text-white"
-            >
-              Visit site
-            </Link>
-          </div>
-        </header>
 
-        {checking ? (
-          <div className="mt-3 flex items-center justify-center gap-2 rounded-3xl bg-white p-12 text-sm text-neutral-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Checking your sign in…
-          </div>
-        ) : signedIn ? (
-          <div className="mt-3">
-            <EnquiryDashboard enquiries={enquiries} />
-          </div>
-        ) : (
-          <div className="mt-3 rounded-3xl bg-white p-6 sm:p-10">
-            <h2
-              className="text-neutral-900"
-              style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em" }}
-            >
-              See your enquiry, budget and stage
-            </h2>
-            <p className="mt-2 max-w-md text-sm text-neutral-500">
-              Enter the email address you used when you contacted us. We'll send you a 6-digit code
-              — no password needed.
-            </p>
+  // Handle Approve Creative
+  const handleApproveCreative = (itemId: string) => {
+    setCreativeApprovals((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          const updatedHistory = item.history.map((h) =>
+            h.version === item.current_version
+              ? { ...h, status: "approved" as const, action_by: clientName, action_at: new Date().toISOString() }
+              : h
+          );
+          return {
+            ...item,
+            status: "approved" as const,
+            action_at: new Date().toISOString(),
+            action_by: clientName,
+            history: updatedHistory,
+          };
+        }
+        return item;
+      })
+    );
 
-            {step === "email" ? (
-              <form onSubmit={(e) => void sendCode(e)} className="mt-6 max-w-sm space-y-3">
+    toast.show("Creative asset officially APPROVED! Agency team notified for campaign deployment.", "success");
+  };
+
+  // Handle Reject Creative with Comment
+  const handleConfirmRejectCreative = () => {
+    if (!rejectModalItem) return;
+
+    setCreativeApprovals((prev) =>
+      prev.map((item) => {
+        if (item.id === rejectModalItem.id) {
+          const updatedHistory = item.history.map((h) =>
+            h.version === item.current_version
+              ? {
+                  ...h,
+                  status: "rejected" as const,
+                  feedback: rejectReason || "Revision requested by client.",
+                  action_by: clientName,
+                  action_at: new Date().toISOString(),
+                }
+              : h
+          );
+          return {
+            ...item,
+            status: "rejected" as const,
+            client_comment: rejectReason || "Revision requested by client.",
+            action_at: new Date().toISOString(),
+            action_by: clientName,
+            history: updatedHistory,
+          };
+        }
+        return item;
+      })
+    );
+
+    toast.show("Creative asset REJECTED with feedback comments. Agency video team alerted for revision.", "info");
+    setRejectModalItem(null);
+    setRejectReason("");
+  };
+
+  // Handle Lead CSV Export
+  const handleExportLeadsCsv = () => {
+    const csvContent = generateLeadsCsv(myClientLeads);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `lumen_and_co_leads_${clientCompany.toLowerCase().replace(/\s+/g, "_")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.show(`Exported ${myClientLeads.length} leads to CSV successfully.`, "success");
+  };
+
+  // Password Change Submission
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currPass) {
+      toast.show("Please enter your current password.", "error");
+      return;
+    }
+    if (newPass.length < 8) {
+      toast.show("New password must be at least 8 characters long.", "error");
+      return;
+    }
+    if (newPass !== confirmPass) {
+      toast.show("New password and confirmation do not match.", "error");
+      return;
+    }
+
+    setCurrPass("");
+    setNewPass("");
+    setConfirmPass("");
+    toast.show("Password updated successfully! Next login will require your new credentials.", "success");
+  };
+
+  // Support Query Submission
+  const handleSendSupportQuery = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject || !supportMessage) {
+      toast.show("Please enter subject and message details.", "error");
+      return;
+    }
+
+    setSupportSubject("");
+    setSupportMessage("");
+    toast.show("Support request & DPDP data query transmitted to Grievance Officer (Sahit Sai). Ticket #DPDP-8921 opened.", "success");
+  };
+
+  // Filtered Leads
+  const myClientLeads = businessLeads.filter((lead) => {
+    const isMatchingClient =
+      lead.client_id === clientId ||
+      lead.client_name.toLowerCase().includes(clientCompany.toLowerCase().substring(0, 4));
+    const matchesTemp = leadFilterTemp === "all" || lead.temperature === leadFilterTemp;
+    const matchesSearch =
+      lead.lead_name.toLowerCase().includes(leadSearchQuery.toLowerCase()) ||
+      lead.email.toLowerCase().includes(leadSearchQuery.toLowerCase()) ||
+      lead.phone.includes(leadSearchQuery) ||
+      lead.campaign_source.toLowerCase().includes(leadSearchQuery.toLowerCase());
+
+    return isMatchingClient && matchesTemp && matchesSearch;
+  });
+
+  // Count pending approvals
+  const pendingApprovalsCount = creativeApprovals.filter(
+    (c) => c.status === "pending" && (c.client_id === clientId || c.client_id === "client-101")
+  ).length;
+
+  // Render Loader while checking auth
+  if (checking) {
+    return (
+      <div className="fixed inset-0 bg-[#0c0d12] text-white flex flex-col items-center justify-center space-y-4 font-sans">
+        <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-10 w-auto brightness-0 invert animate-pulse" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#ef4d23]">
+          <Loader2 className="h-4 w-4 animate-spin text-[#ef4d23]" />
+          <span>Authenticating Client Portal Session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 1. UNAUTHENTICATED LOGIN / OTP SCREEN (MANDATORY PAGE #1)
+  // =========================================================================
+  if (!signedIn) {
+    return (
+      <div className="fixed inset-0 overflow-hidden bg-[#0c0d12] text-white flex items-center justify-center p-4 font-sans isolate">
+        {/* Background Motion Stage */}
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]">
+          <video
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-70 transition-opacity duration-700"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+          />
+        </div>
+
+        <div className="w-full max-w-md bg-white/25 backdrop-blur-3xl border border-white/40 rounded-3xl p-8 shadow-2xl space-y-6 relative isolate text-white">
+          {/* Header Branding */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center p-3.5 bg-white/10 rounded-2xl border border-white/20 shadow-inner">
+              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 invert" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight">Client Portal Sign In</h1>
+              <p className="text-xs text-white/70 mt-1">
+                Access your real-time campaign performance, creative approvals & leads.
+              </p>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handlePerformSignIn} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-white/80 uppercase tracking-wider block">
+                Authorized Client Email
+              </label>
+              <div className="relative">
                 <input
                   type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  className="w-full rounded-xl border border-neutral-200 bg-[#f5f2ee] p-3 text-sm outline-none focus:border-[#ef4d23]"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#ef4d23] focus:ring-2 focus:ring-[#ef4d23]/40 transition-all font-medium"
                 />
+                <Mail className="absolute right-4 top-3.5 h-4 w-4 text-white/40 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-white/80 uppercase tracking-wider block">
+                  Password / OTP Code
+                </label>
                 <button
-                  type="submit"
-                  disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#ef4d23] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                  type="button"
+                  onClick={() => setStep(step === "email" ? "code" : "email")}
+                  className="text-[10px] font-bold text-[#ef4d23] hover:underline"
                 >
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Send my code
+                  {step === "email" ? "Use One-Time Passcode (OTP)" : "Use Email Password"}
                 </button>
-              </form>
-            ) : (
-              <form onSubmit={(e) => void verify(e)} className="mt-6 max-w-sm space-y-3">
-                <p className="text-xs text-neutral-500">We sent a code to {email}.</p>
+              </div>
+              <div className="relative">
                 <input
-                  inputMode="numeric"
-                  required
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="6-digit code"
-                  className="w-full rounded-xl border border-neutral-200 bg-[#f5f2ee] p-3 text-sm tracking-widest outline-none focus:border-[#ef4d23]"
+                  type="password"
+                  value={step === "email" ? passwordInput : otpInput}
+                  onChange={(e) => (step === "email" ? setPasswordInput(e.target.value) : setOtpInput(e.target.value))}
+                  placeholder="••••••••••••"
+                  className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#ef4d23] focus:ring-2 focus:ring-[#ef4d23]/40 transition-all font-medium"
                 />
+                <KeyRound className="absolute right-4 top-3.5 h-4 w-4 text-white/40 pointer-events-none" />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#ef4d23] hover:bg-[#d83f17] text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-[#ef4d23]/30 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 text-sm cursor-pointer"
+            >
+              <span>Authenticate & Enter Portal</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </form>
+
+          {/* 1-Click Demo Accounts Quick Switcher */}
+          <div className="pt-4 border-t border-white/15 space-y-3">
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest block text-center">
+              Instant Demo Accounts (Select to Test)
+            </span>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  handleSelectDemoAccount({
+                    userId: "user-mark-101",
+                    clientId: "client-101",
+                    name: "Mark Davis",
+                    company: "Northbeam E-Commerce",
+                    email: "mark@northbeam.io",
+                  })
+                }
+                className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-2xl border border-white/20 text-left transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-xl bg-[#ef4d23] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#ef4d23]/30">
+                    N
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white group-hover:text-[#ef4d23] transition-colors">
+                      Mark Davis
+                    </p>
+                    <p className="text-[10px] text-white/60">Northbeam E-Commerce (Scale Retainer)</p>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">
+                  Active
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleSelectDemoAccount({
+                    userId: "user-ananya-102",
+                    clientId: "client-102",
+                    name: "Ananya Roy",
+                    company: "Bloom Skincare",
+                    email: "ananya@bloomskincare.in",
+                  })
+                }
+                className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-2xl border border-white/20 text-left transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                    B
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white group-hover:text-[#ef4d23] transition-colors">
+                      Ananya Roy
+                    </p>
+                    <p className="text-[10px] text-white/60">Bloom Skincare (Growth Retainer)</p>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-bold">
+                  Consent Gate Pending
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="text-center pt-2">
+            <p className="text-[10px] text-white/50">
+              Compliant with India's Digital Personal Data Protection (DPDP) Act, 2023.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. BLOCKING FIRST-LOGIN CONSENT GATE SCREEN (FROSTED DARK GLASS MULTI-DOC PROCESS)
+  // =========================================================================
+  if (signedIn && !consentAccepted) {
+    const isBothChecked = privacyChecked && termsChecked;
+
+    return (
+      <div className="fixed inset-0 overflow-y-auto bg-[#0c0d12] text-white flex flex-col items-center justify-center p-4 sm:p-6 font-sans isolate z-50">
+        {/* Background Motion Stage */}
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]">
+          <video
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-70 transition-opacity duration-700"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+          />
+        </div>
+
+        {/* Full Size Frosted Dark Glass Container */}
+        <div className="w-full max-w-5xl bg-white/25 backdrop-blur-3xl border border-white/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto flex flex-col max-h-[95vh] text-white isolate">
+          {/* Header Bar */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/15 pb-5 gap-4 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-[#ef4d23]/20 border border-[#ef4d23]/40 rounded-2xl text-[#ef4d23] shadow-lg shadow-[#ef4d23]/20">
+                <ShieldCheck className="h-7 w-7" />
+              </div>
+              <div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#ef4d23] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto brightness-0 invert" />
+                  <span className="text-white/30">•</span>
+                  <h2 className="text-xl font-black text-white tracking-tight">
+                    Mandatory Policy & Consent Gate
+                  </h2>
+                  <span className="bg-[#ef4d23] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-white/30 shadow-md shadow-[#ef4d23]/30">
+                    Policy v{CURRENT_POLICY_VERSION}
+                  </span>
+                </div>
+                <p className="text-xs text-white/70 mt-1">
+                  Client Account: <span className="font-bold text-white">{clientName}</span> ({clientCompany}) • <span className="text-emerald-400 font-mono font-bold">{userEmail}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Logout Action Button */}
+            <button
+              type="button"
+              onClick={handleRejectConsentAndLogout}
+              className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white/80 border border-white/20 text-xs font-bold transition-colors flex items-center gap-2 shrink-0 cursor-pointer shadow-xs"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Decline & Exit</span>
+            </button>
+          </div>
+
+          {/* Sequential Process Steps Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-black/40 p-2 rounded-2xl border border-white/15 shrink-0">
+            {/* Step 1 Chip */}
+            <button
+              type="button"
+              onClick={() => setConsentTab("privacy")}
+              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
+                consentTab === "privacy"
+                  ? "bg-[#ef4d23] text-white border-orange-400/40 shadow-lg shadow-[#ef4d23]/30"
+                  : "bg-white/5 hover:bg-white/10 text-white/80 border-white/10"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  privacyChecked ? "bg-emerald-500 text-white shadow-xs" : "bg-white/20 text-white"
+                }`}>
+                  {privacyChecked ? "✓" : "1"}
+                </span>
+                <div>
+                  <p className="text-xs font-extrabold">Document 1: Privacy Policy (v1.0)</p>
+                  <p className="text-[10px] opacity-80">DPDP Act 2023 Compliant</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                privacyChecked ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+              }`}>
+                {privacyChecked ? "Accepted" : "Required"}
+              </span>
+            </button>
+
+            {/* Step 2 Chip */}
+            <button
+              type="button"
+              disabled={!privacyChecked}
+              onClick={() => setConsentTab("terms")}
+              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
+                !privacyChecked
+                  ? "opacity-50 cursor-not-allowed bg-black/20 text-white/40 border-white/10"
+                  : consentTab === "terms"
+                  ? "bg-[#ef4d23] text-white border-orange-400/40 shadow-lg shadow-[#ef4d23]/30"
+                  : "bg-white/5 hover:bg-white/10 text-white/80 border-white/10"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  termsChecked ? "bg-emerald-500 text-white shadow-xs" : "bg-white/20 text-white"
+                }`}>
+                  {termsChecked ? "✓" : "2"}
+                </span>
+                <div>
+                  <p className="text-xs font-extrabold">Document 2: Terms of Service (v1.0)</p>
+                  <p className="text-[10px] opacity-80">Client Scope & SLA Governance</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                termsChecked
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                  : !privacyChecked
+                  ? "bg-white/10 text-white/40 border border-white/15"
+                  : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+              }`}>
+                {termsChecked ? "Accepted" : !privacyChecked ? "Locked (Complete Step 1)" : "Required"}
+              </span>
+            </button>
+          </div>
+
+          {/* Scroll Status Banner */}
+          {consentTab === "privacy" ? (
+            <div
+              className={`p-3.5 rounded-2xl text-xs flex items-center justify-between gap-3 shrink-0 transition-all duration-300 shadow-md ${
+                hasScrolledPrivacy
+                  ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
+                  : "bg-amber-500/15 border border-amber-500/40 text-amber-200"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                {hasScrolledPrivacy ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />
+                )}
+                <span>
+                  {hasScrolledPrivacy ? (
+                    <>
+                      <strong>Document 1 Verified:</strong> Privacy Policy fully read. Checkbox unlocked below!
+                    </>
+                  ) : (
+                    <>
+                      <strong>Action Required:</strong> Scroll to the bottom of Document 1 (Privacy Policy) to unlock the agreement checkbox.
+                    </>
+                  )}
+                </span>
+              </div>
+              {!hasScrolledPrivacy && (
+                <span className="text-[10px] bg-amber-500/30 text-amber-200 font-extrabold px-3 py-1 rounded-full border border-amber-400 animate-pulse shrink-0">
+                  Scroll Down ↓
+                </span>
+              )}
+            </div>
+          ) : (
+            <div
+              className={`p-3.5 rounded-2xl text-xs flex items-center justify-between gap-3 shrink-0 transition-all duration-300 shadow-md ${
+                hasScrolledTerms
+                  ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
+                  : "bg-amber-500/15 border border-amber-500/40 text-amber-200"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                {hasScrolledTerms ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />
+                )}
+                <span>
+                  {hasScrolledTerms ? (
+                    <>
+                      <strong>Document 2 Verified:</strong> Terms of Service fully read. Checkbox unlocked below!
+                    </>
+                  ) : (
+                    <>
+                      <strong>Action Required:</strong> Scroll to the bottom of Document 2 (Terms of Service) to unlock the agreement checkbox.
+                    </>
+                  )}
+                </span>
+              </div>
+              {!hasScrolledTerms && (
+                <span className="text-[10px] bg-amber-500/30 text-amber-200 font-extrabold px-3 py-1 rounded-full border border-amber-400 animate-pulse shrink-0">
+                  Scroll Down ↓
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Full Size Glassmorphic Document Reader (with scroll detector) */}
+          <div
+            onScroll={handleDocumentScroll}
+            className="flex-1 overflow-y-auto bg-black/40 backdrop-blur-2xl rounded-3xl border border-white/15 p-6 sm:p-7 space-y-6 text-xs text-white/90 font-sans leading-relaxed shadow-inner scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-[#ef4d23]/60 transition-colors"
+          >
+            {consentTab === "privacy" ? (
+              <div className="space-y-6">
+                <div className="border-b border-white/15 pb-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-white tracking-tight">
+                      {LUMEN_POLICY_CONTENT_V1.privacy_policy.title}
+                    </h3>
+                    <p className="text-[10px] text-white/50 mt-0.5">
+                      Last updated: {LUMEN_POLICY_CONTENT_V1.last_updated} • Version 1.0 (DPDP Act 2023 Compliant)
+                    </p>
+                  </div>
+                  <span className="bg-[#ef4d23]/20 text-[#ef4d23] border border-[#ef4d23]/40 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-xs">
+                    Document 1 of 2
+                  </span>
+                </div>
+
+                {LUMEN_POLICY_CONTENT_V1.privacy_policy.sections.map((sec) => (
+                  <div
+                    key={sec.section_number}
+                    className="space-y-2 bg-white/5 border border-white/10 rounded-2xl p-5 shadow-xs hover:border-[#ef4d23]/50 hover:bg-white/10 transition-all duration-300 group"
                   >
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Open my dashboard
-                  </button>
+                    <div className="flex items-center gap-2.5">
+                      <span className="bg-[#ef4d23]/20 border border-[#ef4d23]/30 text-[#ef4d23] font-mono text-[11px] font-black px-2.5 py-0.5 rounded-lg shadow-2xs">
+                        Section {sec.section_number}
+                      </span>
+                      <h4 className="font-bold text-white text-xs group-hover:text-[#ef4d23] transition-colors">
+                        {sec.title}
+                      </h4>
+                    </div>
+                    <p className="text-white/80 whitespace-pre-line text-[11px] leading-relaxed pl-1 font-medium">
+                      {sec.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="border-b border-white/15 pb-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-white tracking-tight">
+                      {LUMEN_POLICY_CONTENT_V1.terms_of_service.title}
+                    </h3>
+                    <p className="text-[10px] text-white/50 mt-0.5">
+                      Last updated: {LUMEN_POLICY_CONTENT_V1.last_updated} • Version 1.0 (Client SLA Governance)
+                    </p>
+                  </div>
+                  <span className="bg-[#ef4d23]/20 text-[#ef4d23] border border-[#ef4d23]/40 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-xs">
+                    Document 2 of 2
+                  </span>
+                </div>
+
+                {LUMEN_POLICY_CONTENT_V1.terms_of_service.sections.map((sec) => (
+                  <div
+                    key={sec.section_number}
+                    className="space-y-2 bg-white/5 border border-white/10 rounded-2xl p-5 shadow-xs hover:border-[#ef4d23]/50 hover:bg-white/10 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="bg-[#ef4d23]/20 border border-[#ef4d23]/30 text-[#ef4d23] font-mono text-[11px] font-black px-2.5 py-0.5 rounded-lg shadow-2xs">
+                        Section {sec.section_number}
+                      </span>
+                      <h4 className="font-bold text-white text-xs group-hover:text-[#ef4d23] transition-colors">
+                        {sec.title}
+                      </h4>
+                    </div>
+                    <p className="text-white/80 whitespace-pre-line text-[11px] leading-relaxed pl-1 font-medium">
+                      {sec.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Active Document Checkbox & Sequential Navigation */}
+          <div className="space-y-4 pt-3 border-t border-white/15 shrink-0">
+            {consentTab === "privacy" ? (
+              <div className="space-y-3">
+                <label
+                  className={`flex items-start gap-3 p-4 rounded-2xl border transition-all select-none ${
+                    !hasScrolledPrivacy
+                      ? "bg-white/5 border-white/10 opacity-50 cursor-not-allowed"
+                      : "bg-white/10 hover:bg-white/15 border-white/20 cursor-pointer shadow-xs"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    disabled={!hasScrolledPrivacy}
+                    checked={privacyChecked}
+                    onChange={(e) => setPrivacyChecked(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 text-[#ef4d23] rounded focus:ring-[#ef4d23] border-white/30 bg-black/40 accent-[#ef4d23] disabled:cursor-not-allowed"
+                  />
+                  <div className="text-xs">
+                    <span className="text-white font-bold">
+                      I have read, understand, and agree to the <strong>Privacy Policy (Version 1.0)</strong> under DPDP Act 2023 guidelines.
+                    </span>
+                    {!hasScrolledPrivacy && (
+                      <p className="text-[10px] text-amber-300 font-extrabold mt-1">
+                        🔒 Scroll to the bottom of the Privacy Policy document above to unlock this checkbox.
+                      </p>
+                    )}
+                  </div>
+                </label>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
                   <button
                     type="button"
-                    onClick={() => setStep("email")}
-                    className="text-xs text-neutral-500 underline"
+                    onClick={handleRejectConsentAndLogout}
+                    className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-400 border border-white/15 text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
                   >
-                    Use a different email
+                    <LogOut className="h-4 w-4" />
+                    <span>Decline & Exit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!privacyChecked}
+                    onClick={() => setConsentTab("terms")}
+                    className={`px-8 py-3.5 rounded-2xl font-extrabold text-xs transition-all duration-200 flex items-center gap-2 shadow-lg ${
+                      privacyChecked
+                        ? "bg-[#ef4d23] hover:bg-[#d83f17] text-white shadow-[#ef4d23]/40 cursor-pointer transform hover:scale-[1.02]"
+                        : "bg-white/10 text-white/40 cursor-not-allowed border border-white/15"
+                    }`}
+                  >
+                    <span>Proceed to Document 2: Terms of Service</span>
+                    <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </div>
-              </form>
-            )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <label
+                  className={`flex items-start gap-3 p-4 rounded-2xl border transition-all select-none ${
+                    !hasScrolledTerms
+                      ? "bg-white/5 border-white/10 opacity-50 cursor-not-allowed"
+                      : "bg-white/10 hover:bg-white/15 border-white/20 cursor-pointer shadow-xs"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    disabled={!hasScrolledTerms}
+                    checked={termsChecked}
+                    onChange={(e) => setTermsChecked(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 text-[#ef4d23] rounded focus:ring-[#ef4d23] border-white/30 bg-black/40 accent-[#ef4d23] disabled:cursor-not-allowed"
+                  />
+                  <div className="text-xs">
+                    <span className="text-white font-bold">
+                      I have read, understand, and agree to the <strong>Terms of Service (Version 1.0)</strong> governing Client Portal usage.
+                    </span>
+                    {!hasScrolledTerms && (
+                      <p className="text-[10px] text-amber-300 font-extrabold mt-1">
+                        🔒 Scroll to the bottom of the Terms of Service document above to unlock this checkbox.
+                      </p>
+                    )}
+                  </div>
+                </label>
 
-            {error ? <p className="mt-3 text-xs text-[#ef4d23]">{error}</p> : null}
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setConsentTab("privacy")}
+                    className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                  >
+                    ← Back to Privacy Policy
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!isBothChecked}
+                    onClick={handleAcceptConsentGate}
+                    className={`px-9 py-3.5 rounded-2xl font-black text-xs transition-all duration-200 flex items-center gap-2.5 shadow-xl ${
+                      isBothChecked
+                        ? "bg-[#ef4d23] hover:bg-[#d83f17] text-white shadow-[#ef4d23]/40 cursor-pointer transform hover:scale-[1.02]"
+                        : "bg-white/10 text-white/40 cursor-not-allowed border border-white/15"
+                    }`}
+                  >
+                    <CheckCircle2 className="h-4.5 w-4.5" />
+                    <span>Accept All Policies & Unlock Client Portal</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    );
+  }
+
+
+  // =========================================================================
+  // MAIN FULL CLIENT PORTAL SHELL & 10 MANDATORY PAGES
+  // =========================================================================
+  return (
+    <ClientLayoutShell
+      currentTab={currentTab}
+      onTabChange={setCurrentTab}
+      clientName={clientName}
+      clientCompany={clientCompany}
+      onSignOut={() => {
+        setSignedIn(false);
+        setConsentAccepted(false);
+        toast.show("Signed out of Client Portal.", "info");
+      }}
+      onOpenPrivacyPolicy={() => setViewPolicyModal("privacy")}
+      onOpenTermsOfService={() => setViewPolicyModal("terms")}
+    >
+      {/* ========================================================================= */}
+      {/* PAGE #3: DASHBOARD OVERVIEW */}
+      {/* ========================================================================= */}
+      {currentTab === "overview" && (
+        <div className="space-y-6">
+          {/* Welcome Banner */}
+          <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="bg-[#ef4d23] text-white font-extrabold text-[10px] uppercase px-2.5 py-0.5 rounded-full border border-white/30 shadow-md shadow-[#ef4d23]/30">
+                  Client Portal
+                </span>
+                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Consent Active (v1.0)
+                </span>
+              </div>
+              <h1 className="text-2xl font-black text-white mt-1">Welcome back, {clientName}!</h1>
+              <p className="text-xs text-white/70 mt-0.5">
+                Here is your real-time campaign performance summary for <strong className="text-white">{clientCompany}</strong>.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setCurrentTab("approvals")}
+                className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg shadow-[#ef4d23]/30 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Review Approvals ({pendingApprovalsCount})</span>
+              </button>
+              <button
+                onClick={() => setCurrentTab("leads")}
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs backdrop-blur-md"
+              >
+                <Users className="h-4 w-4 text-[#ef4d23]" />
+                <span>View Leads ({myClientLeads.length})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Metric Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <RigidGlassMetricCard
+              title="Active Campaigns"
+              value="4 Live"
+              caption="Meta, Google & TikTok"
+              variant="ruby"
+            />
+            <RigidGlassMetricCard
+              title="Pending Approvals"
+              value={`${pendingApprovalsCount} Creatives`}
+              caption="Action required today"
+              variant={pendingApprovalsCount === 0 ? "emerald" : "speed"}
+            />
+            <RigidGlassMetricCard
+              title="Business Leads"
+              value={`${myClientLeads.length} Total`}
+              caption="+12 New this week"
+              variant="emerald"
+            />
+            <RigidGlassMetricCard
+              title="Blended Ad ROAS"
+              value="4.42x"
+              caption="+0.6x vs last month"
+              variant="context"
+            />
+          </div>
+
+          {/* Two-Column Grid: Approvals & Leads Snapshot */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Approvals Widget */}
+            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-[#ef4d23]" />
+                  <h3 className="font-extrabold text-white text-sm">Creative Approvals Awaiting Sign-off</h3>
+                </div>
+                <button
+                  onClick={() => setCurrentTab("approvals")}
+                  className="text-[11px] font-bold text-[#ef4d23] hover:underline cursor-pointer"
+                >
+                  View All ({creativeApprovals.length})
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {creativeApprovals.slice(0, 2).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15 shadow-xs"
+                  >
+                    <img
+                      src={item.thumbnailUrl}
+                      alt={item.title}
+                      className="w-16 h-12 object-cover rounded-xl border border-white/20 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-bold text-white truncate">{item.title}</h4>
+                      <p className="text-[10px] text-white/60">
+                        {item.type} • v{item.current_version}
+                      </p>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {item.status === "pending" ? (
+                        <>
+                          <button
+                            onClick={() => handleApproveCreative(item.id)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all shadow-md cursor-pointer"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => setRejectModalItem(item)}
+                            className="bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all shadow-xs cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <Badge
+                          variant={item.status === "approved" ? "success" : "destructive"}
+                          className="capitalize text-[9px]"
+                        >
+                          {item.status}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Leads Snapshot */}
+            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-emerald-400" />
+                  <h3 className="font-extrabold text-white text-sm">Recent Business Leads Snapshot</h3>
+                </div>
+                <button
+                  onClick={() => setCurrentTab("leads")}
+                  className="text-[11px] font-bold text-[#ef4d23] hover:underline cursor-pointer"
+                >
+                  Manage Leads
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                {myClientLeads.slice(0, 3).map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15 shadow-xs"
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">{lead.lead_name}</p>
+                      <p className="text-[10px] text-white/60">
+                        {lead.email} • {lead.campaign_source}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        lead.temperature === "hot"
+                          ? "destructive"
+                          : lead.temperature === "warm"
+                          ? "warning"
+                          : lead.temperature === "converted"
+                          ? "success"
+                          : "secondary"
+                      }
+                      className="uppercase text-[9px] font-black"
+                    >
+                      {lead.temperature}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #4: VIDEO / CREATIVE APPROVALS */}
+      {/* ========================================================================= */}
+      {currentTab === "approvals" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-[#ef4d23]" />
+                <h2 className="text-xl font-black text-white">Video & Creative Approvals</h2>
+              </div>
+              <p className="text-xs text-white/70 mt-1">
+                Review submitted video reels, carousel graphics, and motion banners. Approving an asset gives official sign-off for campaign launch.
+              </p>
+            </div>
+            <span className="bg-[#ef4d23] text-white px-3.5 py-1 rounded-full text-xs font-extrabold shadow-lg shadow-[#ef4d23]/30">
+              {pendingApprovalsCount} Awaiting Decision
+            </span>
+          </div>
+
+          {/* Approvals Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {creativeApprovals.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 overflow-hidden flex flex-col shadow-2xl hover:border-[#ef4d23]/50 hover:shadow-2xl transition-all group text-white"
+              >
+                {/* Media Thumbnail Container */}
+                <div className="relative h-48 bg-black/60 overflow-hidden">
+                  <img
+                    src={item.thumbnailUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+
+                  {item.videoUrl && (
+                    <button
+                      onClick={() => setPreviewVideoUrl(item.videoUrl || null)}
+                      className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-[#ef4d23] hover:bg-[#d83f17] text-white flex items-center justify-center shadow-2xl cursor-pointer transform hover:scale-110 transition-all"
+                    >
+                      <Play className="h-6 w-6 ml-1 fill-current" />
+                    </button>
+                  )}
+
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20">
+                      {item.type}
+                    </span>
+                    <span className="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20">
+                      v{item.current_version}
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-3 right-3">
+                    <Badge
+                      variant={
+                        item.status === "approved"
+                          ? "success"
+                          : item.status === "rejected"
+                          ? "destructive"
+                          : "warning"
+                      }
+                      className="uppercase text-[9px] font-black tracking-wider px-2.5 py-1"
+                    >
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Content Body */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div>
+                    <h3 className="font-extrabold text-white text-sm line-clamp-2">{item.title}</h3>
+                    <p className="text-[10px] text-white/60 mt-1">
+                      Submitted on {new Date(item.submitted_at).toLocaleDateString()}
+                    </p>
+
+                    {item.client_comment && (
+                      <div className="mt-3 bg-red-500/10 p-3 rounded-2xl border border-red-500/30 text-xs text-red-200">
+                        <span className="text-[10px] font-bold text-red-400 block mb-0.5">Rejection Comment:</span>
+                        "{item.client_comment}"
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions & Version History */}
+                  <div className="pt-3 border-t border-white/15 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => setHistoryModalItem(item)}
+                        className="text-[11px] font-bold text-white/70 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <History className="h-3.5 w-3.5 text-[#ef4d23]" />
+                        <span>Version History ({item.history.length})</span>
+                      </button>
+
+                      {item.status === "pending" && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleApproveCreative(item.id)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shadow-md cursor-pointer"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => setRejectModalItem(item)}
+                            className="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shadow-xs cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #5: BUSINESS LEADS */}
+      {/* ========================================================================= */}
+      {currentTab === "leads" && (
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <div>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-[#ef4d23]" />
+                <h2 className="text-xl font-black text-white">Business Leads Directory</h2>
+              </div>
+              <p className="text-xs text-white/70 mt-1">
+                Leads collected through active ad campaigns for <strong className="text-white">{clientCompany}</strong>. Filter, search, and export.
+              </p>
+            </div>
+
+            <button
+              onClick={handleExportLeadsCsv}
+              className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-5 py-2.5 rounded-2xl text-xs font-extrabold shadow-lg shadow-[#ef4d23]/30 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export Leads to CSV</span>
+            </button>
+          </div>
+
+          {/* Search & Filter Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/25 p-4 rounded-3xl border border-white/40 backdrop-blur-xl shadow-md">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-3 h-4 w-4 text-white/40" />
+              <input
+                type="text"
+                value={leadSearchQuery}
+                onChange={(e) => setLeadSearchQuery(e.target.value)}
+                placeholder="Search leads by name, email, phone..."
+                className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-2xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+              />
+            </div>
+
+            <div>
+              <select
+                value={leadFilterTemp}
+                onChange={(e) => setLeadFilterTemp(e.target.value)}
+                className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+              >
+                <option value="all" className="bg-[#181922]">Filter by Temperature (All)</option>
+                <option value="hot" className="bg-[#181922]">Hot Lead</option>
+                <option value="warm" className="bg-[#181922]">Warm Lead</option>
+                <option value="cold" className="bg-[#181922]">Cold Lead</option>
+                <option value="converted" className="bg-[#181922]">Converted</option>
+              </select>
+            </div>
+
+            <div>
+              <select
+                value={leadFilterDate}
+                onChange={(e) => setLeadFilterDate(e.target.value)}
+                className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+              >
+                <option value="all" className="bg-[#181922]">Date Range (All Time)</option>
+                <option value="7days" className="bg-[#181922]">Last 7 Days</option>
+                <option value="30days" className="bg-[#181922]">Last 30 Days</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Leads Table */}
+          <div className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 overflow-hidden shadow-2xl">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-white/15 bg-white/10">
+                  <TableHead className="text-white/80 font-extrabold text-xs">Lead Name & Contact</TableHead>
+                  <TableHead className="text-white/80 font-extrabold text-xs">City</TableHead>
+                  <TableHead className="text-white/80 font-extrabold text-xs">Campaign Source</TableHead>
+                  <TableHead className="text-white/80 font-extrabold text-xs">Status</TableHead>
+                  <TableHead className="text-white/80 font-extrabold text-xs">Est. Value</TableHead>
+                  <TableHead className="text-white/80 font-extrabold text-xs">Date Collected</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {myClientLeads.map((lead) => (
+                  <TableRow key={lead.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
+                    <TableCell>
+                      <div>
+                        <p className="font-bold text-white text-xs">{lead.lead_name}</p>
+                        <p className="text-[10px] text-white/60">
+                          {lead.email} • {lead.phone}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-white/80 font-medium">{lead.city}</TableCell>
+                    <TableCell className="text-xs text-white/80 font-medium">{lead.campaign_source}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          lead.temperature === "hot"
+                            ? "destructive"
+                            : lead.temperature === "warm"
+                            ? "warning"
+                            : lead.temperature === "converted"
+                            ? "success"
+                            : "secondary"
+                        }
+                        className="uppercase text-[9px] font-black"
+                      >
+                        {lead.temperature}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs font-bold text-emerald-400">
+                      ₹{lead.estimated_deal_value_rupees.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-xs text-white/60 font-medium">
+                      {new Date(lead.created_at).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #6: REPORTS & CAMPAIGN PERFORMANCE (READ-ONLY) */}
+      {/* ========================================================================= */}
+      {currentTab === "reports" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <div>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-[#ef4d23]" />
+                <h2 className="text-xl font-black text-white">Campaign Performance & ROAS Analytics</h2>
+              </div>
+              <p className="text-xs text-white/70 mt-1">
+                Read-only analytics view. Internal agency profit margins and ad costs are restricted under client role policies.
+              </p>
+            </div>
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+              Live Channel Feed
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <RigidGlassMetricCard title="Blended ROAS" value="4.42x" caption="Target: 3.50x" variant="context" />
+            <RigidGlassMetricCard title="Monthly Ad Spend" value="₹4,80,000" caption="Meta & Google" variant="speed" />
+            <RigidGlassMetricCard title="Total Orders" value="1,240" caption="CPA: ₹387" variant="emerald" />
+            <RigidGlassMetricCard title="Impressions" value="2.4M Views" caption="3.8% Avg CTR" variant="connections" />
+          </div>
+
+          {/* Ad Channel Breakdown Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
+              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+                <span>Meta Ads (FB & Insta)</span>
+                <span className="text-xs text-emerald-400 font-bold">4.8x ROAS</span>
+              </h3>
+              <p className="text-xs text-white/70">Total Spend: ₹2,90,000 • 890 Conversions</p>
+              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
+                <div className="bg-[#ef4d23] h-full w-[65%]" />
+              </div>
+            </div>
+
+            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
+              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+                <span>Google Search & Shopping</span>
+                <span className="text-xs text-emerald-400 font-bold">3.9x ROAS</span>
+              </h3>
+              <p className="text-xs text-white/70">Total Spend: ₹1,40,000 • 280 Conversions</p>
+              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
+                <div className="bg-blue-500 h-full w-[45%]" />
+              </div>
+            </div>
+
+            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
+              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+                <span>TikTok & UGC Reels</span>
+                <span className="text-xs text-emerald-400 font-bold">5.2x ROAS</span>
+              </h3>
+              <p className="text-xs text-white/70">Total Spend: ₹50,000 • 170 Conversions</p>
+              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
+                <div className="bg-purple-500 h-full w-[80%]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #7: NOTIFICATIONS FEED */}
+      {/* ========================================================================= */}
+      {currentTab === "notifications" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <div>
+              <h2 className="text-xl font-black text-white">Notifications & Account Alerts</h2>
+              <p className="text-xs text-white/70 mt-1">Real-time alerts for new leads, creative approvals, and campaign milestones.</p>
+            </div>
+            <button
+              onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+              className="text-xs font-bold text-[#ef4d23] hover:underline cursor-pointer"
+            >
+              Mark All as Read
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className={`p-4 rounded-3xl border transition-all flex items-start gap-4 ${
+                  n.read
+                    ? "bg-black/30 border-white/10 text-white/70"
+                    : "bg-[#161722]/90 border-[#ef4d23]/40 text-white shadow-xl ring-1 ring-[#ef4d23]/20"
+                }`}
+              >
+                <div className="p-2.5 rounded-2xl bg-[#ef4d23]/20 border border-[#ef4d23]/30 text-[#ef4d23] shrink-0">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-extrabold text-sm text-white">{n.title}</h3>
+                    <span className="text-[10px] text-white/50">{n.time}</span>
+                  </div>
+                  <p className="text-xs text-white/80 mt-1">{n.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #8: PROFILE & ACCOUNT SETTINGS (LOGIN HISTORY) */}
+      {/* ========================================================================= */}
+      {currentTab === "profile" && (
+        <div className="space-y-6">
+          <div className="bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <h2 className="text-xl font-black text-white">Profile & Security Settings</h2>
+            <p className="text-xs text-white/70 mt-1">Manage credentials and inspect your login session audit history.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Account Card */}
+            <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#ef4d23] text-white font-extrabold text-lg flex items-center justify-center shadow-lg shadow-[#ef4d23]/30">
+                  {clientName.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-white text-base">{clientName}</h3>
+                  <p className="text-xs text-white/70">{clientCompany}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs pt-3 border-t border-white/15">
+                <p className="text-white/70">Email: <span className="font-bold text-white">{userEmail}</span></p>
+                <p className="text-white/70">Role: <span className="font-bold text-white">Verified Client Account</span></p>
+                <p className="text-white/70">DPDP Consent: <span className="font-bold text-emerald-400">Accepted (v1.0)</span></p>
+              </div>
+            </div>
+
+            {/* Password Form */}
+            <div className="lg:col-span-2 bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <h3 className="font-extrabold text-white text-sm">Change Account Password</h3>
+              <form onSubmit={handleChangePassword} className="space-y-4 text-xs">
+                <div>
+                  <label className="text-white/80 block mb-1 font-semibold">Current Password</label>
+                  <input
+                    type="password"
+                    value={currPass}
+                    onChange={(e) => setCurrPass(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-white/80 block mb-1 font-semibold">New Password</label>
+                    <input
+                      type="password"
+                      value={newPass}
+                      onChange={(e) => setNewPass(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/80 block mb-1 font-semibold">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={confirmPass}
+                      onChange={(e) => setConfirmPass(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-5 py-2.5 rounded-2xl font-bold text-xs transition-all shadow-lg shadow-[#ef4d23]/30 cursor-pointer"
+                >
+                  Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Own Login History Table */}
+          <div className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 p-6 space-y-4 shadow-2xl text-white">
+            <h3 className="font-extrabold text-white text-sm">Your Account Login Audit History</h3>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-white/15 bg-white/10">
+                  <TableHead className="text-white/80 font-bold text-xs">Timestamp</TableHead>
+                  <TableHead className="text-white/80 font-bold text-xs">IP Address</TableHead>
+                  <TableHead className="text-white/80 font-bold text-xs">Device & Browser Specs</TableHead>
+                  <TableHead className="text-white/80 font-bold text-xs">Auth Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loginHistory.map((lh) => (
+                  <TableRow key={lh.id} className="border-b border-white/10 hover:bg-white/5">
+                    <TableCell className="text-xs text-white/80 font-medium">
+                      {new Date(lh.login_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono text-emerald-400 font-bold">{lh.ip_address}</TableCell>
+                    <TableCell className="text-xs text-white/70">{lh.device_browser}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={lh.status === "success" ? "success" : "warning"}
+                        className="uppercase text-[9px] font-black"
+                      >
+                        {lh.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE #10: SUPPORT / DPDP ACT 2023 GRIEVANCE CONTACT */}
+      {/* ========================================================================= */}
+      {currentTab === "support" && (
+        <div className="space-y-6">
+          <div className="bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-6 w-6 text-[#ef4d23]" />
+              <h2 className="text-xl font-black text-white">Support & Data Rights (DPDP Act 2023)</h2>
+            </div>
+            <p className="text-xs text-white/70 mt-1">
+              Contact our designated Grievance Officer or submit data access / erasure requests under India's Digital Personal Data Protection Act, 2023.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Grievance Officer Card */}
+            <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <h3 className="font-extrabold text-xs uppercase tracking-wider text-[#ef4d23]">Statutory Grievance Officer</h3>
+              <div className="space-y-2 text-xs text-white/80">
+                <p><strong className="text-white">Officer Name:</strong> Sahit Sai</p>
+                <p><strong className="text-white">Designation:</strong> Data Protection Lead</p>
+                <p><strong className="text-white">Email:</strong> privacy@lumenandco.in</p>
+                <p><strong className="text-white">Direct Phone:</strong> +91 98490 00000</p>
+                <p><strong className="text-white">Address:</strong> Level 4, Jubilee Hills, Hyderabad 500033</p>
+              </div>
+            </div>
+
+            {/* Submit Query Form */}
+            <div className="lg:col-span-2 bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+              <h3 className="font-extrabold text-white text-sm">Submit Data Request / Support Ticket</h3>
+              <form onSubmit={handleSendSupportQuery} className="space-y-4 text-xs">
+                <div>
+                  <label className="text-white/80 block mb-1 font-semibold">Request Category</label>
+                  <select
+                    value={supportCategory}
+                    onChange={(e) => setSupportCategory(e.target.value)}
+                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                  >
+                    <option value="dpdp_data_request" className="bg-[#181922]">DPDP Data Access / Copy Request</option>
+                    <option value="dpdp_correction" className="bg-[#181922]">DPDP Data Correction Request</option>
+                    <option value="dpdp_erasure" className="bg-[#181922]">DPDP Erasure / Deletion Request</option>
+                    <option value="agency_support" className="bg-[#181922]">General Campaign Support</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/80 block mb-1 font-semibold">Subject</label>
+                  <input
+                    type="text"
+                    value={supportSubject}
+                    onChange={(e) => setSupportSubject(e.target.value)}
+                    placeholder="e.g. Request copy of client audit logs"
+                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/80 block mb-1 font-semibold">Message / Request Details</label>
+                  <textarea
+                    rows={4}
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                    placeholder="Provide details regarding your request..."
+                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-6 py-3 rounded-2xl font-bold text-xs transition-all shadow-lg shadow-[#ef4d23]/30 flex items-center gap-2 cursor-pointer"
+                >
+                  <Send className="h-4 w-4" />
+                  <span>Transmit Ticket to Grievance Officer</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Default Fallback for other tabs (invoices, scope, creatives) */}
+      {(currentTab === "creatives" || currentTab === "invoices" || currentTab === "scope") && (
+        <div className="bg-white/25 backdrop-blur-3xl p-8 rounded-3xl border border-white/40 text-center space-y-4 shadow-2xl text-white">
+          <Sparkles className="h-12 w-12 text-[#ef4d23] mx-auto animate-bounce" />
+          <h2 className="text-xl font-black text-white capitalize">{currentTab} Section</h2>
+          <p className="text-xs text-white/70 max-w-md mx-auto">
+            This module is active under your retainer package. All assets, deliverables, and documents are synchronized with the agency delivery hub.
+          </p>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* AUXILIARY MODALS */}
+      {/* ========================================================================= */}
+
+      {/* 1. Rejection Comment Modal */}
+      {rejectModalItem && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white shadow-2xl">
+            <h3 className="font-black text-base text-white">Provide Rejection Feedback</h3>
+            <p className="text-xs text-white/70">
+              Please explain what changes or revisions are needed for "{rejectModalItem.title}".
+            </p>
+            <textarea
+              rows={4}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Please add promo code overlay in first 3 seconds..."
+              className="w-full bg-white/10 text-white border border-white/20 rounded-2xl p-3 text-xs focus:outline-none focus:border-red-500"
+            />
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setRejectModalItem(null)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRejectCreative}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white shadow-md cursor-pointer"
+              >
+                Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Version History Modal */}
+      {historyModalItem && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/15 pb-3">
+              <h3 className="font-black text-base text-white">Version History Timeline</h3>
+              <button onClick={() => setHistoryModalItem(null)} className="text-white/60 hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+              {historyModalItem.history.map((ver) => (
+                <div key={ver.version} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-[#ef4d23] text-xs">Version v{ver.version}</span>
+                    <Badge
+                      variant={ver.status === "approved" ? "success" : ver.status === "rejected" ? "destructive" : "warning"}
+                      className="uppercase text-[9px]"
+                    >
+                      {ver.status}
+                    </Badge>
+                  </div>
+                  <p className="text-white/80">{ver.notes}</p>
+                  {ver.feedback && (
+                    <div className="bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl text-red-200 text-[11px]">
+                      <strong>Feedback:</strong> "{ver.feedback}"
+                    </div>
+                  )}
+                  <p className="text-[10px] text-white/50 text-right">
+                    Submitted: {new Date(ver.submitted_at).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Video Player Modal */}
+      {previewVideoUrl && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-black border border-white/20 rounded-3xl overflow-hidden shadow-2xl relative">
+            <button
+              onClick={() => setPreviewVideoUrl(null)}
+              className="absolute top-4 right-4 z-10 bg-black/60 hover:bg-black p-2 rounded-full text-white border border-white/20 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <video src={previewVideoUrl} controls autoPlay className="w-full max-h-[75vh] object-contain" />
+          </div>
+        </div>
+      )}
+
+      {/* 4. Persistent Footer Policy Reader Modals */}
+      {viewPolicyModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-3xl bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/15 pb-3">
+              <h3 className="font-black text-lg text-white">
+                {viewPolicyModal === "privacy" ? LUMEN_POLICY_CONTENT_V1.privacy_policy.title : LUMEN_POLICY_CONTENT_V1.terms_of_service.title}
+              </h3>
+              <button onClick={() => setViewPolicyModal(null)} className="text-white/60 hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 text-xs">
+              {(viewPolicyModal === "privacy"
+                ? LUMEN_POLICY_CONTENT_V1.privacy_policy.sections
+                : LUMEN_POLICY_CONTENT_V1.terms_of_service.sections
+              ).map((sec) => (
+                <div key={sec.section_number} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-1">
+                  <h4 className="font-bold text-[#ef4d23]">
+                    {sec.section_number}. {sec.title}
+                  </h4>
+                  <p className="text-white/80 whitespace-pre-line leading-relaxed">{sec.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </ClientLayoutShell>
   );
 }

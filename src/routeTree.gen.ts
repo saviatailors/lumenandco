@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClientRouteImport } from './routes/client'
+import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as SahitRouteImport } from './routes/sahit'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ClientRoute = ClientRouteImport.update({
   id: '/client',
   path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SahitRoute = SahitRouteImport.update({
@@ -50,6 +56,7 @@ const SahitVideosRoute = SahitVideosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/client': typeof ClientRoute
+  '/delivery': typeof DeliveryRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/client': typeof ClientRoute
+  '/delivery': typeof DeliveryRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/client': typeof ClientRoute
+  '/delivery': typeof DeliveryRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -75,13 +84,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/client' | '/sahit' | '/work' | '/portal/$token' | '/sahit/videos'
+    | '/'
+    | '/client'
+    | '/delivery'
+    | '/sahit'
+    | '/work'
+    | '/portal/$token'
+    | '/sahit/videos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/client' | '/sahit' | '/work' | '/portal/$token' | '/sahit/videos'
+  to:
+    | '/'
+    | '/client'
+    | '/delivery'
+    | '/sahit'
+    | '/work'
+    | '/portal/$token'
+    | '/sahit/videos'
   id:
     | '__root__'
     | '/'
     | '/client'
+    | '/delivery'
     | '/sahit'
     | '/work'
     | '/portal/$token'
@@ -91,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClientRoute: typeof ClientRoute
+  DeliveryRoute: typeof DeliveryRoute
   SahitRoute: typeof SahitRoute
   WorkRoute: typeof WorkRoute
   PortalTokenRoute: typeof PortalTokenRoute
@@ -111,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/client'
       fullPath: '/client'
       preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sahit': {
@@ -147,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClientRoute: ClientRoute,
+  DeliveryRoute: DeliveryRoute,
   SahitRoute: SahitRoute,
   WorkRoute: WorkRoute,
   PortalTokenRoute: PortalTokenRoute,

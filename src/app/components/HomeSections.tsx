@@ -608,9 +608,13 @@ export function Footer() {
     <footer className="mt-3 sm:mt-4 bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-10">
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em" }}>
-            lumen&co<span style={{ color: ORANGE }}>.</span>
-          </p>
+          <Link to="/" className="inline-block">
+            <img
+              src="/lumen-and-co-logo.png"
+              alt="Lumen & Co Agency"
+              className="h-8 w-auto object-contain"
+            />
+          </Link>
           <p className="mt-3 text-neutral-600" style={{ fontSize: 14, lineHeight: 1.6 }}>
             A digital marketing agency building compounding growth for ambitious brands.
           </p>

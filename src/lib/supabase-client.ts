@@ -1,4 +1,4 @@
-// Browser client for your own Supabase project (not Lovable Cloud).
+// Browser client for your Supabase project.
 // The publishable key is safe to ship to the browser — row level security
 // on your Supabase project is what protects the data.
 import { createClient } from "@supabase/supabase-js";

@@ -3,15 +3,16 @@ import { Link } from "@tanstack/react-router";
 import { goToSection } from "./nav";
 import { openLeadForm } from "./LeadForm";
 import { ChevronDown, ChevronRight, Menu, ShoppingCart } from "lucide-react";
-import logoAsset from "@/assets/tradarent-logo-transparent.png.asset.json";
 
 function Logo() {
   return (
-    <img
-      src={logoAsset.url}
-      alt="Agency logo"
-      className="h-8 sm:h-10 w-auto object-contain"
-    />
+    <Link to="/" className="inline-flex items-center">
+      <img
+        src="/lumen-and-co-logo.png"
+        alt="Lumen & Co Agency"
+        className="h-7 sm:h-9 w-auto object-contain"
+      />
+    </Link>
   );
 }
 

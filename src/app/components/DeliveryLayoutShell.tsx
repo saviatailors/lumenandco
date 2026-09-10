@@ -1,0 +1,278 @@
+import { ReactNode, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Calendar,
+  Building2,
+  Users,
+  BarChart3,
+  Settings,
+  Search,
+  Bell,
+  Mail,
+  Rocket,
+  ChevronDown,
+  Plus,
+  LogOut,
+  Sparkles,
+  MessageSquare,
+} from "lucide-react";
+import CommandPalette from "./CommandPalette";
+import NotificationCenter from "./NotificationCenter";
+import EmailSenderModal from "./EmailSenderModal";
+import BuiltInMessengerModal from "./BuiltInMessengerModal";
+import { useAdminAuth } from "./useAdminAuth";
+
+export type DeliveryTab =
+  | "dashboard"
+  | "tasks"
+  | "leads"
+  | "calendar"
+  | "clients"
+  | "workload"
+  | "reports"
+  | "settings";
+
+interface DeliveryLayoutShellProps {
+  currentTab: DeliveryTab;
+  onTabChange: (tab: DeliveryTab) => void;
+  children: ReactNode;
+  onQuickAction?: () => void;
+}
+
+export default function DeliveryLayoutShell({
+  currentTab,
+  onTabChange,
+  children,
+  onQuickAction,
+}: DeliveryLayoutShellProps) {
+  const admin = useAdminAuth();
+
+  const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
+
+  const sidebarNavItems: { id: DeliveryTab; label: string; icon: typeof LayoutDashboard; badge?: string }[] = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "tasks", label: "My Tasks", icon: CheckSquare, badge: "4" },
+    { id: "leads", label: "Leads", icon: Users, badge: "5" },
+    { id: "calendar", label: "Calendar", icon: Calendar },
+    { id: "clients", label: "Clients", icon: Building2, badge: "8" },
+    { id: "workload", label: "Workload", icon: Users, badge: "⚠️" },
+    { id: "reports", label: "Reports", icon: BarChart3 },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  return (
+    <div className="fixed inset-0 overflow-hidden bg-[#121318] text-[#222222] flex flex-col font-sans isolate z-10">
+      {/* Stage Background Video Overlay (Viewport-wide glass stage) */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#121318] via-[#181924] to-[#0c0d12]">
+        <video
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-80 transition-opacity duration-700"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+        />
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 1. TOP BAR (64px Glass Header) */}
+      {/* ========================================================================= */}
+      <header className="h-[64px] bg-black/30 backdrop-blur-3xl text-white border-b border-white/20 px-5 flex items-center justify-between shrink-0 z-30 shadow-xl">
+        {/* Left Branding */}
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-10 sm:h-11 w-auto brightness-0 invert object-contain transition-all" />
+          </Link>
+
+          <span className="text-white/20 text-sm">|</span>
+
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+            <Rocket className="h-3.5 w-3.5 text-[#ef4d23]" />
+            <span className="text-xs font-bold text-white">Delivery Hub</span>
+          </div>
+        </div>
+
+        {/* Center Search Launcher (⌘K) */}
+        <button
+          onClick={() => setIsCmdPaletteOpen(true)}
+          className="hidden md:flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/80 hover:text-white px-4 py-2 rounded-full border border-white/20 text-xs transition-all w-64 justify-between cursor-pointer shadow-inner"
+        >
+          <div className="flex items-center gap-2">
+            <Search className="h-3.5 w-3.5 text-white/60" />
+            <span>Search tasks (⌘K)...</span>
+          </div>
+          <kbd className="bg-white/20 text-white text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/30">
+            ⌘K
+          </kbd>
+        </button>
+
+        {/* Right Action Icons & User Menu */}
+        <div className="flex items-center gap-3">
+          {/* Quick App Switcher Links */}
+          <div className="hidden xl:flex items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 text-[11px] font-semibold">
+            <Link to="/sahit" className="px-3 py-1 text-white/70 hover:text-white rounded-full transition-colors hover:bg-white/10">
+              CRM
+            </Link>
+            <Link to="/delivery" className="px-3 py-1 bg-white text-neutral-900 rounded-full shadow-md font-bold">
+              Delivery Hub
+            </Link>
+            <Link to="/client" className="px-3 py-1 text-white/70 hover:text-white rounded-full transition-colors hover:bg-white/10">
+              Client Portal
+            </Link>
+          </div>
+
+
+          {/* Real-time Email Button */}
+          <button
+            onClick={() => setIsEmailModalOpen(true)}
+            className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-full border border-white/30 transition-all cursor-pointer"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Send Email</span>
+          </button>
+
+          {/* Notifications Center */}
+          <NotificationCenter
+            isOpen={isNotificationsOpen}
+            onOpenChange={setIsNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
+          />
+
+          {/* User Profile 👤 Priya ▾ */}
+          <div className="relative">
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all text-xs font-bold text-white cursor-pointer"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-[10px] font-extrabold border border-white/30">
+                P
+              </div>
+              <span className="hidden sm:inline">Priya</span>
+              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+            </button>
+
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-[#18181f]/95 backdrop-blur-2xl text-white rounded-3xl shadow-2xl border border-white/20 p-3 z-50 text-xs">
+                <div className="px-3 py-2 border-b border-white/10 mb-1">
+                  <p className="font-extrabold text-white">Priya Sharma</p>
+                  <p className="text-[10px] text-white/60 truncate">priya@lumenandco.in</p>
+                  <span className="inline-block mt-1 bg-purple-500/30 text-purple-300 border border-purple-500/40 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                    Senior Creative Designer
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    onTabChange("settings");
+                  }}
+                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-2xl font-semibold flex items-center gap-2 transition-colors"
+                >
+                  <Settings className="h-3.5 w-3.5 text-white/60" /> Delivery Preferences
+                </button>
+                <button
+                  onClick={() => admin.signOut()}
+                  className="w-full text-left px-3 py-2 hover:bg-red-500/20 text-red-400 rounded-2xl font-semibold flex items-center gap-2 mt-1 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 2. BODY LAYOUT: 240px GLASS SIDEBAR + MAIN CONTENT AREA */}
+      {/* ========================================================================= */}
+      <div className="flex-1 flex overflow-hidden h-[calc(100vh-64px)]">
+        {/* Left Fixed Glassy Sidebar (240px) */}
+        <aside className="w-[240px] text-white flex flex-col shrink-0 z-20 h-full bg-transparent">
+          <div className="p-4 space-y-1.5 flex-1 overflow-y-auto">
+            <span className="text-[10px] font-extrabold text-white/60 uppercase tracking-widest px-3 block mb-2">
+              Operations Menu
+            </span>
+
+            {sidebarNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onTabChange(item.id)}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-extrabold transition-all duration-200 cursor-pointer select-none ${
+                    isActive
+                      ? "bg-[#ef4d23] text-white font-extrabold border border-white/40 backdrop-blur-xl"
+                      : "bg-white/20 hover:bg-white/35 backdrop-blur-xl text-white/90 hover:text-white border border-white/40 hover:border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-4 w-4 text-white drop-shadow-sm" />
+                    <span>{item.label}</span>
+                  </div>
+
+                  {item.badge && (
+                    <span
+                      className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                        isActive
+                          ? "bg-white/30 text-white border border-white/40 shadow-xs"
+                          : "bg-white/25 text-white/90 border border-white/35"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Action Footer */}
+          <div className="p-4 border-t border-white/20 bg-transparent">
+            {onQuickAction && (
+              <button
+                onClick={onQuickAction}
+                className="w-full flex items-center justify-center gap-2 bg-white/25 hover:bg-white/40 backdrop-blur-xl text-white text-xs font-extrabold py-2.5 px-4 rounded-full border border-white/40 transition-all cursor-pointer hover:scale-[1.01] hover:border-white/70"
+              >
+                <Plus className="h-4 w-4 text-[#fed7aa]" /> New Task
+              </button>
+            )}
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 relative overflow-y-auto p-4 sm:p-6 isolate h-full">
+          {children}
+        </main>
+      </div>
+
+      {/* Auxiliary Modals */}
+      <CommandPalette
+        isOpen={isCmdPaletteOpen}
+        onClose={() => setIsCmdPaletteOpen(false)}
+        onSelectAction={() => {}}
+      />
+
+      <EmailSenderModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        defaultRecipient="sahitsai7@gmail.com"
+      />
+
+      <BuiltInMessengerModal
+        isOpen={isMessengerOpen}
+        onClose={() => setIsMessengerOpen(false)}
+        currentUserRole="designer"
+        currentUserName="Priya Sharma"
+      />
+    </div>
+  );
+}
