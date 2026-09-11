@@ -99,8 +99,8 @@ export default function DeliveryLayoutShell({
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-white/95 rounded-xl px-2.5 py-1 border border-white/40 shadow-md">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 sm:h-8 w-auto object-contain transition-all" />
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-white/95 rounded-xl px-3 py-1.5 border border-white/40 shadow-md">
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 sm:h-10 w-auto object-contain transition-all" />
           </Link>
 
           <span className="hidden sm:inline text-white/20 text-sm">|</span>

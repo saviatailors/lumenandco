@@ -612,7 +612,7 @@ export function Footer() {
             <img
               src="/lumen-and-co-logo.png"
               alt="Lumen & Co Agency"
-              className="h-8 w-auto object-contain"
+              className="h-11 sm:h-12 w-auto object-contain transition-all hover:scale-105"
             />
           </Link>
           <p className="mt-3 text-neutral-600" style={{ fontSize: 14, lineHeight: 1.6 }}>

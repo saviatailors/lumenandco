@@ -10,7 +10,7 @@ function Logo() {
       <img
         src="/lumen-and-co-logo.png"
         alt="Lumen & Co Agency"
-        className="h-7 sm:h-9 w-auto object-contain"
+        className="h-10 sm:h-12 w-auto object-contain transition-all hover:scale-105"
       />
     </Link>
   );

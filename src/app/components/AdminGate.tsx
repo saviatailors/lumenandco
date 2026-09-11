@@ -37,7 +37,7 @@ export default function AdminGate({
       <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)] space-y-4">
         <div className="mx-auto flex items-center justify-center pt-1 pb-2">
           <Link to="/">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Agency" className="h-9 w-auto object-contain" />
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Agency" className="h-12 sm:h-14 w-auto object-contain transition-all hover:scale-105" />
           </Link>
         </div>
         
