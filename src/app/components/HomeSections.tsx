@@ -134,30 +134,32 @@ const SERVICES = [
 
 function Services() {
   return (
-    <section id="services" className="scroll-mt-4 mt-3 sm:mt-4 bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-10">
+    <section id="services" className="scroll-mt-4 mt-3 sm:mt-4 bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-10">
       <Eyebrow>What we do</Eyebrow>
       <Title lead="Creative + media," italic="one" tail="growth engine" />
-      <div className="mt-8 grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 sm:mt-8 grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
         {SERVICES.map((s, i) => {
           const Icon = s.icon;
           return (
             <div
               key={s.title}
-              className="bg-[#f5f2ee] rounded-2xl p-5 sm:p-6 animate-fade-in hover-lift"
+              className="bg-[#f5f2ee] rounded-2xl p-3.5 sm:p-6 animate-fade-in hover-lift flex flex-col justify-between"
               style={{ animationDelay: `${i * 70}ms` }}
             >
-              <span
-                className="inline-flex items-center justify-center w-10 h-10 rounded-xl"
-                style={{ backgroundColor: "#fdece7" }}
-              >
-                <Icon className="w-5 h-5" style={{ color: ORANGE }} />
-              </span>
-              <h3 className="mt-4" style={{ fontSize: 18, fontWeight: 600 }}>
-                {s.title}
-              </h3>
-              <p className="mt-2 text-neutral-600" style={{ fontSize: 14, lineHeight: 1.6 }}>
-                {s.body}
-              </p>
+              <div>
+                <span
+                  className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl"
+                  style={{ backgroundColor: "#fdece7" }}
+                >
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: ORANGE }} />
+                </span>
+                <h3 className="mt-2.5 sm:mt-4 text-xs sm:text-lg font-semibold tracking-tight">
+                  {s.title}
+                </h3>
+                <p className="mt-1 sm:mt-2 text-neutral-600 text-[11px] sm:text-sm leading-snug sm:leading-relaxed">
+                  {s.body}
+                </p>
+              </div>
             </div>
           );
         })}
