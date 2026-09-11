@@ -2896,8 +2896,8 @@ export default function CrmPage() {
         <CentralCommLogView
           commLogs={commLogs && commLogs.length > 0 ? commLogs : INITIAL_COMM_LOG}
           onAddCommLog={(newLog) => setCommLogs((prev) => [newLog, ...(prev || [])])}
-          clients={clients && clients.length > 0 ? clients : INITIAL_SCHOOL_CLIENTS}
-          clientLeads={clientLeads && clientLeads.length > 0 ? clientLeads : INITIAL_CLIENT_BUSINESS_LEADS}
+          clients={schoolClients && schoolClients.length > 0 ? schoolClients : INITIAL_SCHOOL_CLIENTS}
+          clientLeads={clientBusinessLeads && clientBusinessLeads.length > 0 ? clientBusinessLeads : INITIAL_CLIENT_BUSINESS_LEADS}
           onOpenMessenger={() => setCurrentTab("chat")}
         />
       )}
