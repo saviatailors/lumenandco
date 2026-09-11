@@ -182,13 +182,13 @@ export default function NotificationCenter({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-[#18181f]/95 backdrop-blur-2xl text-white rounded-3xl shadow-2xl border border-white/20 z-50 p-4 space-y-3 animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white/95 backdrop-blur-3xl text-slate-900 rounded-3xl shadow-2xl border border-white/90 z-50 p-4 space-y-3 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-[#ef4d23]" />
-              <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+              <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
                 <span>Notifications</span>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="flex items-center gap-1 text-[10px] text-emerald-700 font-extrabold bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
                   <Radio className="h-2.5 w-2.5 animate-spin" /> Live Realtime
                 </span>
               </h4>
@@ -198,14 +198,14 @@ export default function NotificationCenter({
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-white/60 hover:text-white font-semibold underline text-[11px] transition-colors cursor-pointer"
+                  className="text-slate-600 hover:text-slate-900 font-bold underline text-[11px] transition-colors cursor-pointer"
                 >
                   Mark all read
                 </button>
               )}
               <button
                 onClick={() => setOpen(false)}
-                className="text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                className="text-slate-500 hover:text-slate-900 p-1 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -214,7 +214,7 @@ export default function NotificationCenter({
 
           <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
             {items.length === 0 ? (
-              <p className="text-xs text-white/40 text-center py-6">No notifications right now.</p>
+              <p className="text-xs text-slate-500 font-medium text-center py-6">No notifications right now.</p>
             ) : (
               items.map((n) => (
                 <div
@@ -224,29 +224,30 @@ export default function NotificationCenter({
                     onSelectDeliverable(n.deliverable_id);
                     setOpen(false);
                   }}
-                  className={`p-3 rounded-2xl border text-xs space-y-1 cursor-pointer transition-all ${!n.read
-                      ? "bg-gradient-to-br from-[#ef4d23]/20 to-white/5 border-[#ef4d23]/40 shadow-sm"
-                      : "bg-white/5 border-white/10 hover:bg-white/10"
-                    }`}
+                  className={`p-3 rounded-2xl border text-xs space-y-1 cursor-pointer transition-all ${
+                    !n.read
+                      ? "bg-orange-50/90 border-[#ef4d23]/40 shadow-sm text-slate-900 ring-1 ring-[#ef4d23]/20"
+                      : "bg-slate-50/90 border-slate-200/80 hover:bg-slate-100/90 text-slate-900"
+                  }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-white flex items-center gap-1.5">
+                    <span className="font-extrabold text-slate-900 flex items-center gap-1.5">
                       {n.type === "sla_warning" ? (
-                        <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-red-600 shrink-0" />
                       ) : n.type === "revision" ? (
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
                       ) : n.type === "comment" ? (
-                        <MessageSquare className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                        <MessageSquare className="h-3.5 w-3.5 text-sky-600 shrink-0" />
                       ) : (
-                        <UserPlus className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                        <UserPlus className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                       )}
                       {n.title}
                     </span>
-                    <span className="text-[10px] text-white/50">
+                    <span className="text-[10px] font-bold text-slate-500">
                       {new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="text-[11px] text-white/70 leading-snug">{n.body}</p>
+                  <p className="text-[11px] text-slate-600 font-semibold leading-snug">{n.body}</p>
                 </div>
               ))
             )}

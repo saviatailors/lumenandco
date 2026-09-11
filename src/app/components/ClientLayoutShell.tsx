@@ -175,11 +175,11 @@ export default function ClientLayoutShell({
             </button>
 
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-60 bg-[#161722]/95 backdrop-blur-3xl text-white rounded-3xl shadow-2xl border border-white/20 p-3 z-50 text-xs">
-                <div className="px-3 py-2 border-b border-white/15 mb-1">
-                  <p className="font-bold text-white">{clientName}</p>
-                  <p className="text-[10px] text-white/60 truncate">{clientCompany}</p>
-                  <span className="inline-block mt-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+              <div className="absolute right-0 mt-2 w-60 bg-white/95 backdrop-blur-3xl text-slate-900 rounded-3xl shadow-2xl border border-white/90 p-3 z-50 text-xs">
+                <div className="px-3 py-2 border-b border-slate-200/80 mb-1">
+                  <p className="font-extrabold text-slate-900">{clientName}</p>
+                  <p className="text-[10px] text-slate-600 font-semibold truncate">{clientCompany}</p>
+                  <span className="inline-block mt-1 bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase">
                     Verified Client Account
                   </span>
                 </div>
@@ -188,7 +188,7 @@ export default function ClientLayoutShell({
                     setIsProfileMenuOpen(false);
                     onTabChange("profile");
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-2xl font-semibold flex items-center gap-2 transition-colors text-white/80 hover:text-white"
+                  className="w-full text-left px-3 py-2 hover:bg-slate-100 rounded-2xl font-bold flex items-center gap-2 transition-colors text-slate-800 hover:text-slate-950"
                 >
                   <UserCheck className="h-3.5 w-3.5 text-[#ef4d23]" /> Account Settings
                 </button>
@@ -197,7 +197,7 @@ export default function ClientLayoutShell({
                     setIsProfileMenuOpen(false);
                     onTabChange("scope");
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-2xl font-semibold flex items-center gap-2 transition-colors text-white/80 hover:text-white"
+                  className="w-full text-left px-3 py-2 hover:bg-slate-100 rounded-2xl font-bold flex items-center gap-2 transition-colors text-slate-800 hover:text-slate-950"
                 >
                   <FileText className="h-3.5 w-3.5 text-[#ef4d23]" /> Retainer SLA & Scope
                 </button>
@@ -206,7 +206,7 @@ export default function ClientLayoutShell({
                     setIsProfileMenuOpen(false);
                     onSignOut();
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-red-500/20 text-red-400 rounded-2xl font-bold flex items-center gap-2 mt-1 transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-2 mt-1 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Sign out
                 </button>
@@ -228,15 +228,15 @@ export default function ClientLayoutShell({
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            <aside className="relative w-[280px] max-w-[85vw] bg-[#14151f]/95 backdrop-blur-3xl text-white flex flex-col h-full z-50 border-r border-white/20 shadow-2xl overflow-y-auto p-4 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/15">
+            <aside className="relative w-[280px] max-w-[85vw] bg-white/95 backdrop-blur-3xl text-slate-900 flex flex-col h-full z-50 border-r border-white/90 shadow-2xl overflow-y-auto p-4 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 invert object-contain" />
-                  <span className="text-xs font-extrabold text-white">Client Portal</span>
+                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 object-contain" />
+                  <span className="text-xs font-black text-slate-900">Client Portal</span>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 text-white/70 hover:text-white bg-white/10 rounded-full border border-white/20"
+                  className="p-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-full border border-slate-200"
                 >
                   <X className="h-4 w-4" />
                 </button>

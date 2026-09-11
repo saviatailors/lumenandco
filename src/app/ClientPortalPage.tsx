@@ -1035,19 +1035,19 @@ export default function ClientPortalPage() {
       {currentTab === "overview" && (
         <div className="space-y-6">
           {/* Welcome Banner */}
-          <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl text-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="bg-[#ef4d23] text-white font-extrabold text-[10px] uppercase px-2.5 py-0.5 rounded-full border border-white/30 shadow-md shadow-[#ef4d23]/30">
                   Client Portal
                 </span>
-                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                <span className="text-xs text-emerald-700 font-black flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Consent Active (v1.0)
                 </span>
               </div>
-              <h1 className="text-2xl font-black text-white mt-1">Welcome back, {clientName}!</h1>
-              <p className="text-xs text-white/70 mt-0.5">
-                Here is your real-time campaign performance summary for <strong className="text-white">{clientCompany}</strong>.
+              <h1 className="text-2xl font-black text-slate-900 mt-1">Welcome back, {clientName}!</h1>
+              <p className="text-xs text-slate-600 mt-0.5 font-semibold">
+                Here is your real-time campaign performance summary for <strong className="text-slate-900">{clientCompany}</strong>.
               </p>
             </div>
 
@@ -1061,7 +1061,7 @@ export default function ClientPortalPage() {
               </button>
               <button
                 onClick={() => setCurrentTab("leads")}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs backdrop-blur-md"
+                className="bg-white/90 hover:bg-white text-slate-900 border border-slate-200/90 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs backdrop-blur-md"
               >
                 <Users className="h-4 w-4 text-[#ef4d23]" />
                 <span>View Leads ({myClientLeads.length})</span>
@@ -1100,15 +1100,15 @@ export default function ClientPortalPage() {
           {/* Two-Column Grid: Approvals & Leads Snapshot */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Approvals Widget */}
-            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-[#ef4d23]" />
-                  <h3 className="font-extrabold text-white text-sm">Creative Approvals Awaiting Sign-off</h3>
+                  <h3 className="font-extrabold text-slate-900 text-sm">Creative Approvals Awaiting Sign-off</h3>
                 </div>
                 <button
                   onClick={() => setCurrentTab("approvals")}
-                  className="text-[11px] font-bold text-[#ef4d23] hover:underline cursor-pointer"
+                  className="text-[11px] font-extrabold text-[#ef4d23] hover:underline cursor-pointer"
                 >
                   View All ({creativeApprovals.length})
                 </button>
@@ -1118,16 +1118,16 @@ export default function ClientPortalPage() {
                 {creativeApprovals.slice(0, 2).map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15 shadow-xs"
+                    className="flex items-center gap-3 bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900"
                   >
                     <img
                       src={item.thumbnailUrl}
                       alt={item.title}
-                      className="w-16 h-12 object-cover rounded-xl border border-white/20 shrink-0"
+                      className="w-16 h-12 object-cover rounded-xl border border-slate-200/80 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-white truncate">{item.title}</h4>
-                      <p className="text-[10px] text-white/60">
+                      <h4 className="text-xs font-extrabold text-slate-900 truncate">{item.title}</h4>
+                      <p className="text-[11px] text-slate-600 font-semibold">
                         {item.type} • v{item.current_version}
                       </p>
                     </div>
@@ -1150,7 +1150,7 @@ export default function ClientPortalPage() {
                       ) : (
                         <Badge
                           variant={item.status === "approved" ? "success" : "destructive"}
-                          className="capitalize text-[9px]"
+                          className="capitalize text-[9px] font-black"
                         >
                           {item.status}
                         </Badge>
@@ -1162,15 +1162,15 @@ export default function ClientPortalPage() {
             </div>
 
             {/* Recent Leads Snapshot */}
-            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-emerald-400" />
-                  <h3 className="font-extrabold text-white text-sm">Recent Business Leads Snapshot</h3>
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  <h3 className="font-extrabold text-slate-900 text-sm">Recent Business Leads Snapshot</h3>
                 </div>
                 <button
                   onClick={() => setCurrentTab("leads")}
-                  className="text-[11px] font-bold text-[#ef4d23] hover:underline cursor-pointer"
+                  className="text-[11px] font-extrabold text-[#ef4d23] hover:underline cursor-pointer"
                 >
                   Manage Leads
                 </button>
@@ -1180,11 +1180,11 @@ export default function ClientPortalPage() {
                 {myClientLeads.slice(0, 3).map((lead) => (
                   <div
                     key={lead.id}
-                    className="flex items-center justify-between bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/15 shadow-xs"
+                    className="flex items-center justify-between bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900"
                   >
                     <div>
-                      <p className="text-xs font-bold text-white">{lead.lead_name}</p>
-                      <p className="text-[10px] text-white/60">
+                      <p className="text-xs font-extrabold text-slate-900">{lead.lead_name}</p>
+                      <p className="text-[11px] text-slate-600 font-semibold">
                         {lead.email} • {lead.campaign_source}
                       </p>
                     </div>
@@ -1215,13 +1215,13 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "approvals" && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
             <div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-[#ef4d23]" />
-                <h2 className="text-xl font-black text-white">Video & Creative Approvals</h2>
+                <h2 className="text-xl font-extrabold text-slate-900">Video & Creative Approvals</h2>
               </div>
-              <p className="text-xs text-white/70 mt-1">
+              <p className="text-xs text-slate-600 font-semibold mt-1">
                 Review submitted video reels, carousel graphics, and motion banners. Approving an asset gives official sign-off for campaign launch.
               </p>
             </div>
@@ -1235,7 +1235,7 @@ export default function ClientPortalPage() {
             {creativeApprovals.map((item) => (
               <div
                 key={item.id}
-                className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 overflow-hidden flex flex-col shadow-2xl hover:border-[#ef4d23]/50 hover:shadow-2xl transition-all group text-white"
+                className="bg-white/80 backdrop-blur-3xl rounded-3xl border border-white/90 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl transition-all group text-slate-900"
               >
                 {/* Media Thumbnail Container */}
                 <div className="relative h-48 bg-black/60 overflow-hidden">
@@ -1283,25 +1283,25 @@ export default function ClientPortalPage() {
                 {/* Content Body */}
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div>
-                    <h3 className="font-extrabold text-white text-sm line-clamp-2">{item.title}</h3>
-                    <p className="text-[10px] text-white/60 mt-1">
+                    <h3 className="font-extrabold text-slate-900 text-sm line-clamp-2">{item.title}</h3>
+                    <p className="text-[11px] text-slate-600 font-semibold mt-1">
                       Submitted on {new Date(item.submitted_at).toLocaleDateString()}
                     </p>
 
                     {item.client_comment && (
-                      <div className="mt-3 bg-red-500/10 p-3 rounded-2xl border border-red-500/30 text-xs text-red-200">
-                        <span className="text-[10px] font-bold text-red-400 block mb-0.5">Rejection Comment:</span>
+                      <div className="mt-3 bg-red-50 p-3 rounded-2xl border border-red-200 text-xs text-red-700 font-semibold">
+                        <span className="text-[10px] font-extrabold text-red-600 block mb-0.5">Rejection Comment:</span>
                         "{item.client_comment}"
                       </div>
                     )}
                   </div>
 
                   {/* Actions & Version History */}
-                  <div className="pt-3 border-t border-white/15 space-y-2">
+                  <div className="pt-3 border-t border-slate-200/80 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <button
                         onClick={() => setHistoryModalItem(item)}
-                        className="text-[11px] font-bold text-white/70 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="text-[11px] font-extrabold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <History className="h-3.5 w-3.5 text-[#ef4d23]" />
                         <span>Version History ({item.history.length})</span>
@@ -1456,17 +1456,17 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "reports" && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
             <div>
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-[#ef4d23]" />
-                <h2 className="text-xl font-black text-white">Campaign Performance & ROAS Analytics</h2>
+                <h2 className="text-xl font-extrabold text-slate-900">Campaign Performance & ROAS Analytics</h2>
               </div>
-              <p className="text-xs text-white/70 mt-1">
+              <p className="text-xs text-slate-600 font-semibold mt-1">
                 Read-only analytics view. Internal agency profit margins and ad costs are restricted under client role policies.
               </p>
             </div>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+            <span className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">
               Live Channel Feed
             </span>
           </div>
@@ -1480,36 +1480,36 @@ export default function ClientPortalPage() {
 
           {/* Ad Channel Breakdown Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
-              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-3 text-slate-900">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center justify-between">
                 <span>Meta Ads (FB & Insta)</span>
-                <span className="text-xs text-emerald-400 font-bold">4.8x ROAS</span>
+                <span className="text-xs text-emerald-700 font-black">4.8x ROAS</span>
               </h3>
-              <p className="text-xs text-white/70">Total Spend: ₹2,90,000 • 890 Conversions</p>
-              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
+              <p className="text-xs text-slate-600 font-semibold">Total Spend: ₹2,90,000 • 890 Conversions</p>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/80">
                 <div className="bg-[#ef4d23] h-full w-[65%]" />
               </div>
             </div>
 
-            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
-              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-3 text-slate-900">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center justify-between">
                 <span>Google Search & Shopping</span>
-                <span className="text-xs text-emerald-400 font-bold">3.9x ROAS</span>
+                <span className="text-xs text-emerald-700 font-black">3.9x ROAS</span>
               </h3>
-              <p className="text-xs text-white/70">Total Spend: ₹1,40,000 • 280 Conversions</p>
-              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
-                <div className="bg-blue-500 h-full w-[45%]" />
+              <p className="text-xs text-slate-600 font-semibold">Total Spend: ₹1,40,000 • 280 Conversions</p>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/80">
+                <div className="bg-blue-600 h-full w-[45%]" />
               </div>
             </div>
 
-            <div className="bg-white/25 backdrop-blur-3xl p-5 rounded-3xl border border-white/40 shadow-2xl space-y-3 text-white">
-              <h3 className="font-extrabold text-white text-sm flex items-center justify-between">
+            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-3 text-slate-900">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center justify-between">
                 <span>TikTok & UGC Reels</span>
-                <span className="text-xs text-emerald-400 font-bold">5.2x ROAS</span>
+                <span className="text-xs text-emerald-700 font-black">5.2x ROAS</span>
               </h3>
-              <p className="text-xs text-white/70">Total Spend: ₹50,000 • 170 Conversions</p>
-              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden border border-white/15">
-                <div className="bg-purple-500 h-full w-[80%]" />
+              <p className="text-xs text-slate-600 font-semibold">Total Spend: ₹50,000 • 170 Conversions</p>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/80">
+                <div className="bg-purple-600 h-full w-[80%]" />
               </div>
             </div>
           </div>
@@ -1521,14 +1521,14 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "notifications" && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+          <div className="flex items-center justify-between bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
             <div>
-              <h2 className="text-xl font-black text-white">Notifications & Account Alerts</h2>
-              <p className="text-xs text-white/70 mt-1">Real-time alerts for new leads, creative approvals, and campaign milestones.</p>
+              <h2 className="text-xl font-extrabold text-slate-900">Notifications & Account Alerts</h2>
+              <p className="text-xs text-slate-600 mt-1">Real-time alerts for new leads, creative approvals, and campaign milestones.</p>
             </div>
             <button
               onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
-              className="text-xs font-bold text-[#ef4d23] hover:underline cursor-pointer"
+              className="text-xs font-extrabold text-[#ef4d23] hover:underline cursor-pointer"
             >
               Mark All as Read
             </button>
@@ -1540,19 +1540,19 @@ export default function ClientPortalPage() {
                 key={n.id}
                 className={`p-4 rounded-3xl border transition-all flex items-start gap-4 ${
                   n.read
-                    ? "bg-black/30 border-white/10 text-white/70"
-                    : "bg-[#161722]/90 border-[#ef4d23]/40 text-white shadow-xl ring-1 ring-[#ef4d23]/20"
+                    ? "bg-white/70 border-white/80 text-slate-700 backdrop-blur-xl shadow-md"
+                    : "bg-white/95 border-[#ef4d23]/40 text-slate-900 shadow-xl ring-1 ring-[#ef4d23]/30 backdrop-blur-3xl"
                 }`}
               >
-                <div className="p-2.5 rounded-2xl bg-[#ef4d23]/20 border border-[#ef4d23]/30 text-[#ef4d23] shrink-0">
+                <div className="p-2.5 rounded-2xl bg-[#ef4d23]/10 border border-[#ef4d23]/30 text-[#ef4d23] shrink-0">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-extrabold text-sm text-white">{n.title}</h3>
-                    <span className="text-[10px] text-white/50">{n.time}</span>
+                    <h3 className="font-extrabold text-sm text-slate-900">{n.title}</h3>
+                    <span className="text-[10px] font-bold text-slate-500">{n.time}</span>
                   </div>
-                  <p className="text-xs text-white/80 mt-1">{n.desc}</p>
+                  <p className="text-xs text-slate-600 font-medium mt-1">{n.desc}</p>
                 </div>
               </div>
             ))}
@@ -1565,64 +1565,64 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "profile" && (
         <div className="space-y-6">
-          <div className="bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
-            <h2 className="text-xl font-black text-white">Profile & Security Settings</h2>
-            <p className="text-xs text-white/70 mt-1">Manage credentials and inspect your login session audit history.</p>
+          <div className="bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
+            <h2 className="text-xl font-extrabold text-slate-900">Profile & Security Settings</h2>
+            <p className="text-xs text-slate-600 mt-1">Manage credentials and inspect your login session audit history.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Account Card */}
-            <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+            <div className="bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#ef4d23] text-white font-extrabold text-lg flex items-center justify-center shadow-lg shadow-[#ef4d23]/30">
                   {clientName.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-white text-base">{clientName}</h3>
-                  <p className="text-xs text-white/70">{clientCompany}</p>
+                  <h3 className="font-extrabold text-slate-900 text-base">{clientName}</h3>
+                  <p className="text-xs text-slate-600 font-semibold">{clientCompany}</p>
                 </div>
               </div>
 
-              <div className="space-y-2 text-xs pt-3 border-t border-white/15">
-                <p className="text-white/70">Email: <span className="font-bold text-white">{userEmail}</span></p>
-                <p className="text-white/70">Role: <span className="font-bold text-white">Verified Client Account</span></p>
-                <p className="text-white/70">DPDP Consent: <span className="font-bold text-emerald-400">Accepted (v1.0)</span></p>
+              <div className="space-y-2 text-xs pt-3 border-t border-slate-200/80">
+                <p className="text-slate-600 font-semibold">Email: <span className="font-extrabold text-slate-900">{userEmail}</span></p>
+                <p className="text-slate-600 font-semibold">Role: <span className="font-extrabold text-slate-900">Verified Client Account</span></p>
+                <p className="text-slate-600 font-semibold">DPDP Consent: <span className="font-black text-emerald-700">Accepted (v1.0)</span></p>
               </div>
             </div>
 
             {/* Password Form */}
-            <div className="lg:col-span-2 bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
-              <h3 className="font-extrabold text-white text-sm">Change Account Password</h3>
+            <div className="lg:col-span-2 bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
+              <h3 className="font-extrabold text-slate-900 text-sm">Change Account Password</h3>
               <form onSubmit={handleChangePassword} className="space-y-4 text-xs">
                 <div>
-                  <label className="text-white/80 block mb-1 font-semibold">Current Password</label>
+                  <label className="text-slate-800 block mb-1.5 font-bold">Current Password</label>
                   <input
                     type="password"
                     value={currPass}
                     onChange={(e) => setCurrPass(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-white/80 block mb-1 font-semibold">New Password</label>
+                    <label className="text-slate-800 block mb-1.5 font-bold">New Password</label>
                     <input
                       type="password"
                       value={newPass}
                       onChange={(e) => setNewPass(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                      className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                     />
                   </div>
                   <div>
-                    <label className="text-white/80 block mb-1 font-semibold">Confirm New Password</label>
+                    <label className="text-slate-800 block mb-1.5 font-bold">Confirm New Password</label>
                     <input
                       type="password"
                       value={confirmPass}
                       onChange={(e) => setConfirmPass(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                      className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                     />
                   </div>
                 </div>
@@ -1677,64 +1677,64 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "support" && (
         <div className="space-y-6">
-          <div className="bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+          <div className="bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-[#ef4d23]" />
-              <h2 className="text-xl font-black text-white">Support & Data Rights (DPDP Act 2023)</h2>
+              <h2 className="text-xl font-extrabold text-slate-900">Support & Data Rights (DPDP Act 2023)</h2>
             </div>
-            <p className="text-xs text-white/70 mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               Contact our designated Grievance Officer or submit data access / erasure requests under India's Digital Personal Data Protection Act, 2023.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Grievance Officer Card */}
-            <div className="bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
+            <div className="bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
               <h3 className="font-extrabold text-xs uppercase tracking-wider text-[#ef4d23]">Statutory Grievance Officer</h3>
-              <div className="space-y-2 text-xs text-white/80">
-                <p><strong className="text-white">Officer Name:</strong> Sahit Sai</p>
-                <p><strong className="text-white">Designation:</strong> Data Protection Lead</p>
-                <p><strong className="text-white">Email:</strong> privacy@lumenandco.in</p>
-                <p><strong className="text-white">Direct Phone:</strong> +91 98490 00000</p>
-                <p><strong className="text-white">Address:</strong> Level 4, Jubilee Hills, Hyderabad 500033</p>
+              <div className="space-y-2 text-xs text-slate-700">
+                <p><strong className="text-slate-900">Officer Name:</strong> Sahit Sai</p>
+                <p><strong className="text-slate-900">Designation:</strong> Data Protection Lead</p>
+                <p><strong className="text-slate-900">Email:</strong> privacy@lumenandco.in</p>
+                <p><strong className="text-slate-900">Direct Phone:</strong> +91 98490 00000</p>
+                <p><strong className="text-slate-900">Address:</strong> Level 4, Jubilee Hills, Hyderabad 500033</p>
               </div>
             </div>
 
             {/* Submit Query Form */}
-            <div className="lg:col-span-2 bg-white/25 backdrop-blur-3xl p-6 rounded-3xl border border-white/40 shadow-2xl space-y-4 text-white">
-              <h3 className="font-extrabold text-white text-sm">Submit Data Request / Support Ticket</h3>
+            <div className="lg:col-span-2 bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
+              <h3 className="font-extrabold text-slate-900 text-sm">Submit Data Request / Support Ticket</h3>
               <form onSubmit={handleSendSupportQuery} className="space-y-4 text-xs">
                 <div>
-                  <label className="text-white/80 block mb-1 font-semibold">Request Category</label>
+                  <label className="text-slate-800 block mb-1.5 font-bold">Request Category</label>
                   <select
                     value={supportCategory}
                     onChange={(e) => setSupportCategory(e.target.value)}
-                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    className="w-full bg-white text-slate-900 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                   >
-                    <option value="dpdp_data_request" className="bg-[#181922]">DPDP Data Access / Copy Request</option>
-                    <option value="dpdp_correction" className="bg-[#181922]">DPDP Data Correction Request</option>
-                    <option value="dpdp_erasure" className="bg-[#181922]">DPDP Erasure / Deletion Request</option>
-                    <option value="agency_support" className="bg-[#181922]">General Campaign Support</option>
+                    <option value="dpdp_data_request" className="bg-white text-slate-900">DPDP Data Access / Copy Request</option>
+                    <option value="dpdp_correction" className="bg-white text-slate-900">DPDP Data Correction Request</option>
+                    <option value="dpdp_erasure" className="bg-white text-slate-900">DPDP Erasure / Deletion Request</option>
+                    <option value="agency_support" className="bg-white text-slate-900">General Campaign Support</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/80 block mb-1 font-semibold">Subject</label>
+                  <label className="text-slate-800 block mb-1.5 font-bold">Subject</label>
                   <input
                     type="text"
                     value={supportSubject}
                     onChange={(e) => setSupportSubject(e.target.value)}
                     placeholder="e.g. Request copy of client audit logs"
-                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                   />
                 </div>
                 <div>
-                  <label className="text-white/80 block mb-1 font-semibold">Message / Request Details</label>
+                  <label className="text-slate-800 block mb-1.5 font-bold">Message / Request Details</label>
                   <textarea
                     rows={4}
                     value={supportMessage}
                     onChange={(e) => setSupportMessage(e.target.value)}
                     placeholder="Provide details regarding your request..."
-                    className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-[#ef4d23]"
+                    className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
                   />
                 </div>
                 <button
@@ -1752,10 +1752,10 @@ export default function ClientPortalPage() {
 
       {/* Default Fallback for other tabs (invoices, scope, creatives) */}
       {(currentTab === "creatives" || currentTab === "invoices" || currentTab === "scope") && (
-        <div className="bg-white/25 backdrop-blur-3xl p-8 rounded-3xl border border-white/40 text-center space-y-4 shadow-2xl text-white">
+        <div className="bg-white/80 backdrop-blur-3xl p-8 rounded-3xl border border-white/90 text-center space-y-4 shadow-xl text-slate-900">
           <Sparkles className="h-12 w-12 text-[#ef4d23] mx-auto animate-bounce" />
-          <h2 className="text-xl font-black text-white capitalize">{currentTab} Section</h2>
-          <p className="text-xs text-white/70 max-w-md mx-auto">
+          <h2 className="text-xl font-extrabold text-slate-900 capitalize">{currentTab} Section</h2>
+          <p className="text-xs text-slate-600 font-semibold max-w-md mx-auto">
             This module is active under your retainer package. All assets, deliverables, and documents are synchronized with the agency delivery hub.
           </p>
         </div>
@@ -1767,10 +1767,10 @@ export default function ClientPortalPage() {
 
       {/* 1. Rejection Comment Modal */}
       {rejectModalItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white shadow-2xl">
-            <h3 className="font-black text-base text-white">Provide Rejection Feedback</h3>
-            <p className="text-xs text-white/70">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white/95 border border-white/90 rounded-3xl p-6 space-y-4 text-slate-900 shadow-2xl backdrop-blur-3xl">
+            <h3 className="font-extrabold text-base text-slate-900">Provide Rejection Feedback</h3>
+            <p className="text-xs text-slate-600 font-semibold">
               Please explain what changes or revisions are needed for "{rejectModalItem.title}".
             </p>
             <textarea
@@ -1778,18 +1778,18 @@ export default function ClientPortalPage() {
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="e.g. Please add promo code overlay in first 3 seconds..."
-              className="w-full bg-white/10 text-white border border-white/20 rounded-2xl p-3 text-xs focus:outline-none focus:border-red-500"
+              className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl p-3 text-xs font-semibold focus:outline-none focus:border-red-500 shadow-xs"
             />
             <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setRejectModalItem(null)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700 cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmRejectCreative}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white shadow-md cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-extrabold text-white shadow-md cursor-pointer transition-colors"
               >
                 Confirm Rejection
               </button>
@@ -1800,34 +1800,34 @@ export default function ClientPortalPage() {
 
       {/* 2. Version History Modal */}
       {historyModalItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/15 pb-3">
-              <h3 className="font-black text-base text-white">Version History Timeline</h3>
-              <button onClick={() => setHistoryModalItem(null)} className="text-white/60 hover:text-white cursor-pointer">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white/95 border border-white/90 rounded-3xl p-6 space-y-4 text-slate-900 max-h-[85vh] flex flex-col shadow-2xl backdrop-blur-3xl">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+              <h3 className="font-extrabold text-base text-slate-900">Version History Timeline</h3>
+              <button onClick={() => setHistoryModalItem(null)} className="text-slate-500 hover:text-slate-900 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 pr-2">
               {historyModalItem.history.map((ver) => (
-                <div key={ver.version} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2 text-xs">
+                <div key={ver.version} className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs text-slate-900">
                   <div className="flex items-center justify-between">
                     <span className="font-extrabold text-[#ef4d23] text-xs">Version v{ver.version}</span>
                     <Badge
                       variant={ver.status === "approved" ? "success" : ver.status === "rejected" ? "destructive" : "warning"}
-                      className="uppercase text-[9px]"
+                      className="uppercase text-[9px] font-black"
                     >
                       {ver.status}
                     </Badge>
                   </div>
-                  <p className="text-white/80">{ver.notes}</p>
+                  <p className="text-slate-800 font-semibold">{ver.notes}</p>
                   {ver.feedback && (
-                    <div className="bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl text-red-200 text-[11px]">
+                    <div className="bg-red-50 border border-red-200 p-2.5 rounded-xl text-red-700 text-[11px] font-bold">
                       <strong>Feedback:</strong> "{ver.feedback}"
                     </div>
                   )}
-                  <p className="text-[10px] text-white/50 text-right">
+                  <p className="text-[10px] text-slate-500 font-medium text-right">
                     Submitted: {new Date(ver.submitted_at).toLocaleString()}
                   </p>
                 </div>
@@ -1854,13 +1854,13 @@ export default function ClientPortalPage() {
 
       {/* 4. Persistent Footer Policy Reader Modals */}
       {viewPolicyModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-3xl bg-[#181922] border border-white/20 rounded-3xl p-6 space-y-4 text-white max-h-[90vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/15 pb-3">
-              <h3 className="font-black text-lg text-white">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-3xl bg-white/95 border border-white/90 rounded-3xl p-6 space-y-4 text-slate-900 max-h-[90vh] flex flex-col shadow-2xl backdrop-blur-3xl">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900">
                 {viewPolicyModal === "privacy" ? LUMEN_POLICY_CONTENT_V1.privacy_policy.title : LUMEN_POLICY_CONTENT_V1.terms_of_service.title}
               </h3>
-              <button onClick={() => setViewPolicyModal(null)} className="text-white/60 hover:text-white cursor-pointer">
+              <button onClick={() => setViewPolicyModal(null)} className="text-slate-500 hover:text-slate-900 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1870,11 +1870,11 @@ export default function ClientPortalPage() {
                 ? LUMEN_POLICY_CONTENT_V1.privacy_policy.sections
                 : LUMEN_POLICY_CONTENT_V1.terms_of_service.sections
               ).map((sec) => (
-                <div key={sec.section_number} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-1">
-                  <h4 className="font-bold text-[#ef4d23]">
+                <div key={sec.section_number} className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 space-y-1">
+                  <h4 className="font-extrabold text-[#ef4d23]">
                     {sec.section_number}. {sec.title}
                   </h4>
-                  <p className="text-white/80 whitespace-pre-line leading-relaxed">{sec.content}</p>
+                  <p className="text-slate-700 whitespace-pre-line leading-relaxed font-medium">{sec.content}</p>
                 </div>
               ))}
             </div>
