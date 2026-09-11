@@ -206,47 +206,47 @@ export default function DeliveryHubPage() {
     <DeliveryLayoutShell currentTab={currentTab} onTabChange={setCurrentTab} onQuickAction={() => setIsCreateModalOpen(true)}>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
         {/* ========================================================================= */}
-        {/* 1. EXECUTIVE PULSE BANNER (LUMEN & CO BRAND OPS STAGE) */}
+        {/* 1. EXECUTIVE PULSE BANNER (SOLID DARK OBSIDIAN STAGE) */}
         {/* ========================================================================= */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-black/60 via-[#181924]/80 to-[#221715]/70 backdrop-blur-3xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl text-white">
-          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#ef4d23]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden bg-[#0f1118]/95 backdrop-blur-3xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl text-white">
+          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#ef4d23]/25 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2.5 mb-2">
-                <span className="bg-[#ef4d23] text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md shadow-[#ef4d23]/30 tracking-wider">
+                <span className="bg-[#ef4d23] text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md shadow-[#ef4d23]/40 tracking-wider">
                   Live Operations Command
                 </span>
                 <span className="text-white/40 text-xs">•</span>
-                <span className="text-white/70 text-xs font-semibold">Q3 Creative Deliverables Sprint</span>
+                <span className="text-white/80 text-xs font-bold">Q3 Creative Deliverables Sprint</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 Delivery <span className="font-serif-italic text-[#ef4d23] font-normal">Hub</span>
               </h1>
-              <p className="text-xs sm:text-sm text-white/70 mt-1 max-w-xl font-medium">
+              <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-xl font-medium">
                 Real-time campaign proofing, SLA compliance velocity, and client deliverable stage management.
               </p>
             </div>
 
             {/* Metric Counter Pills */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white/10 backdrop-blur-xl p-3.5 rounded-2xl border border-white/20 shadow-inner">
-                <span className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider block">SLA On-Time</span>
+              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">SLA On-Time</span>
                 <p className="text-xl font-extrabold text-emerald-400 mt-0.5">98.4%</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl p-3.5 rounded-2xl border border-white/20 shadow-inner">
-                <span className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider block">In Sprint</span>
+              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">In Sprint</span>
                 <p className="text-xl font-extrabold text-white mt-0.5">{deliverables.length} Items</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl p-3.5 rounded-2xl border border-white/20 shadow-inner">
-                <span className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider block">Needs Review</span>
+              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Needs Review</span>
                 <p className="text-xl font-extrabold text-amber-400 mt-0.5">3 Pending</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl p-3.5 rounded-2xl border border-white/20 shadow-inner">
-                <span className="text-[10px] font-extrabold text-white/60 uppercase tracking-wider block">Client Approved</span>
+              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Client Approved</span>
                 <p className="text-xl font-extrabold text-sky-400 mt-0.5">
                   {deliverables.filter((d) => d.status === "approved" || d.status === "delivered").length} Total
                 </p>
@@ -258,15 +258,15 @@ export default function DeliveryHubPage() {
         {/* ========================================================================= */}
         {/* 2. DYNAMIC WORKSPACE VIEW SWITCHER DOCK */}
         {/* ========================================================================= */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-black/40 backdrop-blur-3xl p-3 rounded-3xl border border-white/20 shadow-xl">
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f1118]/95 backdrop-blur-3xl p-3 rounded-3xl border border-white/20 shadow-2xl">
           {/* Segmented View Mode Tabs */}
-          <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-2xl border border-white/15">
+          <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-2xl border border-white/20">
             <button
               onClick={() => setViewMode("grid")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/30"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
+                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <LayoutGrid className="h-4 w-4" /> Creative Grid
@@ -276,8 +276,8 @@ export default function DeliveryHubPage() {
               onClick={() => setViewMode("kanban")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                 viewMode === "kanban"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/30"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
+                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Kanban className="h-4 w-4" /> Pipeline Stage Board
@@ -287,8 +287,8 @@ export default function DeliveryHubPage() {
               onClick={() => setViewMode("clients")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                 viewMode === "clients"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/30"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
+                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <Building2 className="h-4 w-4" /> Client Retainers
@@ -298,8 +298,8 @@ export default function DeliveryHubPage() {
               onClick={() => setViewMode("proofs")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                 viewMode === "proofs"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/30"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
+                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               <MessageSquare className="h-4 w-4" /> Proofing & Reviews
@@ -309,7 +309,7 @@ export default function DeliveryHubPage() {
           {/* New Deliverable Action Button */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-lg shadow-[#ef4d23]/30 border border-white/30 transition-all cursor-pointer hover:scale-[1.02]"
+            className="flex items-center gap-2 bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-lg shadow-[#ef4d23]/40 border border-white/30 transition-all cursor-pointer hover:scale-[1.02]"
           >
             <Plus className="h-4 w-4" /> Create Deliverable
           </button>
@@ -321,13 +321,13 @@ export default function DeliveryHubPage() {
         <div className="space-y-3">
           {/* Client Filter Pill Carousel */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <span className="text-xs font-bold text-white/50 shrink-0 uppercase tracking-wider mr-1">Client:</span>
+            <span className="text-xs font-extrabold text-white/70 shrink-0 uppercase tracking-wider mr-1">Client:</span>
             <button
               onClick={() => setSelectedClientFilter("all")}
               className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
                 selectedClientFilter === "all"
-                  ? "bg-white text-neutral-900 shadow-md scale-[1.02]"
-                  : "bg-white/10 hover:bg-white/20 text-white/80 border border-white/15"
+                  ? "bg-white text-neutral-900 shadow-lg scale-[1.02]"
+                  : "bg-[#181a26] hover:bg-white/20 text-white border border-white/20"
               }`}
             >
               All Retainers ({deliverables.length})
@@ -345,23 +345,23 @@ export default function DeliveryHubPage() {
                   onClick={() => setSelectedClientFilter(client.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
                     isSelected
-                      ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/30 border border-white/30 scale-[1.02]"
-                      : "bg-white/10 hover:bg-white/20 text-white/80 border border-white/15"
+                      ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/40 border border-white/40 scale-[1.02]"
+                      : "bg-[#181a26] hover:bg-white/20 text-white border border-white/20"
                   }`}
                 >
                   <span>{client.company_name}</span>
-                  <span className="bg-black/30 px-2 py-0.5 rounded-full text-[10px] text-white/90">{count}</span>
+                  <span className="bg-black/50 px-2 py-0.5 rounded-full text-[10px] text-white font-bold">{count}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Secondary Type & Search Filter Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white/10 backdrop-blur-2xl p-3 rounded-2xl border border-white/15">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0f1118]/95 backdrop-blur-2xl p-3.5 rounded-2xl border border-white/20 shadow-xl">
+            <div className="flex flex-wrap items-center gap-4">
               {/* Type Filter Buttons */}
-              <div className="flex items-center gap-1 text-xs">
-                <span className="text-white/60 font-bold mr-1">Type:</span>
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="text-white/70 font-extrabold mr-1">Type:</span>
                 {[
                   { id: "all", label: "All" },
                   { id: "reels", label: "📹 Reels" },
@@ -372,8 +372,8 @@ export default function DeliveryHubPage() {
                   <button
                     key={t.id}
                     onClick={() => setTypeFilter(t.id)}
-                    className={`px-3 py-1 rounded-xl font-bold transition-all ${
-                      typeFilter === t.id ? "bg-white text-neutral-900 shadow-xs" : "text-white/70 hover:bg-white/10"
+                    className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
+                      typeFilter === t.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
                     }`}
                   >
                     {t.label}
@@ -382,8 +382,8 @@ export default function DeliveryHubPage() {
               </div>
 
               {/* Status Toggles */}
-              <div className="flex items-center gap-1 text-xs pl-3 border-l border-white/15">
-                <span className="text-white/60 font-bold mr-1">Status:</span>
+              <div className="flex items-center gap-1.5 text-xs pl-3 border-l border-white/20">
+                <span className="text-white/70 font-extrabold mr-1">Status:</span>
                 {[
                   { id: "all", label: "All" },
                   { id: "in_progress", label: "⚡ In Production" },
@@ -393,8 +393,8 @@ export default function DeliveryHubPage() {
                   <button
                     key={s.id}
                     onClick={() => setStatusFilter(s.id)}
-                    className={`px-3 py-1 rounded-xl font-bold transition-all ${
-                      statusFilter === s.id ? "bg-white text-neutral-900 shadow-xs" : "text-white/70 hover:bg-white/10"
+                    className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
+                      statusFilter === s.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
                     }`}
                   >
                     {s.label}
@@ -405,13 +405,13 @@ export default function DeliveryHubPage() {
 
             {/* Instant Search Bar */}
             <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
               <input
                 type="text"
                 placeholder="Search deliverable title…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-black/40 border border-white/20 rounded-xl text-xs font-medium text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[#ef4d23] w-60"
+                className="pl-8 pr-3 py-1.5 bg-black/60 border border-white/20 rounded-xl text-xs font-bold text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[#ef4d23] w-60"
               />
             </div>
           </div>
@@ -423,7 +423,7 @@ export default function DeliveryHubPage() {
         {viewMode === "grid" && (
           <div>
             {filteredDeliverables.length === 0 ? (
-              <div className="p-12 text-center text-white/50 bg-white/5 rounded-3xl border border-dashed border-white/20">
+              <div className="p-12 text-center text-white/60 bg-[#0f1118]/90 rounded-3xl border border-dashed border-white/20 shadow-2xl">
                 <Inbox className="h-10 w-10 mx-auto text-white/40 mb-3" />
                 <p className="font-extrabold text-white text-base">No deliverables match this filter combination.</p>
                 <button
@@ -433,7 +433,7 @@ export default function DeliveryHubPage() {
                     setStatusFilter("all");
                     setSearchQuery("");
                   }}
-                  className="mt-3 text-xs font-bold text-[#ef4d23] hover:underline"
+                  className="mt-3 text-xs font-extrabold text-[#ef4d23] hover:underline"
                 >
                   Reset all filters
                 </button>
@@ -455,29 +455,29 @@ export default function DeliveryHubPage() {
                         setSelectedTask(item);
                         setIsTaskModalOpen(true);
                       }}
-                      className="group bg-white/10 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/20 shadow-xl hover:shadow-2xl hover:border-[#ef4d23]/80 transition-all duration-300 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                      className="group bg-[#12141e]/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/20 shadow-2xl hover:shadow-2xl hover:border-[#ef4d23] transition-all duration-300 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
                     >
                       {/* Media Card Cover Thumbnail */}
-                      <div className="relative h-44 w-full overflow-hidden bg-black/40">
+                      <div className="relative h-44 w-full overflow-hidden bg-black/60">
                         <img
                           src={coverImage}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#12141e] via-black/40 to-transparent" />
 
                         {/* Top Badges */}
                         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                          <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1 rounded-full border border-white/20 uppercase tracking-wider">
+                          <span className="bg-black/80 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1 rounded-full border border-white/30 uppercase tracking-wider shadow-md">
                             {item.type.replace("_", " ")}
                           </span>
 
                           {isApproved ? (
-                            <span className="bg-emerald-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                            <span className="bg-emerald-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
                               <Check className="h-3 w-3" /> Approved
                             </span>
                           ) : (
-                            <span className="bg-amber-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-md flex items-center gap-1 animate-pulse">
+                            <span className="bg-amber-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
                               <Clock className="h-3 w-3" /> In Production
                             </span>
                           )}
@@ -485,7 +485,7 @@ export default function DeliveryHubPage() {
 
                         {/* Bottom Client Tag */}
                         <div className="absolute bottom-3 left-3 right-3">
-                          <span className="text-[11px] font-extrabold text-white/90 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 inline-block">
+                          <span className="text-[11px] font-extrabold text-white bg-black/70 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 inline-block shadow-md">
                             🏢 {item.client_name}
                           </span>
                         </div>
@@ -497,18 +497,18 @@ export default function DeliveryHubPage() {
                           <h3 className="font-extrabold text-sm text-white leading-snug group-hover:text-[#ef4d23] transition-colors line-clamp-2">
                             {item.title}
                           </h3>
-                          <p className="text-[11px] text-white/60 mt-1 line-clamp-2 font-medium">
+                          <p className="text-[11px] text-white/70 mt-1 line-clamp-2 font-semibold">
                             {item.brief_description || "Standard creative deliverable sprint item."}
                           </p>
                         </div>
 
                         {/* Progress Stepper & Subtask Count */}
-                        <div className="space-y-1.5 pt-2 border-t border-white/10">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-white/70">
+                        <div className="space-y-1.5 pt-2 border-t border-white/15">
+                          <div className="flex items-center justify-between text-[11px] font-extrabold text-white/80">
                             <span>Sprint Progress</span>
                             <span>{progressPct}% ({completedSubtasks}/{totalSubtasks})</span>
                           </div>
-                          <div className="w-full bg-white/15 h-2 rounded-full overflow-hidden p-0.5 border border-white/10">
+                          <div className="w-full bg-black/60 h-2 rounded-full overflow-hidden p-0.5 border border-white/20">
                             <div
                               className={`h-full rounded-full transition-all duration-500 ${
                                 isApproved ? "bg-emerald-400 shadow-md shadow-emerald-400/50" : "bg-[#ef4d23]"
@@ -519,14 +519,14 @@ export default function DeliveryHubPage() {
                         </div>
 
                         {/* Card Footer: Assignee & Date */}
-                        <div className="pt-2 flex items-center justify-between text-[11px] text-white/60 font-semibold">
+                        <div className="pt-2 flex items-center justify-between text-[11px] text-white/70 font-extrabold border-t border-white/10">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white text-[9px] font-extrabold flex items-center justify-center border border-white/30">
+                            <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white text-[9px] font-extrabold flex items-center justify-center border border-white/40 shadow-md">
                               {item.assigned_to_name.charAt(0)}
                             </div>
                             <span className="truncate max-w-[100px]">{item.assigned_to_name}</span>
                           </div>
-                          <span>Due: {item.due_date}</span>
+                          <span className="text-white/80">Due: {item.due_date}</span>
                         </div>
                       </div>
                     </div>
@@ -543,10 +543,10 @@ export default function DeliveryHubPage() {
         {viewMode === "kanban" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
             {[
-              { id: "in_progress", label: "⚡ In Production", color: "border-sky-500/50 bg-sky-500/10 text-sky-300" },
-              { id: "internal_review", label: "🔍 Internal QA", color: "border-purple-500/50 bg-purple-500/10 text-purple-300" },
-              { id: "client_review", label: "🟡 Client Proofing", color: "border-amber-500/50 bg-amber-500/10 text-amber-300" },
-              { id: "approved", label: "🟢 Approved & Ready", color: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300" },
+              { id: "in_progress", label: "⚡ In Production", color: "border-sky-500 bg-sky-500/20 text-sky-200" },
+              { id: "internal_review", label: "🔍 Internal QA", color: "border-purple-500 bg-purple-500/20 text-purple-200" },
+              { id: "client_review", label: "🟡 Client Proofing", color: "border-amber-500 bg-amber-500/20 text-amber-200" },
+              { id: "approved", label: "🟢 Approved & Ready", color: "border-emerald-500 bg-emerald-500/20 text-emerald-200" },
             ].map((column) => {
               const columnDeliverables = filteredDeliverables.filter((d) => {
                 if (column.id === "approved") return d.status === "approved" || d.status === "delivered";
@@ -554,12 +554,12 @@ export default function DeliveryHubPage() {
               });
 
               return (
-                <div key={column.id} className="bg-white/10 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-xl space-y-3">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/15">
-                    <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${column.color}`}>
+                <div key={column.id} className="bg-[#12141e]/95 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl space-y-3">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/20">
+                    <span className={`text-xs font-extrabold px-3 py-1 rounded-full border shadow-md ${column.color}`}>
                       {column.label}
                     </span>
-                    <span className="text-xs font-extrabold text-white/60 bg-white/10 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-extrabold text-white bg-black/60 border border-white/20 px-2.5 py-0.5 rounded-full">
                       {columnDeliverables.length}
                     </span>
                   </div>
@@ -572,15 +572,15 @@ export default function DeliveryHubPage() {
                           setSelectedTask(item);
                           setIsTaskModalOpen(true);
                         }}
-                        className="bg-black/40 backdrop-blur-xl p-4 rounded-2xl border border-white/15 hover:border-[#ef4d23] text-white shadow-md cursor-pointer space-y-2.5 transition-all hover:-translate-y-0.5"
+                        className="bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/20 hover:border-[#ef4d23] text-white shadow-xl cursor-pointer space-y-2.5 transition-all hover:-translate-y-0.5"
                       >
-                        <span className="text-[10px] font-extrabold text-white/50 uppercase tracking-wider block">
+                        <span className="text-[10px] font-extrabold text-[#ef4d23] uppercase tracking-wider block">
                           {item.client_name}
                         </span>
                         <h4 className="font-extrabold text-xs text-white leading-snug">{item.title}</h4>
-                        <div className="flex items-center justify-between text-[10px] text-white/60 pt-2 border-t border-white/10">
+                        <div className="flex items-center justify-between text-[10px] text-white/80 pt-2 border-t border-white/15 font-extrabold">
                           <span>👤 {item.assigned_to_name}</span>
-                          <span className="bg-white/10 px-2 py-0.5 rounded-full text-white/80 font-bold">{item.type}</span>
+                          <span className="bg-white/20 border border-white/20 px-2 py-0.5 rounded-full text-white font-bold">{item.type}</span>
                         </div>
                       </div>
                     ))}
@@ -592,38 +592,44 @@ export default function DeliveryHubPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 6. MODE 3: CLIENT RETAINERS DIRECTORY */}
+        {/* 6. MODE 3: HIGH-CONTRAST CLIENT RETAINERS DIRECTORY */}
         {/* ========================================================================= */}
         {viewMode === "clients" && (
-          <div className="bg-white/10 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-2xl p-6 text-white space-y-4">
-            <h3 className="text-lg font-extrabold text-white">Client Retainers Portfolio & Delivery SLA</h3>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-white/10 text-white/70 font-extrabold text-xs uppercase border-b border-white/15">
-                  <TableHead className="py-3.5 text-white/80">Client Company</TableHead>
-                  <TableHead className="py-3.5 text-white/80">Retainer Tier</TableHead>
-                  <TableHead className="py-3.5 text-white/80">Location</TableHead>
-                  <TableHead className="py-3.5 text-white/80">In-Flight Tasks</TableHead>
-                  <TableHead className="py-3.5 text-white/80 text-right">SLA Health</TableHead>
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 shadow-2xl p-6 text-white space-y-4">
+            <div className="flex items-center justify-between border-b border-white/15 pb-3">
+              <h3 className="text-lg font-extrabold text-white">Client Retainers Portfolio & Delivery SLA</h3>
+              <span className="text-xs font-extrabold bg-[#ef4d23] text-white px-3 py-1 rounded-full shadow-md">
+                100% High-Contrast View
+              </span>
+            </div>
+
+            <Table containerClassName="bg-[#161824] border border-white/25">
+              <TableHeader className="bg-[#1c1e2d]">
+                <TableRow className="border-b border-white/20">
+                  <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Client Company</TableHead>
+                  <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Retainer Tier</TableHead>
+                  <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Location</TableHead>
+                  <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">In-Flight Tasks</TableHead>
+                  <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider text-right">SLA Health</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-white/10 text-xs text-white font-medium">
+              <TableBody className="divide-y divide-white/15 text-xs text-white">
                 {SEED_CLIENTS.map((c) => {
                   const tasksCount = deliverables.filter((d) => d.client_id === c.id || d.client_name === c.company_name).length;
                   return (
                     <TableRow key={c.id} className="hover:bg-white/10 border-b border-white/10 transition-colors">
                       <TableCell className="py-4 font-extrabold text-white text-sm">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#ef4d23] text-white flex items-center justify-center font-bold text-xs shadow-md">
+                          <div className="w-8 h-8 rounded-full bg-[#ef4d23] text-white flex items-center justify-center font-extrabold text-xs shadow-md border border-white/30">
                             {c.company_name.charAt(0)}
                           </div>
-                          <span>{c.company_name}</span>
+                          <span className="text-white font-extrabold text-sm">{c.company_name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 text-white/80 font-bold">{c.package_tier}</TableCell>
-                      <TableCell className="py-4 text-white/60">{c.location || "Global"}</TableCell>
-                      <TableCell className="py-4 font-extrabold text-[#ef4d23]">{tasksCount} Active Deliverables</TableCell>
-                      <TableCell className="py-4 text-right font-extrabold text-emerald-400">🟢 98.4% On-Time SLA</TableCell>
+                      <TableCell className="py-4 text-neutral-200 font-extrabold text-xs">{c.package_tier}</TableCell>
+                      <TableCell className="py-4 text-neutral-300 font-bold text-xs">{c.location || "Global"}</TableCell>
+                      <TableCell className="py-4 font-extrabold text-[#ef4d23] text-xs">{tasksCount} Active Deliverables</TableCell>
+                      <TableCell className="py-4 text-right font-extrabold text-emerald-400 text-xs">🟢 98.4% On-Time SLA</TableCell>
                     </TableRow>
                   );
                 })}
@@ -637,7 +643,7 @@ export default function DeliveryHubPage() {
         {/* ========================================================================= */}
         {viewMode === "proofs" && (
           <div className="space-y-4">
-            <div className="bg-white/10 backdrop-blur-3xl rounded-3xl border border-white/20 p-6 shadow-2xl space-y-4 text-white">
+            <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 shadow-2xl space-y-4 text-white">
               <h3 className="text-lg font-extrabold text-white">Recent Client Review Requests & Proofing Activity</h3>
 
               <div className="space-y-3">
@@ -645,16 +651,16 @@ export default function DeliveryHubPage() {
                   { client: "Northbeam Outdoors", task: "Q4 Performance Video Reel", time: "2h ago", text: "Approved second cut! Ready for campaign publication." },
                   { client: "Fable Skincare", task: "Gen AI UGC Ad Concepts", time: "4h ago", text: "Requested color grading adjustment on slide 3 background." },
                 ].map((item, idx) => (
-                  <div key={idx} className="p-4 bg-black/30 rounded-2xl border border-white/15 flex items-center justify-between text-xs">
+                  <div key={idx} className="p-4 bg-black/60 rounded-2xl border border-white/20 flex items-center justify-between text-xs shadow-lg">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-white">{item.client}</span>
+                        <span className="font-extrabold text-white text-sm">{item.client}</span>
                         <span className="text-white/40">•</span>
-                        <span className="text-[#ef4d23] font-bold">{item.task}</span>
+                        <span className="text-[#ef4d23] font-extrabold">{item.task}</span>
                       </div>
-                      <p className="text-white/80">{item.text}</p>
+                      <p className="text-white/90 font-medium">{item.text}</p>
                     </div>
-                    <span className="text-[10px] text-white/50 font-bold">{item.time}</span>
+                    <span className="text-xs text-white/70 font-extrabold bg-white/10 px-3 py-1 rounded-full">{item.time}</span>
                   </div>
                 ))}
               </div>
@@ -666,9 +672,9 @@ export default function DeliveryHubPage() {
         {/* CREATE DELIVERABLE MODAL */}
         {/* ========================================================================= */}
         {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-[#181924] text-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-white/20 text-xs">
-              <div className="flex items-center justify-between border-b border-white/15 pb-3">
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#141622] text-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 border border-white/25 text-xs">
+              <div className="flex items-center justify-between border-b border-white/20 pb-3">
                 <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
                   <Plus className="h-5 w-5 text-[#ef4d23]" /> Create New Deliverable
                 </h3>
@@ -679,26 +685,26 @@ export default function DeliveryHubPage() {
 
               <form onSubmit={handleCreateDeliverable} className="space-y-4">
                 <div>
-                  <label className="block font-bold text-white/80 mb-1">Deliverable Title *</label>
+                  <label className="block font-extrabold text-white mb-1">Deliverable Title *</label>
                   <input
                     type="text"
                     placeholder="e.g. Q4 Instagram Reel & Motion Graphics Cut"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full bg-black/40 border border-white/20 rounded-xl p-3 font-medium text-white placeholder:text-white/40 focus:ring-1 focus:ring-[#ef4d23]"
+                    className="w-full bg-black/60 border border-white/25 rounded-xl p-3 font-bold text-white placeholder:text-white/40 focus:ring-1 focus:ring-[#ef4d23]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-white/80 mb-1">Client Retainer Account</label>
+                  <label className="block font-extrabold text-white mb-1">Client Retainer Account</label>
                   <select
                     value={newClient}
                     onChange={(e) => setNewClient(e.target.value)}
-                    className="w-full bg-black/40 border border-white/20 rounded-xl p-3 font-medium text-white focus:ring-1 focus:ring-[#ef4d23]"
+                    className="w-full bg-black/60 border border-white/25 rounded-xl p-3 font-bold text-white focus:ring-1 focus:ring-[#ef4d23]"
                   >
                     {SEED_CLIENTS.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-[#181924]">
+                      <option key={c.id} value={c.id} className="bg-[#141622] text-white">
                         {c.company_name} ({c.location || "Retainer"})
                       </option>
                     ))}
@@ -706,36 +712,36 @@ export default function DeliveryHubPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-white/80 mb-1">Deliverable Category</label>
+                  <label className="block font-extrabold text-white mb-1">Deliverable Category</label>
                   <select
                     value={newType}
                     onChange={(e) => setNewType(e.target.value as Deliverable["type"])}
-                    className="w-full bg-black/40 border border-white/20 rounded-xl p-3 font-medium text-white focus:ring-1 focus:ring-[#ef4d23]"
+                    className="w-full bg-black/60 border border-white/25 rounded-xl p-3 font-bold text-white focus:ring-1 focus:ring-[#ef4d23]"
                   >
-                    <option value="reel" className="bg-[#181924]">Instagram Reel / Short Video</option>
-                    <option value="ad_creative" className="bg-[#181924]">Paid Ad Creative Set</option>
-                    <option value="carousel" className="bg-[#181924]">Carousel Slide Deck</option>
-                    <option value="blog" className="bg-[#181924]">SEO Article / Blog</option>
-                    <option value="email_campaign" className="bg-[#181924]">Email Campaign Template</option>
+                    <option value="reel" className="bg-[#141622] text-white">Instagram Reel / Short Video</option>
+                    <option value="ad_creative" className="bg-[#141622] text-white">Paid Ad Creative Set</option>
+                    <option value="carousel" className="bg-[#141622] text-white">Carousel Slide Deck</option>
+                    <option value="blog" className="bg-[#141622] text-white">SEO Article / Blog</option>
+                    <option value="email_campaign" className="bg-[#141622] text-white">Email Campaign Template</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-white/80 mb-1">Brief & Objectives</label>
+                  <label className="block font-extrabold text-white mb-1">Brief & Objectives</label>
                   <textarea
                     rows={3}
                     placeholder="Key requirements and targets..."
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
-                    className="w-full bg-black/40 border border-white/20 rounded-xl p-3 font-medium text-white placeholder:text-white/40 focus:ring-1 focus:ring-[#ef4d23]"
+                    className="w-full bg-black/60 border border-white/25 rounded-xl p-3 font-bold text-white placeholder:text-white/40 focus:ring-1 focus:ring-[#ef4d23]"
                   />
                 </div>
 
-                <div className="pt-3 flex justify-end gap-2 border-t border-white/15">
-                  <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)} className="text-white/70 hover:text-white">
+                <div className="pt-3 flex justify-end gap-2 border-t border-white/20">
+                  <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)} className="text-white/80 hover:text-white">
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold px-5 shadow-lg shadow-[#ef4d23]/30">
+                  <Button type="submit" className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold px-5 shadow-lg shadow-[#ef4d23]/40">
                     Create Deliverable
                   </Button>
                 </div>
