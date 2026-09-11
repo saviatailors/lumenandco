@@ -1521,7 +1521,7 @@ export default function CrmPage() {
           {/* EMPLOYEE WORKDAY PLANNER (Personal Task List & Fixed Deliverables Board) */}
           {/* ========================================================================= */}
           {(() => {
-            const activeStaff = teamMembers.find((m) => m.role === currentUserRole) || teamMembers[0];
+            const activeStaff = (teamMembers.find((m) => m.role === currentUserRole) || teamMembers[0])!;
             const myTasks = tasks.filter((t) => t.assigned_to_id === activeStaff.id);
             const completedCount = myTasks.filter((t) => t.completed).length;
             const progressPct = myTasks.length > 0 ? Math.round((completedCount / myTasks.length) * 100) : 100;
@@ -1569,7 +1569,7 @@ export default function CrmPage() {
                               task_type: "poster",
                               priority: "high",
                               completed: false,
-                              due_date: new Date().toISOString().split("T")[0],
+                              due_date: new Date().toISOString().slice(0, 10),
                               reasoning: "Added to employee personal planner queue.",
                             },
                           ]);
@@ -1625,7 +1625,7 @@ export default function CrmPage() {
                                   task_type: "poster",
                                   priority: "high",
                                   completed: false,
-                                  due_date: new Date().toISOString().split("T")[0],
+                                  due_date: new Date().toISOString().slice(0, 10),
                                   reasoning: "Manually added to employee planner queue.",
                                 },
                               ]);
@@ -1691,7 +1691,7 @@ export default function CrmPage() {
       {currentTab === "planner" && (
         <div className="space-y-6">
           {(() => {
-            const activeStaff = teamMembers.find((m) => m.role === currentUserRole) || teamMembers[0];
+            const activeStaff = (teamMembers.find((m) => m.role === currentUserRole) || teamMembers[0])!;
             const totalMyTasks = tasks.filter((t) => t.assigned_to_id === activeStaff.id);
             const myCompletedCount = totalMyTasks.filter((t) => t.completed).length;
             const myPendingCount = totalMyTasks.filter((t) => !t.completed).length;
@@ -1759,7 +1759,7 @@ export default function CrmPage() {
                               task_type: "poster",
                               priority: "high",
                               completed: false,
-                              due_date: new Date().toISOString().split("T")[0],
+                              due_date: new Date().toISOString().slice(0, 10),
                               reasoning: "Manually added to employee fixed task queue.",
                             },
                           ]);
@@ -1974,7 +1974,7 @@ export default function CrmPage() {
                                       task_type: "poster",
                                       priority: "high",
                                       completed: false,
-                                      due_date: new Date().toISOString().split("T")[0],
+                                      due_date: new Date().toISOString().slice(0, 10),
                                       reasoning: "Manually added to employee planner queue.",
                                     },
                                   ]);
@@ -2288,7 +2288,7 @@ export default function CrmPage() {
                     <TableCell>
                       <button
                         onClick={() => {
-                          if (!permissions.can_toggle_access) {
+                          if (!permissions?.can_toggle_access) {
                             toast.error("Role Permission Restricted: Only Co-Founders or Admin can toggle access.");
                             return;
                           }
@@ -2946,7 +2946,7 @@ export default function CrmPage() {
                         task_type: "poster",
                         priority: "high",
                         completed: false,
-                        due_date: new Date().toISOString().split("T")[0],
+                        due_date: new Date().toISOString().slice(0, 10),
                         reasoning: "Manually added deliverable queued for staff processing.",
                       },
                     ]);

@@ -204,8 +204,8 @@ export default function DeliveryHubPage() {
       assigned_to_name: "David Miller",
       created_by_staff_id: "staff-1",
       priority: "urgent",
-      due_date: new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
-      publish_date: new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
+      due_date: new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10),
+      publish_date: new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10),
       status: "in_progress",
       client_visible: true,
       estimated_hours: 6,
@@ -796,7 +796,17 @@ export default function DeliveryHubPage() {
         {/* ========================================================================= */}
         {/* TAB 4: CALENDAR VIEW */}
         {/* ========================================================================= */}
-        {currentTab === "calendar" && <DeliveryCalendarView deliverables={deliverables} />}
+        {currentTab === "calendar" && (
+          <DeliveryCalendarView
+            deliverables={deliverables}
+            onSelectTask={(task) => setSelectedTask(task)}
+            onUpdateDueDate={(taskId, newDate) =>
+              setDeliverables((prev) =>
+                prev.map((d) => (d.id === taskId ? { ...d, due_date: newDate } : d))
+              )
+            }
+          />
+        )}
 
         {/* ========================================================================= */}
         {/* TAB 5: CLIENTS RETAINERS TAB */}

@@ -14,10 +14,10 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const fromEmail = process.env.SMTP_USER || "sahitsai6@gmail.com";
-    const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || "";
-    const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-    const smtpPort = Number(process.env.SMTP_PORT || 465);
+    const fromEmail = process.env["SMTP_USER"] || "sahitsai6@gmail.com";
+    const smtpPass = process.env["SMTP_PASS"] || process.env["GMAIL_APP_PASSWORD"] || "";
+    const smtpHost = process.env["SMTP_HOST"] || "smtp.gmail.com";
+    const smtpPort = Number(process.env["SMTP_PORT"] || 465);
 
     if (!smtpPass) {
       console.warn(

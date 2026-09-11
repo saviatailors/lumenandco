@@ -85,7 +85,7 @@ export async function exportRealtimeAnalyticsToExcel({
     // Generate Brand Benchmark Bar Chart PNG (Conversion Rate vs ROAS)
     const topBrands = filteredClients.slice(0, 5);
     const brandBenchmarkChartBase64 = createBarChartCanvas(
-      topBrands.map((b) => b.school_name.split(" ")[0]),
+      topBrands.map((b) => (b.school_name || "Brand").split(" ")[0] || "Brand"),
       [
         {
           name: "Conversion Rate (%)",
@@ -358,7 +358,7 @@ export async function exportRealtimeAnalyticsToExcel({
   }
 
   // Engine 3: HTML XML Excel Spreadsheet Engine
-  exportHtmlExcelSpreadsheet(filteredClients, clientLeads, currentDate);
+  exportHtmlExcelSpreadsheet(filteredClients, clientLeads, currentDate || new Date().toISOString());
 }
 
 /**

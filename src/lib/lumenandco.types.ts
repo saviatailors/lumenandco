@@ -216,6 +216,7 @@ export type MessageTemplate = {
   channel: "whatsapp" | "email";
   subject?: string;
   body_template: string;
+  auto_trigger?: string;
 };
 
 export type ServicePricingCatalog = {
@@ -533,7 +534,7 @@ export interface InternalTask {
   category?: "Content" | "Ads" | "SEO" | "Sales";
   task_type?: "reel" | "poster" | "caption" | "ad_creative" | "ad_copy" | "seo_audit" | "keyword_research" | "outreach_call" | "proposal";
   priority: "low" | "medium" | "high" | "urgent";
-  due_date: string;
+  due_date?: string;
   completed: boolean;
   reasoning?: string;
 }

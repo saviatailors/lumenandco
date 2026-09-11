@@ -6,13 +6,16 @@ interface RigidGlassMetricCardProps {
   title: ReactNode;
   value: string | number;
   unit?: string;
-  caption: ReactNode;
+  caption?: ReactNode;
   buttonText?: string;
   variant?: CardVariant;
   mediaVideoSrc?: string;
   mediaPosterSrc?: string;
   badge?: ReactNode;
   customGraphic?: ReactNode;
+  change?: string;
+  changeType?: string;
+  icon?: any;
   onClick?: () => void;
   className?: string;
 }

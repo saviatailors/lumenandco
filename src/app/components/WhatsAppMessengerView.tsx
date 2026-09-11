@@ -98,7 +98,7 @@ export interface WhatsAppMessengerViewProps {
   clientBrandName?: string;
   onCloseModal?: () => void;
   isEmbeddedModal?: boolean;
-  targetCodeOrChannelId?: string;
+  targetCodeOrChannelId?: string | undefined;
 }
 
 const AI_COPILOT_CHANNEL: ChatChannel = {

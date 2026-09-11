@@ -47,6 +47,8 @@ export type DeliverableType = typeof DELIVERABLE_TYPES[number];
 export const PRIORITIES = ["low", "med", "high", "urgent"] as const;
 export type Priority = typeof PRIORITIES[number];
 
+export type StaffRole = "super_admin" | "ops_manager" | "account_manager" | "designer" | "content_writer" | "ad_specialist";
+
 export type StaffMember = {
   id: string;
   code: string; // Unique Employee Code e.g. "EMP-100"
@@ -459,7 +461,7 @@ export const INITIAL_DELIVERABLES: Deliverable[] = [
     assigned_to_staff_id: "staff-4",
     assigned_to_name: "Elena Rostova",
     created_by_staff_id: "staff-1",
-    priority: "normal",
+    priority: "med",
     due_date: "2026-09-07",
     publish_date: "2026-09-07",
     status: "approved",

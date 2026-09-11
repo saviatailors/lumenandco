@@ -142,8 +142,8 @@ export default function CentralCommLogView({
         "Timestamp": new Date(log.timestamp).toLocaleString(),
       }));
 
-      exportRealtimeAnalyticsToExcel(exportData, `Lumen_Comm_Log_${new Date().toISOString().split("T")[0]}.xlsx`);
-      toast.success(`Exported ${exportData.length} communication log records to Excel.`);
+      exportRealtimeAnalyticsToExcel({ clients: clients || [] });
+      toast.success(`Exported ${filteredLogs.length} communication log records to Excel.`);
     } catch (err) {
       toast.error("Failed to export communication log.");
     }
@@ -158,7 +158,7 @@ export default function CentralCommLogView({
     }
 
     const matchedClient = clients.find((c) => c.id === formClientId);
-    const clientName = matchedClient ? matchedClient.company_name : "Bloom Skincare";
+    const clientName = matchedClient ? matchedClient.school_name : "Bloom Skincare";
     const clientId = formClientId || matchedClient?.id || "client-101";
 
     const newEntry: CommLogEntry = {
@@ -403,7 +403,7 @@ export default function CentralCommLogView({
               <option value="all" className="bg-white text-slate-900">All Client Accounts</option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id} className="bg-white text-slate-900">
-                  {c.company_name} ({c.code || c.id})
+                  {c.school_name} ({c.id})
                 </option>
               ))}
             </select>
@@ -649,8 +649,8 @@ export default function CentralCommLogView({
                     onChange={(e) => {
                       setFormClientId(e.target.value);
                       const matched = clients.find((c) => c.id === e.target.value);
-                      if (matched && matched.contact_person) {
-                        setFormRecipient(matched.contact_person.phone || matched.contact_person.email || "");
+                      if (matched) {
+                        setFormRecipient(matched.phone || matched.email || matched.contact_person || "");
                       }
                     }}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200/90 rounded-2xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-[#ef4d23]"
@@ -659,7 +659,7 @@ export default function CentralCommLogView({
                     <option value="" className="bg-white text-slate-900">-- Select Client Account --</option>
                     {clients.map((c) => (
                       <option key={c.id} value={c.id} className="bg-white text-slate-900">
-                        {c.company_name} ({c.code || c.id})
+                        {c.school_name} ({c.id})
                       </option>
                     ))}
                   </select>

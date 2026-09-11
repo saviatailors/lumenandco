@@ -14,7 +14,7 @@ interface AddClientWizardModalProps {
     contact_email?: string;
     contact_phone?: string;
     estimated_value?: number;
-  };
+  } | undefined;
 }
 
 export default function AddClientWizardModal({
