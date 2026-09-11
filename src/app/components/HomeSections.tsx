@@ -177,7 +177,7 @@ const STEPS = [
 
 function Process() {
   return (
-    <section className="mt-3 sm:mt-4 bg-[#0b0f1a]/85 backdrop-blur-xl text-white rounded-2xl sm:rounded-3xl p-6 sm:p-10">
+    <section className="mt-3 sm:mt-4 bg-[#0b0f1a]/85 backdrop-blur-xl text-white rounded-2xl sm:rounded-3xl p-4 sm:p-10">
       <div
         className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5"
         style={{ fontSize: 13 }}
@@ -209,20 +209,22 @@ function Process() {
         </span>{" "}
         growth
       </h2>
-      <div className="mt-8 grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 sm:mt-8 grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {STEPS.map((s, i) => (
           <div
             key={s.n}
-            className="rounded-2xl p-5 sm:p-6 bg-white/5 border border-white/10 animate-fade-in hover-lift"
+            className="rounded-2xl p-3.5 sm:p-6 bg-white/5 border border-white/10 animate-fade-in hover-lift flex flex-col justify-between"
             style={{ animationDelay: `${i * 70}ms` }}
           >
-            <span style={{ color: ORANGE, fontSize: 13, fontWeight: 600 }}>{s.n}</span>
-            <h3 className="mt-3" style={{ fontSize: 18, fontWeight: 600 }}>
-              {s.t}
-            </h3>
-            <p className="mt-2 text-white/60" style={{ fontSize: 14, lineHeight: 1.6 }}>
-              {s.b}
-            </p>
+            <div>
+              <span style={{ color: ORANGE, fontSize: 13, fontWeight: 600 }}>{s.n}</span>
+              <h3 className="mt-2 sm:mt-3 text-xs sm:text-lg font-semibold tracking-tight">
+                {s.t}
+              </h3>
+              <p className="mt-1 sm:mt-2 text-white/60 text-[11px] sm:text-sm leading-snug sm:leading-relaxed">
+                {s.b}
+              </p>
+            </div>
           </div>
         ))}
       </div>
