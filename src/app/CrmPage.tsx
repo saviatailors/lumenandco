@@ -85,6 +85,7 @@ import {
   INITIAL_CLIENT_BUSINESS_LEADS,
 } from "@/lib/lumenandco.types";
 
+import { loadStoredData, saveStoredData, STORAGE_KEYS } from "@/lib/db-sync";
 import AddClientWizardModal from "./components/AddClientWizardModal";
 import { AccessToggleModal, AccessAuditLogDrawer } from "./components/AccessAuditLogModal";
 import AutoMessagingModal from "./components/AutoMessagingModal";
@@ -368,19 +369,45 @@ export default function CrmPage() {
   const [currentTab, setCurrentTab] = useState<CrmTab>("dashboard");
   const [targetChatCode, setTargetChatCode] = useState<string | undefined>();
 
-  // Datasets
-  const [schoolClients, setSchoolClients] = useState<SchoolClient[]>(INITIAL_SCHOOL_CLIENTS);
+  // Datasets with Optimized Local DB Persistence
+  const [schoolClients, setSchoolClients] = useState<SchoolClient[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_CLIENTS, INITIAL_SCHOOL_CLIENTS)
+  );
   const [auditLogs, setAuditLogs] = useState<AccessAuditEntry[]>(INITIAL_ACCESS_AUDIT_LOG);
-  const [invoices, setInvoices] = useState<BillingInvoice[]>(INITIAL_INVOICES);
-  const [commLogs, setCommLogs] = useState<CommLogEntry[]>(INITIAL_COMM_LOG);
+  const [invoices, setInvoices] = useState<BillingInvoice[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_INVOICES, INITIAL_INVOICES)
+  );
+  const [commLogs, setCommLogs] = useState<CommLogEntry[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_COMM_LOGS, INITIAL_COMM_LOG)
+  );
   const [templates, setTemplates] = useState<MessageTemplate[]>(INITIAL_MESSAGE_TEMPLATES);
-  const [tasks, setTasks] = useState<InternalTask[]>(INITIAL_INTERNAL_TASKS);
-  const [leads, setLeads] = useState<AdvancedLead[]>(INITIAL_ADVANCED_LEADS);
-  const [serviceCatalog, setServiceCatalog] = useState<ServicePricingCatalog[]>(INITIAL_SERVICE_CATALOG);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(INITIAL_TEAM_MEMBERS);
+  const [tasks, setTasks] = useState<InternalTask[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_TASKS, INITIAL_INTERNAL_TASKS)
+  );
+  const [leads, setLeads] = useState<AdvancedLead[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_LEADS, INITIAL_ADVANCED_LEADS)
+  );
+  const [serviceCatalog, setServiceCatalog] = useState<ServicePricingCatalog[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_CATALOG, INITIAL_SERVICE_CATALOG)
+  );
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_TEAM_MEMBERS, INITIAL_TEAM_MEMBERS)
+  );
 
   // Client Business Leads State (End-Customer Tele-calling & Tier Pipeline)
-  const [clientBusinessLeads, setClientBusinessLeads] = useState<ClientBusinessLead[]>(INITIAL_CLIENT_BUSINESS_LEADS);
+  const [clientBusinessLeads, setClientBusinessLeads] = useState<ClientBusinessLead[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS, INITIAL_CLIENT_BUSINESS_LEADS)
+  );
+
+  // Auto-Persistence DB Effects
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_CLIENTS, schoolClients); }, [schoolClients]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_INVOICES, invoices); }, [invoices]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_COMM_LOGS, commLogs); }, [commLogs]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_TASKS, tasks); }, [tasks]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_LEADS, leads); }, [leads]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_CATALOG, serviceCatalog); }, [serviceCatalog]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_TEAM_MEMBERS, teamMembers); }, [teamMembers]);
+  useEffect(() => { saveStoredData(STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS, clientBusinessLeads); }, [clientBusinessLeads]);
   const [clientLeadSearch, setClientLeadSearch] = useState("");
   const [selectedClientFilter, setSelectedClientFilter] = useState<string>("all");
   const [selectedTierFilter, setSelectedTierFilter] = useState<string>("all");

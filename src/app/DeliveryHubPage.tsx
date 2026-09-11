@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Rocket,
   CheckCircle2,
@@ -77,6 +77,7 @@ import { useToast } from "./components/ui/Toast";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "./components/ui/Table";
 import { Badge } from "./components/ui/Badge";
 import { Button } from "./components/ui/Button";
+import { loadStoredData, saveStoredData, STORAGE_KEYS } from "@/lib/db-sync";
 
 // Card Media Mockup Mapping (Rich agency visual covers)
 const CARD_COVER_MOCKUPS: Record<string, string> = {
@@ -108,8 +109,14 @@ export default function DeliveryHubPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Primary Deliverables Dataset
-  const [deliverables, setDeliverables] = useState<Deliverable[]>(INITIAL_DELIVERABLES);
+  // Primary Deliverables Dataset with Optimized Storage Persistence
+  const [deliverables, setDeliverables] = useState<Deliverable[]>(() =>
+    loadStoredData(STORAGE_KEYS.DELIVERY_DELIVERABLES, INITIAL_DELIVERABLES)
+  );
+
+  useEffect(() => {
+    saveStoredData(STORAGE_KEYS.DELIVERY_DELIVERABLES, deliverables);
+  }, [deliverables]);
   const [selectedTask, setSelectedTask] = useState<Deliverable | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
