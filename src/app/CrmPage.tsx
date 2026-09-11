@@ -880,6 +880,13 @@ export default function CrmPage() {
     }, 150);
   };
 
+  const handleDeleteTeamMember = (id: string) => {
+    const member = teamMembers.find((m) => m.id === id);
+    if (!member) return;
+    setTeamMembers((prev) => prev.filter((m) => m.id !== id));
+    toast.success(`Removed ${member.name} from the team directory.`);
+  };
+
   const handleCreateStaffMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStaffName || !newStaffEmail) {
@@ -3187,7 +3194,6 @@ export default function CrmPage() {
 
                     <select
                       value={member.role}
-                      disabled={currentUserRole !== "owner"}
                       onChange={(e) => handleChangeMemberRole(member.id, e.target.value as UserRole)}
                       className="w-full p-2 bg-white border border-neutral-300 rounded-xl text-xs font-semibold text-neutral-900 cursor-pointer outline-none focus:ring-1 focus:ring-[#ef4d23]"
                     >
@@ -3231,28 +3237,38 @@ export default function CrmPage() {
                     ))}
                   </div>
 
-                  {/* Master CRM Access Switch */}
-                  <button
-                    disabled={currentUserRole !== "owner"}
-                    onClick={() => handleToggleMemberAccess(member.id)}
-                    className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs ${
-                      member.crmAccess
-                        ? "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300"
-                        : "bg-red-100 hover:bg-red-200 text-red-800 border border-red-300"
-                    }`}
-                  >
-                    {member.crmAccess ? (
-                      <>
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                        <span>🟢 CRM Access Active</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
-                        <span>🔴 Access Suspended</span>
-                      </>
-                    )}
-                  </button>
+                  {/* Master CRM Access Switch & Delete Actions */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleToggleMemberAccess(member.id)}
+                      className={`w-full py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer ${
+                        member.crmAccess
+                          ? "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300"
+                          : "bg-red-100 hover:bg-red-200 text-red-800 border border-red-300"
+                      }`}
+                    >
+                      {member.crmAccess ? (
+                        <>
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+                          <span>Suspended</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteTeamMember(member.id)}
+                      className="w-full py-2 px-2 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center gap-1 transition-all cursor-pointer"
+                      title="Remove staff member"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-rose-600" />
+                      <span>Remove</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -3275,7 +3291,7 @@ export default function CrmPage() {
                   <TableHead className="font-semibold text-xs text-neutral-700">Assigned RBAC Role</TableHead>
                   <TableHead className="font-semibold text-xs text-neutral-700">CRM Access State</TableHead>
                   <TableHead className="font-semibold text-xs text-neutral-700">Accounts & Capacity</TableHead>
-                  <TableHead className="font-semibold text-xs text-neutral-700">Actions</TableHead>
+                  <TableHead className="font-semibold text-xs text-neutral-700 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -3360,19 +3376,47 @@ export default function CrmPage() {
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-xs">
-                      <Button
-                        size="sm"
-                        disabled={currentUserRole !== "owner"}
-                        onClick={() => handleToggleMemberAccess(row.id)}
-                        className={`text-xs py-1 px-3 rounded-full font-semibold ${
-                          row.crmAccess
-                            ? "bg-red-100 hover:bg-red-200 text-red-800"
-                            : "bg-emerald-100 hover:bg-emerald-200 text-emerald-800"
-                        }`}
-                      >
-                        {row.crmAccess ? "Revoke Access" : "Grant Access"}
-                      </Button>
+                    <TableCell className="text-xs text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          size="sm"
+                          onClick={() => setEditingMember({ ...row })}
+                          className="text-xs py-1 px-2.5 rounded-xl font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border border-neutral-300 cursor-pointer"
+                          title="Edit Employee Details"
+                        >
+                          ✏️ Edit
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          onClick={() => handleToggleMemberAccess(row.id)}
+                          className={`text-xs py-1 px-2.5 rounded-xl font-semibold cursor-pointer ${
+                            row.crmAccess
+                              ? "bg-red-100 hover:bg-red-200 text-red-800"
+                              : "bg-emerald-100 hover:bg-emerald-200 text-emerald-800"
+                          }`}
+                        >
+                          {row.crmAccess ? "Revoke" : "Grant"}
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          onClick={() => setCurrentTab("chat")}
+                          className="text-xs py-1 px-2.5 rounded-xl font-semibold bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer"
+                          title="Open Direct Messenger Chat"
+                        >
+                          💬 Chat
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          onClick={() => handleDeleteTeamMember(row.id)}
+                          className="text-xs py-1 px-2 rounded-xl font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer"
+                          title="Remove Staff Member"
+                        >
+                          🗑️
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

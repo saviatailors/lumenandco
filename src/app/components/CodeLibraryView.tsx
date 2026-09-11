@@ -15,6 +15,8 @@ import {
   Sparkles,
   BadgeCheck,
   FolderPlus,
+  Trash2,
+  Mail,
 } from "lucide-react";
 
 import { SEED_STAFF, SEED_CLIENTS, StaffMember, ClientInfo } from "@/lib/delivery.functions";
@@ -48,6 +50,12 @@ export default function CodeLibraryView({ onOpenMessengerWithChannel }: CodeLibr
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleDeleteStaff = (id: string) => {
+    const staff = staffList.find((s) => s.id === id);
+    if (!staff) return;
+    setStaffList((prev) => prev.filter((s) => s.id !== id));
   };
 
   // Filtered lists
@@ -298,14 +306,35 @@ export default function CodeLibraryView({ onOpenMessengerWithChannel }: CodeLibr
                   </td>
 
                   <td className="py-4 px-5 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onOpenMessengerWithChannel?.(staff.code)}
-                      className="inline-flex items-center gap-1.5 bg-[#00a884] hover:bg-[#008f70] text-white font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-xs text-xs"
-                    >
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      <span>Chat [{staff.code}]</span>
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onOpenMessengerWithChannel?.(staff.code)}
+                        className="inline-flex items-center gap-1 bg-[#00a884] hover:bg-[#008f70] text-white font-bold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-xs text-xs"
+                        title={`Direct Chat with ${staff.name} [${staff.code}]`}
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        <span>Chat</span>
+                      </button>
+
+                      <a
+                        href={`mailto:${staff.email}`}
+                        className="inline-flex items-center gap-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer text-xs"
+                        title={`Send Email to ${staff.email}`}
+                      >
+                        <Mail className="h-3.5 w-3.5 text-purple-600" />
+                        <span>Email</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteStaff(staff.id)}
+                        className="inline-flex items-center p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl transition-all cursor-pointer text-xs"
+                        title={`Remove ${staff.name} Code`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-rose-600" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
