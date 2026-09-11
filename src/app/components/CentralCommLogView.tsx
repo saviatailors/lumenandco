@@ -33,12 +33,14 @@ import {
   CommDeliveryStatus,
   SchoolClient,
   ClientBusinessLead,
+  INITIAL_COMM_LOG,
+  INITIAL_SCHOOL_CLIENTS,
 } from "@/lib/lumenandco.types";
 import { useToast } from "./ui/Toast";
 import { exportRealtimeAnalyticsToExcel } from "@/lib/excelExport";
 
 export interface CentralCommLogViewProps {
-  commLogs: CommLogEntry[];
+  commLogs?: CommLogEntry[];
   onAddCommLog: (log: CommLogEntry) => void;
   clients?: SchoolClient[];
   clientLeads?: ClientBusinessLead[];
@@ -47,9 +49,9 @@ export interface CentralCommLogViewProps {
 }
 
 export default function CentralCommLogView({
-  commLogs,
+  commLogs = INITIAL_COMM_LOG,
   onAddCommLog,
-  clients = [],
+  clients = INITIAL_SCHOOL_CLIENTS,
   clientLeads = [],
   onOpenEmailModal,
   onOpenMessenger,
@@ -78,7 +80,8 @@ export default function CentralCommLogView({
 
   // Filtered Comm Logs
   const filteredLogs = useMemo(() => {
-    return commLogs.filter((log) => {
+    const safeLogs = commLogs && commLogs.length > 0 ? commLogs : INITIAL_COMM_LOG;
+    return safeLogs.filter((log) => {
       // Channel Filter
       if (selectedChannel !== "all" && log.channel !== selectedChannel) {
         return false;
@@ -94,10 +97,10 @@ export default function CentralCommLogView({
       // Search Query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        const matchSchool = log.school_name.toLowerCase().includes(query);
-        const matchContent = log.content.toLowerCase().includes(query);
-        const matchRecipient = log.recipient.toLowerCase().includes(query);
-        const matchSender = log.sent_by_name.toLowerCase().includes(query);
+        const matchSchool = (log.school_name || "").toLowerCase().includes(query);
+        const matchContent = (log.content || "").toLowerCase().includes(query);
+        const matchRecipient = (log.recipient || "").toLowerCase().includes(query);
+        const matchSender = (log.sent_by_name || "").toLowerCase().includes(query);
         const matchSubject = (log.subject || "").toLowerCase().includes(query);
         const matchCode = (log.sender_code || "").toLowerCase().includes(query);
 
@@ -111,12 +114,13 @@ export default function CentralCommLogView({
 
   // Analytics Metrics
   const stats = useMemo(() => {
-    const total = commLogs.length;
-    const whatsapp = commLogs.filter((l) => l.channel === "whatsapp").length;
-    const email = commLogs.filter((l) => l.channel === "email").length;
-    const callNotes = commLogs.filter((l) => l.channel === "call_note").length;
-    const suspensions = commLogs.filter((l) => l.channel === "suspension_notice").length;
-    const delivered = commLogs.filter((l) => l.delivery_status === "delivered" || l.delivery_status === "read").length;
+    const safeLogs = commLogs && commLogs.length > 0 ? commLogs : INITIAL_COMM_LOG;
+    const total = safeLogs.length;
+    const whatsapp = safeLogs.filter((l) => l.channel === "whatsapp").length;
+    const email = safeLogs.filter((l) => l.channel === "email").length;
+    const callNotes = safeLogs.filter((l) => l.channel === "call_note").length;
+    const suspensions = safeLogs.filter((l) => l.channel === "suspension_notice").length;
+    const delivered = safeLogs.filter((l) => l.delivery_status === "delivered" || l.delivery_status === "read").length;
     const deliveryRate = total > 0 ? Math.round((delivered / total) * 100) : 100;
 
     return { total, whatsapp, email, callNotes, suspensions, deliveryRate };
