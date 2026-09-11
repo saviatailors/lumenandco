@@ -111,8 +111,8 @@ export default function ClientLayoutShell({
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 sm:h-11 w-auto brightness-0 invert object-contain transition-all" />
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-white/95 rounded-xl px-2.5 py-1 border border-white/40 shadow-md">
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 sm:h-8 w-auto object-contain transition-all" />
           </Link>
 
           <span className="hidden sm:inline text-white/20 text-sm">|</span>
@@ -231,7 +231,9 @@ export default function ClientLayoutShell({
             <aside className="relative w-[280px] max-w-[85vw] bg-white/95 backdrop-blur-3xl text-slate-900 flex flex-col h-full z-50 border-r border-white/90 shadow-2xl overflow-y-auto p-4 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 object-contain" />
+                  <span className="bg-white/95 rounded-xl px-2 py-0.5 border border-slate-200/80 shadow-sm inline-block">
+                    <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto object-contain" />
+                  </span>
                   <span className="text-xs font-black text-slate-900">Client Portal</span>
                 </div>
                 <button

@@ -457,7 +457,9 @@ export default function ClientPortalPage() {
   if (checking) {
     return (
       <div className="fixed inset-0 bg-[#0c0d12] text-white flex flex-col items-center justify-center space-y-4 font-sans">
-        <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-10 w-auto brightness-0 invert animate-pulse" />
+        <span className="bg-white/95 rounded-2xl px-3 py-1.5 border border-white/40 shadow-lg inline-block">
+          <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto object-contain animate-pulse" />
+        </span>
         <div className="flex items-center gap-2 text-xs font-semibold text-[#ef4d23]">
           <Loader2 className="h-4 w-4 animate-spin text-[#ef4d23]" />
           <span>Authenticating Client Portal Session...</span>
@@ -489,8 +491,8 @@ export default function ClientPortalPage() {
         <div className="w-full max-w-md bg-white/25 backdrop-blur-3xl border border-white/40 rounded-3xl p-8 shadow-2xl space-y-6 relative isolate text-white">
           {/* Header Branding */}
           <div className="text-center space-y-3">
-            <div className="inline-flex items-center justify-center p-3.5 bg-white/10 rounded-2xl border border-white/20 shadow-inner">
-              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 invert" />
+            <div className="inline-flex items-center justify-center p-2.5 bg-white/95 rounded-2xl border border-white/40 shadow-lg">
+              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto object-contain" />
             </div>
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Client Portal Sign In</h1>
@@ -660,7 +662,9 @@ export default function ClientPortalPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto brightness-0 invert" />
+                  <span className="bg-white/95 rounded-xl px-2 py-0.5 border border-white/40 shadow-sm inline-block">
+                    <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-5 w-auto object-contain" />
+                  </span>
                   <span className="text-white/30">•</span>
                   <h2 className="text-xl font-black text-white tracking-tight">
                     Mandatory Policy & Consent Gate
