@@ -413,7 +413,7 @@ const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
 export const listLeads = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({}).parse(data ?? {}))
+  .validator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -428,7 +428,7 @@ export const listLeads = createServerFn({ method: "POST" })
 
 export const updateLead = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) =>
+  .validator((data) =>
     z
       .object({
         id: z.string().uuid(),
@@ -453,7 +453,7 @@ export const updateLead = createServerFn({ method: "POST" })
 
 export const listLeadEvents = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -469,7 +469,7 @@ export const listLeadEvents = createServerFn({ method: "POST" })
 
 export const logLeadOpened = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await requireAdmin(context.claims);
     return { ok: true };
@@ -477,7 +477,7 @@ export const logLeadOpened = createServerFn({ method: "POST" })
 
 export const deleteLead = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -490,7 +490,7 @@ const KINDS = ["reel", "creative"] as const;
 
 export const listMedia = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({}).parse(data ?? {}))
+  .validator((data) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -506,7 +506,7 @@ export const listMedia = createServerFn({ method: "POST" })
 
 export const saveMedia = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) =>
+  .validator((data) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -542,7 +542,7 @@ export const saveMedia = createServerFn({ method: "POST" })
 
 export const deleteMedia = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -555,7 +555,7 @@ const VIDEO_BUCKET = "site-videos";
 
 export const createVideoUpload = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) =>
+  .validator((data) =>
     z
       .object({
         filename: z.string().trim().min(1).max(200),
@@ -576,7 +576,7 @@ export const createVideoUpload = createServerFn({ method: "POST" })
 
 export const deleteVideoFile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data) => z.object({ path: z.string().trim().min(1).max(400) }).parse(data))
+  .validator((data) => z.object({ path: z.string().trim().min(1).max(400) }).parse(data))
   .handler(async ({ data, context }) => {
     await requireAdmin(context.claims);
     const supabase = admin();
@@ -589,7 +589,7 @@ const PORTAL_FIELDS =
   "id, name, email, company, website, budget, goal, message, status, next_steps, created_at";
 
 export const getLeadPortal = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ token: z.string().trim().min(16).max(80) }).parse(data))
+  .validator((data) => z.object({ token: z.string().trim().min(16).max(80) }).parse(data))
   .handler(async ({ data }) => {
     const supabase = admin();
     const { data: row, error } = await supabase

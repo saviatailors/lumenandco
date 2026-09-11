@@ -305,9 +305,8 @@ export async function exportRealtimeAnalyticsToExcel({
 
   // Engine 2: SheetJS XLSX Fallback Engine
   try {
-    const xlsx = (XLSX as any).utils ? XLSX : (XLSX as any).default || XLSX;
-    const utils = xlsx?.utils || (XLSX as any).utils;
-    const write = xlsx?.write || (XLSX as any).write;
+    const utils = XLSX.utils;
+    const write = XLSX.write;
 
     if (utils && utils.book_new) {
       const workbook = utils.book_new();
@@ -668,9 +667,9 @@ function escapeHtml(str: string): string {
 
 export function downloadWorkbook(workbook: any, filename: string) {
   try {
-    const xlsx = (XLSX as any).utils ? XLSX : (XLSX as any).default || XLSX;
-    const write = xlsx?.write || (XLSX as any).write;
-    const writeFile = xlsx?.writeFile || (XLSX as any).writeFile;
+    const utils = XLSX.utils;
+    const write = XLSX.write;
+    const writeFile = XLSX.writeFile;
 
     if (typeof window !== "undefined" && typeof write === "function") {
       try {
