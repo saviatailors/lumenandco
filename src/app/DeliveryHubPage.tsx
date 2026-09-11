@@ -46,6 +46,7 @@ import {
   Eye,
   SlidersHorizontal,
   Share2,
+  Settings,
 } from "lucide-react";
 
 import DeliveryLayoutShell, { DeliveryTab } from "./components/DeliveryLayoutShell";
@@ -66,6 +67,7 @@ import {
   ClientHealthSnapshot,
   AttachmentVersion,
   ClientInfo,
+  Subtask,
 } from "@/lib/delivery.functions";
 
 import DeliveryTaskModal from "./components/DeliveryTaskModal";
@@ -156,7 +158,28 @@ export default function DeliveryHubPage() {
     );
   }
 
-  // Quick Action Handler
+  // Handle Task Update from Modal
+  const handleUpdateTask = (updatedTask: Deliverable) => {
+    setDeliverables((prev) => prev.map((d) => (d.id === updatedTask.id ? updatedTask : d)));
+    setSelectedTask(updatedTask);
+    toast.success(`Updated "${updatedTask.title}"!`);
+  };
+
+  // Toggle Subtask Completion
+  const handleToggleSubtask = (taskId: string, subtaskId: string) => {
+    setDeliverables((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const updatedSubtasks = (t.subtasks || []).map((st) =>
+          st.id === subtaskId ? { ...st, completed: !st.completed } : st
+        );
+        return { ...t, subtasks: updatedSubtasks };
+      })
+    );
+    toast.success("Subtask updated!");
+  };
+
+  // Quick Action Handler for New Task
   const handleCreateDeliverable = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -206,403 +229,560 @@ export default function DeliveryHubPage() {
     <DeliveryLayoutShell currentTab={currentTab} onTabChange={setCurrentTab} onQuickAction={() => setIsCreateModalOpen(true)}>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
         {/* ========================================================================= */}
-        {/* 1. EXECUTIVE PULSE BANNER (SOLID DARK OBSIDIAN STAGE) */}
+        {/* TAB 1: DASHBOARD VIEW (CREATIVE OPERATIONS COMMAND CENTER) */}
         {/* ========================================================================= */}
-        <div className="relative overflow-hidden bg-[#0f1118]/95 backdrop-blur-3xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl text-white">
-          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#ef4d23]/25 rounded-full blur-3xl pointer-events-none" />
+        {currentTab === "dashboard" && (
+          <div className="space-y-6">
+            {/* Executive Pulse Banner */}
+            <div className="relative overflow-hidden bg-[#0f1118]/95 backdrop-blur-3xl rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl text-white">
+              <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-[#ef4d23]/25 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="bg-[#ef4d23] text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md shadow-[#ef4d23]/40 tracking-wider">
-                  Live Operations Command
-                </span>
-                <span className="text-white/40 text-xs">•</span>
-                <span className="text-white/80 text-xs font-bold">Q3 Creative Deliverables Sprint</span>
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="bg-[#ef4d23] text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md shadow-[#ef4d23]/40 tracking-wider">
+                      Live Operations Command
+                    </span>
+                    <span className="text-white/40 text-xs">•</span>
+                    <span className="text-white/80 text-xs font-bold">Q3 Creative Deliverables Sprint</span>
+                  </div>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    Delivery <span className="font-serif-italic text-[#ef4d23] font-normal">Hub</span>
+                  </h1>
+                  <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-xl font-medium">
+                    Real-time campaign proofing, SLA compliance velocity, and client deliverable stage management.
+                  </p>
+                </div>
+
+                {/* Metric Counter Pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg cursor-pointer hover:border-[#ef4d23]" onClick={() => setViewMode("clients")}>
+                    <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">SLA On-Time</span>
+                    <p className="text-xl font-extrabold text-emerald-400 mt-0.5">98.4%</p>
+                  </div>
+
+                  <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg cursor-pointer hover:border-[#ef4d23]" onClick={() => setViewMode("grid")}>
+                    <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">In Sprint</span>
+                    <p className="text-xl font-extrabold text-white mt-0.5">{deliverables.length} Items</p>
+                  </div>
+
+                  <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg cursor-pointer hover:border-[#ef4d23]" onClick={() => setStatusFilter("client_review")}>
+                    <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Needs Review</span>
+                    <p className="text-xl font-extrabold text-amber-400 mt-0.5">3 Pending</p>
+                  </div>
+
+                  <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg cursor-pointer hover:border-[#ef4d23]" onClick={() => setStatusFilter("approved")}>
+                    <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Client Approved</span>
+                    <p className="text-xl font-extrabold text-sky-400 mt-0.5">
+                      {deliverables.filter((d) => d.status === "approved" || d.status === "delivered").length} Total
+                    </p>
+                  </div>
+                </div>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Delivery <span className="font-serif-italic text-[#ef4d23] font-normal">Hub</span>
-              </h1>
-              <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-xl font-medium">
-                Real-time campaign proofing, SLA compliance velocity, and client deliverable stage management.
-              </p>
             </div>
 
-            {/* Metric Counter Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
-                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">SLA On-Time</span>
-                <p className="text-xl font-extrabold text-emerald-400 mt-0.5">98.4%</p>
-              </div>
-
-              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
-                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">In Sprint</span>
-                <p className="text-xl font-extrabold text-white mt-0.5">{deliverables.length} Items</p>
-              </div>
-
-              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
-                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Needs Review</span>
-                <p className="text-xl font-extrabold text-amber-400 mt-0.5">3 Pending</p>
-              </div>
-
-              <div className="bg-[#181a26] p-3.5 rounded-2xl border border-white/20 shadow-lg">
-                <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-wider block">Client Approved</span>
-                <p className="text-xl font-extrabold text-sky-400 mt-0.5">
-                  {deliverables.filter((d) => d.status === "approved" || d.status === "delivered").length} Total
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 2. DYNAMIC WORKSPACE VIEW SWITCHER DOCK */}
-        {/* ========================================================================= */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f1118]/95 backdrop-blur-3xl p-3 rounded-3xl border border-white/20 shadow-2xl">
-          {/* Segmented View Mode Tabs */}
-          <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-2xl border border-white/20">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                viewMode === "grid"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <LayoutGrid className="h-4 w-4" /> Creative Grid
-            </button>
-
-            <button
-              onClick={() => setViewMode("kanban")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                viewMode === "kanban"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <Kanban className="h-4 w-4" /> Pipeline Stage Board
-            </button>
-
-            <button
-              onClick={() => setViewMode("clients")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                viewMode === "clients"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <Building2 className="h-4 w-4" /> Client Retainers
-            </button>
-
-            <button
-              onClick={() => setViewMode("proofs")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                viewMode === "proofs"
-                  ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <MessageSquare className="h-4 w-4" /> Proofing & Reviews
-            </button>
-          </div>
-
-          {/* New Deliverable Action Button */}
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-lg shadow-[#ef4d23]/40 border border-white/30 transition-all cursor-pointer hover:scale-[1.02]"
-          >
-            <Plus className="h-4 w-4" /> Create Deliverable
-          </button>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 3. INTERACTIVE HORIZONTAL CLIENT FILTER & TAG DOCK */}
-        {/* ========================================================================= */}
-        <div className="space-y-3">
-          {/* Client Filter Pill Carousel */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <span className="text-xs font-extrabold text-white/70 shrink-0 uppercase tracking-wider mr-1">Client:</span>
-            <button
-              onClick={() => setSelectedClientFilter("all")}
-              className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
-                selectedClientFilter === "all"
-                  ? "bg-white text-neutral-900 shadow-lg scale-[1.02]"
-                  : "bg-[#181a26] hover:bg-white/20 text-white border border-white/20"
-              }`}
-            >
-              All Retainers ({deliverables.length})
-            </button>
-
-            {SEED_CLIENTS.map((client) => {
-              const count = deliverables.filter(
-                (d) => d.client_id === client.id || d.client_name === client.company_name
-              ).length;
-              const isSelected = selectedClientFilter === client.id;
-
-              return (
+            {/* Dynamic View Switcher Dock */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f1118]/95 backdrop-blur-3xl p-3 rounded-3xl border border-white/20 shadow-2xl">
+              <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-2xl border border-white/20">
                 <button
-                  key={client.id}
-                  onClick={() => setSelectedClientFilter(client.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
-                    isSelected
-                      ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/40 border border-white/40 scale-[1.02]"
+                  onClick={() => setViewMode("grid")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <LayoutGrid className="h-4 w-4" /> Creative Grid
+                </button>
+
+                <button
+                  onClick={() => setViewMode("kanban")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    viewMode === "kanban"
+                      ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <Kanban className="h-4 w-4" /> Pipeline Stage Board
+                </button>
+
+                <button
+                  onClick={() => setViewMode("clients")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    viewMode === "clients"
+                      ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <Building2 className="h-4 w-4" /> Client Retainers
+                </button>
+
+                <button
+                  onClick={() => setViewMode("proofs")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    viewMode === "proofs"
+                      ? "bg-[#ef4d23] text-white shadow-md shadow-[#ef4d23]/40"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <MessageSquare className="h-4 w-4" /> Proofing & Reviews
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-lg shadow-[#ef4d23]/40 border border-white/30 transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <Plus className="h-4 w-4" /> Create Deliverable
+              </button>
+            </div>
+
+            {/* Filter Dock */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <span className="text-xs font-extrabold text-white/70 shrink-0 uppercase tracking-wider mr-1">Client:</span>
+                <button
+                  onClick={() => setSelectedClientFilter("all")}
+                  className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
+                    selectedClientFilter === "all"
+                      ? "bg-white text-neutral-900 shadow-lg scale-[1.02]"
                       : "bg-[#181a26] hover:bg-white/20 text-white border border-white/20"
                   }`}
                 >
-                  <span>{client.company_name}</span>
-                  <span className="bg-black/50 px-2 py-0.5 rounded-full text-[10px] text-white font-bold">{count}</span>
+                  All Retainers ({deliverables.length})
                 </button>
-              );
-            })}
-          </div>
 
-          {/* Secondary Type & Search Filter Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0f1118]/95 backdrop-blur-2xl p-3.5 rounded-2xl border border-white/20 shadow-xl">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Type Filter Buttons */}
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="text-white/70 font-extrabold mr-1">Type:</span>
-                {[
-                  { id: "all", label: "All" },
-                  { id: "reels", label: "📹 Reels" },
-                  { id: "ads", label: "✨ Ad Sets" },
-                  { id: "blogs", label: "📄 Articles" },
-                  { id: "carousels", label: "📱 Carousels" },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTypeFilter(t.id)}
-                    className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
-                      typeFilter === t.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Status Toggles */}
-              <div className="flex items-center gap-1.5 text-xs pl-3 border-l border-white/20">
-                <span className="text-white/70 font-extrabold mr-1">Status:</span>
-                {[
-                  { id: "all", label: "All" },
-                  { id: "in_progress", label: "⚡ In Production" },
-                  { id: "client_review", label: "🟡 In Review" },
-                  { id: "approved", label: "🟢 Approved" },
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setStatusFilter(s.id)}
-                    className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
-                      statusFilter === s.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Instant Search Bar */}
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
-              <input
-                type="text"
-                placeholder="Search deliverable title…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-black/60 border border-white/20 rounded-xl text-xs font-bold text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[#ef4d23] w-60"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 4. MODE 1: CREATIVE GRID VIEW (WITH VISUAL MEDIA COVER PREVIEWS) */}
-        {/* ========================================================================= */}
-        {viewMode === "grid" && (
-          <div>
-            {filteredDeliverables.length === 0 ? (
-              <div className="p-12 text-center text-white/60 bg-[#0f1118]/90 rounded-3xl border border-dashed border-white/20 shadow-2xl">
-                <Inbox className="h-10 w-10 mx-auto text-white/40 mb-3" />
-                <p className="font-extrabold text-white text-base">No deliverables match this filter combination.</p>
-                <button
-                  onClick={() => {
-                    setSelectedClientFilter("all");
-                    setTypeFilter("all");
-                    setStatusFilter("all");
-                    setSearchQuery("");
-                  }}
-                  className="mt-3 text-xs font-extrabold text-[#ef4d23] hover:underline"
-                >
-                  Reset all filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {filteredDeliverables.map((item) => {
-                  const coverImage = CARD_COVER_MOCKUPS[item.id] || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80";
-                  const completedSubtasks = (item.subtasks || []).filter((s) => s.completed).length;
-                  const totalSubtasks = item.subtasks?.length || 1;
-                  const progressPct = Math.round((completedSubtasks / totalSubtasks) * 100);
-
-                  const isApproved = item.status === "approved" || item.status === "delivered";
+                {SEED_CLIENTS.map((client) => {
+                  const count = deliverables.filter(
+                    (d) => d.client_id === client.id || d.client_name === client.company_name
+                  ).length;
+                  const isSelected = selectedClientFilter === client.id;
 
                   return (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        setSelectedTask(item);
-                        setIsTaskModalOpen(true);
-                      }}
-                      className="group bg-[#12141e]/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/20 shadow-2xl hover:shadow-2xl hover:border-[#ef4d23] transition-all duration-300 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                    <button
+                      key={client.id}
+                      onClick={() => setSelectedClientFilter(client.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
+                        isSelected
+                          ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/40 border border-white/40 scale-[1.02]"
+                          : "bg-[#181a26] hover:bg-white/20 text-white border border-white/20"
+                      }`}
                     >
-                      {/* Media Card Cover Thumbnail */}
-                      <div className="relative h-44 w-full overflow-hidden bg-black/60">
-                        <img
-                          src={coverImage}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#12141e] via-black/40 to-transparent" />
+                      <span>{client.company_name}</span>
+                      <span className="bg-black/50 px-2 py-0.5 rounded-full text-[10px] text-white font-bold">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                        {/* Top Badges */}
-                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                          <span className="bg-black/80 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1 rounded-full border border-white/30 uppercase tracking-wider shadow-md">
-                            {item.type.replace("_", " ")}
-                          </span>
+              {/* Type & Search */}
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0f1118]/95 backdrop-blur-2xl p-3.5 rounded-2xl border border-white/20 shadow-xl">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="text-white/70 font-extrabold mr-1">Type:</span>
+                    {[
+                      { id: "all", label: "All" },
+                      { id: "reels", label: "📹 Reels" },
+                      { id: "ads", label: "✨ Ad Sets" },
+                      { id: "blogs", label: "📄 Articles" },
+                      { id: "carousels", label: "📱 Carousels" },
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => setTypeFilter(t.id)}
+                        className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
+                          typeFilter === t.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
 
-                          {isApproved ? (
-                            <span className="bg-emerald-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                              <Check className="h-3 w-3" /> Approved
-                            </span>
-                          ) : (
-                            <span className="bg-amber-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
-                              <Clock className="h-3 w-3" /> In Production
-                            </span>
-                          )}
+                  <div className="flex items-center gap-1.5 text-xs pl-3 border-l border-white/20">
+                    <span className="text-white/70 font-extrabold mr-1">Status:</span>
+                    {[
+                      { id: "all", label: "All" },
+                      { id: "in_progress", label: "⚡ In Production" },
+                      { id: "client_review", label: "🟡 In Review" },
+                      { id: "approved", label: "🟢 Approved" },
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setStatusFilter(s.id)}
+                        className={`px-3 py-1.5 rounded-xl font-extrabold transition-all ${
+                          statusFilter === s.id ? "bg-white text-neutral-900 shadow-md" : "text-white/80 hover:bg-white/10"
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
+                  <input
+                    type="text"
+                    placeholder="Search deliverable title…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 pr-3 py-1.5 bg-black/60 border border-white/20 rounded-xl text-xs font-bold text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-[#ef4d23] w-60"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Creative Grid View Mode */}
+            {viewMode === "grid" && (
+              <div>
+                {filteredDeliverables.length === 0 ? (
+                  <div className="p-12 text-center text-white/60 bg-[#0f1118]/90 rounded-3xl border border-dashed border-white/20 shadow-2xl">
+                    <Inbox className="h-10 w-10 mx-auto text-white/40 mb-3" />
+                    <p className="font-extrabold text-white text-base">No deliverables match this filter combination.</p>
+                    <button
+                      onClick={() => {
+                        setSelectedClientFilter("all");
+                        setTypeFilter("all");
+                        setStatusFilter("all");
+                        setSearchQuery("");
+                      }}
+                      className="mt-3 text-xs font-extrabold text-[#ef4d23] hover:underline"
+                    >
+                      Reset all filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {filteredDeliverables.map((item) => {
+                      const coverImage = CARD_COVER_MOCKUPS[item.id] || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80";
+                      const completedSubtasks = (item.subtasks || []).filter((s) => s.completed).length;
+                      const totalSubtasks = item.subtasks?.length || 1;
+                      const progressPct = Math.round((completedSubtasks / totalSubtasks) * 100);
+
+                      const isApproved = item.status === "approved" || item.status === "delivered";
+
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => {
+                            setSelectedTask(item);
+                            setIsTaskModalOpen(true);
+                          }}
+                          className="group bg-[#12141e]/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/20 shadow-2xl hover:shadow-2xl hover:border-[#ef4d23] transition-all duration-300 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                        >
+                          <div className="relative h-44 w-full overflow-hidden bg-black/60">
+                            <img
+                              src={coverImage}
+                              alt={item.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#12141e] via-black/40 to-transparent" />
+
+                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                              <span className="bg-black/80 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1 rounded-full border border-white/30 uppercase tracking-wider shadow-md">
+                                {item.type.replace("_", " ")}
+                              </span>
+
+                              {isApproved ? (
+                                <span className="bg-emerald-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                                  <Check className="h-3 w-3" /> Approved
+                                </span>
+                              ) : (
+                                <span className="bg-amber-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
+                                  <Clock className="h-3 w-3" /> In Production
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="absolute bottom-3 left-3 right-3">
+                              <span className="text-[11px] font-extrabold text-white bg-black/70 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 inline-block shadow-md">
+                                🏢 {item.client_name}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between text-white">
+                            <div>
+                              <h3 className="font-extrabold text-sm text-white leading-snug group-hover:text-[#ef4d23] transition-colors line-clamp-2">
+                                {item.title}
+                              </h3>
+                              <p className="text-[11px] text-white/70 mt-1 line-clamp-2 font-semibold">
+                                {item.brief_description || "Standard creative deliverable sprint item."}
+                              </p>
+                            </div>
+
+                            <div className="space-y-1.5 pt-2 border-t border-white/15">
+                              <div className="flex items-center justify-between text-[11px] font-extrabold text-white/80">
+                                <span>Sprint Progress</span>
+                                <span>{progressPct}% ({completedSubtasks}/{totalSubtasks})</span>
+                              </div>
+                              <div className="w-full bg-black/60 h-2 rounded-full overflow-hidden p-0.5 border border-white/20">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    isApproved ? "bg-emerald-400 shadow-md shadow-emerald-400/50" : "bg-[#ef4d23]"
+                                  }`}
+                                  style={{ width: `${progressPct}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="pt-2 flex items-center justify-between text-[11px] text-white/70 font-extrabold border-t border-white/10">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white text-[9px] font-extrabold flex items-center justify-center border border-white/40 shadow-md">
+                                  {item.assigned_to_name.charAt(0)}
+                                </div>
+                                <span className="truncate max-w-[100px]">{item.assigned_to_name}</span>
+                              </div>
+                              <span className="text-white/80">Due: {item.due_date}</span>
+                            </div>
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
-                        {/* Bottom Client Tag */}
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <span className="text-[11px] font-extrabold text-white bg-black/70 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 inline-block shadow-md">
-                            🏢 {item.client_name}
-                          </span>
-                        </div>
+            {/* Kanban Stage Board Mode */}
+            {viewMode === "kanban" && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
+                {[
+                  { id: "in_progress", label: "⚡ In Production", color: "border-sky-500 bg-sky-500/20 text-sky-200" },
+                  { id: "internal_review", label: "🔍 Internal QA", color: "border-purple-500 bg-purple-500/20 text-purple-200" },
+                  { id: "client_review", label: "🟡 Client Proofing", color: "border-amber-500 bg-amber-500/20 text-amber-200" },
+                  { id: "approved", label: "🟢 Approved & Ready", color: "border-emerald-500 bg-emerald-500/20 text-emerald-200" },
+                ].map((column) => {
+                  const columnDeliverables = filteredDeliverables.filter((d) => {
+                    if (column.id === "approved") return d.status === "approved" || d.status === "delivered";
+                    return d.status === column.id;
+                  });
+
+                  return (
+                    <div key={column.id} className="bg-[#12141e]/95 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl space-y-3">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/20">
+                        <span className={`text-xs font-extrabold px-3 py-1 rounded-full border shadow-md ${column.color}`}>
+                          {column.label}
+                        </span>
+                        <span className="text-xs font-extrabold text-white bg-black/60 border border-white/20 px-2.5 py-0.5 rounded-full">
+                          {columnDeliverables.length}
+                        </span>
                       </div>
 
-                      {/* Card Content Body */}
-                      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between text-white">
-                        <div>
-                          <h3 className="font-extrabold text-sm text-white leading-snug group-hover:text-[#ef4d23] transition-colors line-clamp-2">
-                            {item.title}
-                          </h3>
-                          <p className="text-[11px] text-white/70 mt-1 line-clamp-2 font-semibold">
-                            {item.brief_description || "Standard creative deliverable sprint item."}
-                          </p>
-                        </div>
-
-                        {/* Progress Stepper & Subtask Count */}
-                        <div className="space-y-1.5 pt-2 border-t border-white/15">
-                          <div className="flex items-center justify-between text-[11px] font-extrabold text-white/80">
-                            <span>Sprint Progress</span>
-                            <span>{progressPct}% ({completedSubtasks}/{totalSubtasks})</span>
-                          </div>
-                          <div className="w-full bg-black/60 h-2 rounded-full overflow-hidden p-0.5 border border-white/20">
-                            <div
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                isApproved ? "bg-emerald-400 shadow-md shadow-emerald-400/50" : "bg-[#ef4d23]"
-                              }`}
-                              style={{ width: `${progressPct}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Card Footer: Assignee & Date */}
-                        <div className="pt-2 flex items-center justify-between text-[11px] text-white/70 font-extrabold border-t border-white/10">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white text-[9px] font-extrabold flex items-center justify-center border border-white/40 shadow-md">
-                              {item.assigned_to_name.charAt(0)}
+                      <div className="space-y-3 min-h-[300px]">
+                        {columnDeliverables.map((item) => (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              setSelectedTask(item);
+                              setIsTaskModalOpen(true);
+                            }}
+                            className="bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/20 hover:border-[#ef4d23] text-white shadow-xl cursor-pointer space-y-2.5 transition-all hover:-translate-y-0.5"
+                          >
+                            <span className="text-[10px] font-extrabold text-[#ef4d23] uppercase tracking-wider block">
+                              {item.client_name}
+                            </span>
+                            <h4 className="font-extrabold text-xs text-white leading-snug">{item.title}</h4>
+                            <div className="flex items-center justify-between text-[10px] text-white/80 pt-2 border-t border-white/15 font-extrabold">
+                              <span>👤 {item.assigned_to_name}</span>
+                              <span className="bg-white/20 border border-white/20 px-2 py-0.5 rounded-full text-white font-bold">{item.type}</span>
                             </div>
-                            <span className="truncate max-w-[100px]">{item.assigned_to_name}</span>
                           </div>
-                          <span className="text-white/80">Due: {item.due_date}</span>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </div>
-        )}
 
-        {/* ========================================================================= */}
-        {/* 5. MODE 2: PIPELINE STAGE BOARD (KANBAN SWIMLANES) */}
-        {/* ========================================================================= */}
-        {viewMode === "kanban" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
-            {[
-              { id: "in_progress", label: "⚡ In Production", color: "border-sky-500 bg-sky-500/20 text-sky-200" },
-              { id: "internal_review", label: "🔍 Internal QA", color: "border-purple-500 bg-purple-500/20 text-purple-200" },
-              { id: "client_review", label: "🟡 Client Proofing", color: "border-amber-500 bg-amber-500/20 text-amber-200" },
-              { id: "approved", label: "🟢 Approved & Ready", color: "border-emerald-500 bg-emerald-500/20 text-emerald-200" },
-            ].map((column) => {
-              const columnDeliverables = filteredDeliverables.filter((d) => {
-                if (column.id === "approved") return d.status === "approved" || d.status === "delivered";
-                return d.status === column.id;
-              });
+            {/* Client Retainers Directory Mode */}
+            {viewMode === "clients" && (
+              <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 shadow-2xl p-6 text-white space-y-4">
+                <div className="flex items-center justify-between border-b border-white/15 pb-3">
+                  <h3 className="text-lg font-extrabold text-white">Client Retainers Portfolio & Delivery SLA</h3>
+                  <span className="text-xs font-extrabold bg-[#ef4d23] text-white px-3 py-1 rounded-full shadow-md">
+                    100% High-Contrast View
+                  </span>
+                </div>
 
-              return (
-                <div key={column.id} className="bg-[#12141e]/95 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl space-y-3">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/20">
-                    <span className={`text-xs font-extrabold px-3 py-1 rounded-full border shadow-md ${column.color}`}>
-                      {column.label}
-                    </span>
-                    <span className="text-xs font-extrabold text-white bg-black/60 border border-white/20 px-2.5 py-0.5 rounded-full">
-                      {columnDeliverables.length}
-                    </span>
-                  </div>
+                <Table containerClassName="bg-[#161824] border border-white/25">
+                  <TableHeader className="bg-[#1c1e2d]">
+                    <TableRow className="border-b border-white/20">
+                      <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Client Company</TableHead>
+                      <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Retainer Tier</TableHead>
+                      <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">Location</TableHead>
+                      <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider">In-Flight Tasks</TableHead>
+                      <TableHead className="py-4 text-white font-extrabold text-xs tracking-wider text-right">SLA Health</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-white/15 text-xs text-white">
+                    {SEED_CLIENTS.map((c) => {
+                      const tasksCount = deliverables.filter((d) => d.client_id === c.id || d.client_name === c.company_name).length;
+                      return (
+                        <TableRow key={c.id} className="hover:bg-white/10 border-b border-white/10 transition-colors cursor-pointer" onClick={() => setSelectedClientFilter(c.id)}>
+                          <TableCell className="py-4 font-extrabold text-white text-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-[#ef4d23] text-white flex items-center justify-center font-extrabold text-xs shadow-md border border-white/30">
+                                {c.company_name.charAt(0)}
+                              </div>
+                              <span className="text-white font-extrabold text-sm">{c.company_name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 text-neutral-200 font-extrabold text-xs">{c.package_tier}</TableCell>
+                          <TableCell className="py-4 text-neutral-300 font-bold text-xs">{c.location || "Global"}</TableCell>
+                          <TableCell className="py-4 font-extrabold text-[#ef4d23] text-xs">{tasksCount} Active Deliverables</TableCell>
+                          <TableCell className="py-4 text-right font-extrabold text-emerald-400 text-xs">🟢 98.4% On-Time SLA</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-                  <div className="space-y-3 min-h-[300px]">
-                    {columnDeliverables.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => {
-                          setSelectedTask(item);
-                          setIsTaskModalOpen(true);
-                        }}
-                        className="bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/20 hover:border-[#ef4d23] text-white shadow-xl cursor-pointer space-y-2.5 transition-all hover:-translate-y-0.5"
-                      >
-                        <span className="text-[10px] font-extrabold text-[#ef4d23] uppercase tracking-wider block">
-                          {item.client_name}
-                        </span>
-                        <h4 className="font-extrabold text-xs text-white leading-snug">{item.title}</h4>
-                        <div className="flex items-center justify-between text-[10px] text-white/80 pt-2 border-t border-white/15 font-extrabold">
-                          <span>👤 {item.assigned_to_name}</span>
-                          <span className="bg-white/20 border border-white/20 px-2 py-0.5 rounded-full text-white font-bold">{item.type}</span>
+            {/* Proofs Mode */}
+            {viewMode === "proofs" && (
+              <div className="space-y-4">
+                <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 shadow-2xl space-y-4 text-white">
+                  <h3 className="text-lg font-extrabold text-white">Recent Client Review Requests & Proofing Activity</h3>
+
+                  <div className="space-y-3">
+                    {[
+                      { client: "Northbeam Outdoors", task: "Q4 Performance Video Reel", time: "2h ago", text: "Approved second cut! Ready for campaign publication." },
+                      { client: "Fable Skincare", task: "Gen AI UGC Ad Concepts", time: "4h ago", text: "Requested color grading adjustment on slide 3 background." },
+                      { client: "Kite & Co", task: "Autumn Promotion Static & Carousel Banners", time: "1d ago", text: "Internal QA approved slide copy deck." },
+                    ].map((item, idx) => (
+                      <div key={idx} className="p-4 bg-black/60 rounded-2xl border border-white/20 flex items-center justify-between text-xs shadow-lg">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-white text-sm">{item.client}</span>
+                            <span className="text-white/40">•</span>
+                            <span className="text-[#ef4d23] font-extrabold">{item.task}</span>
+                          </div>
+                          <p className="text-white/90 font-medium">{item.text}</p>
                         </div>
+                        <span className="text-xs text-white/70 font-extrabold bg-white/10 px-3 py-1 rounded-full">{item.time}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* 6. MODE 3: HIGH-CONTRAST CLIENT RETAINERS DIRECTORY */}
+        {/* TAB 2: MY TASKS (STAFF TASKLIST VIEW) */}
         {/* ========================================================================= */}
-        {viewMode === "clients" && (
-          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 shadow-2xl p-6 text-white space-y-4">
-            <div className="flex items-center justify-between border-b border-white/15 pb-3">
-              <h3 className="text-lg font-extrabold text-white">Client Retainers Portfolio & Delivery SLA</h3>
-              <span className="text-xs font-extrabold bg-[#ef4d23] text-white px-3 py-1 rounded-full shadow-md">
-                100% High-Contrast View
-              </span>
+        {currentTab === "tasks" && (
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 shadow-2xl space-y-5 text-white">
+            <div className="flex items-center justify-between border-b border-white/15 pb-4">
+              <div>
+                <h2 className="text-2xl font-extrabold text-white">My Deliverable Tasks</h2>
+                <p className="text-xs text-white/70 mt-0.5">Click any task row to view details, update status steppers, or upload files.</p>
+              </div>
+
+              <Button onClick={() => setIsCreateModalOpen(true)} className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-4">
+                <Plus className="h-4 w-4 mr-1" /> New Task
+              </Button>
             </div>
 
+            <div className="space-y-3">
+              {deliverables.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setIsTaskModalOpen(true);
+                  }}
+                  className="p-4 bg-black/50 hover:bg-white/10 rounded-2xl flex items-center justify-between border border-white/20 cursor-pointer transition-all shadow-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={task.status === "approved" || task.status === "delivered"}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleUpdateTask({
+                          ...task,
+                          status: task.status === "approved" ? "in_progress" : "approved",
+                        });
+                      }}
+                      className="h-4 w-4 rounded border-white/30 text-[#ef4d23] focus:ring-[#ef4d23]"
+                    />
+                    <div>
+                      <span className={`font-extrabold text-sm ${task.status === "approved" ? "line-through text-white/50" : "text-white"}`}>
+                        {task.title}
+                      </span>
+                      <p className="text-[11px] text-white/60 font-semibold mt-0.5">
+                        Assigned: {task.assigned_to_name} • Category: {task.type}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="font-extrabold text-xs text-white/80 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+                      {task.client_name}
+                    </span>
+                    <span className="bg-[#ef4d23]/20 text-[#ef4d23] font-extrabold text-xs px-3 py-1 rounded-full border border-[#ef4d23]/40">
+                      {STAGE_LABELS[task.status] || task.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 3: LEADS & SALES PIPELINE */}
+        {/* ========================================================================= */}
+        {currentTab === "leads" && (
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl p-6 sm:p-8 rounded-3xl border border-white/25 shadow-2xl text-white space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                  Leads & Sales <span className="font-serif-italic text-[#ef4d23] font-normal">Pipeline</span>
+                </h1>
+                <p className="text-xs text-white/70 mt-0.5 font-medium">
+                  Track client campaign customer inquiries & manage B2B agency retainer deals.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-xs font-bold text-white/70 uppercase">Incoming Inquiries</span>
+                <p className="text-2xl font-extrabold text-white mt-1">12 Leads</p>
+                <span className="text-[10px] text-emerald-400 font-bold">+4 new today</span>
+              </div>
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-xs font-bold text-white/70 uppercase">🔥 Hot Prospects</span>
+                <p className="text-2xl font-extrabold text-[#ef4d23] mt-1">5 Hot Deals</p>
+                <span className="text-[10px] text-white/70 font-bold">Immediate Follow-up Needed</span>
+              </div>
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg">
+                <span className="text-xs font-bold text-white/70 uppercase">🎉 Active Retainer Pipeline</span>
+                <p className="text-2xl font-extrabold text-emerald-400 mt-1">$45,000 /mo</p>
+                <span className="text-[10px] text-white/70 font-bold">Closed Deals Value</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: CALENDAR VIEW */}
+        {/* ========================================================================= */}
+        {currentTab === "calendar" && <DeliveryCalendarView deliverables={deliverables} />}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: CLIENTS RETAINERS TAB */}
+        {/* ========================================================================= */}
+        {currentTab === "clients" && (
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 shadow-2xl p-6 text-white space-y-4">
+            <h3 className="text-lg font-extrabold text-white">Client Retainers Portfolio & Delivery SLA</h3>
             <Table containerClassName="bg-[#161824] border border-white/25">
               <TableHeader className="bg-[#1c1e2d]">
                 <TableRow className="border-b border-white/20">
@@ -617,7 +797,7 @@ export default function DeliveryHubPage() {
                 {SEED_CLIENTS.map((c) => {
                   const tasksCount = deliverables.filter((d) => d.client_id === c.id || d.client_name === c.company_name).length;
                   return (
-                    <TableRow key={c.id} className="hover:bg-white/10 border-b border-white/10 transition-colors">
+                    <TableRow key={c.id} className="hover:bg-white/10 border-b border-white/10 transition-colors cursor-pointer" onClick={() => { setCurrentTab("dashboard"); setSelectedClientFilter(c.id); }}>
                       <TableCell className="py-4 font-extrabold text-white text-sm">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#ef4d23] text-white flex items-center justify-center font-extrabold text-xs shadow-md border border-white/30">
@@ -639,32 +819,53 @@ export default function DeliveryHubPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 7. MODE 4: CLIENT PROOFING & REVIEWS LOG */}
+        {/* TAB 6: WORKLOAD CAPACITY VIEW */}
         {/* ========================================================================= */}
-        {viewMode === "proofs" && (
-          <div className="space-y-4">
-            <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 shadow-2xl space-y-4 text-white">
-              <h3 className="text-lg font-extrabold text-white">Recent Client Review Requests & Proofing Activity</h3>
+        {currentTab === "workload" && <WorkloadCapacityView deliverables={deliverables} onReassignTask={() => {}} />}
 
-              <div className="space-y-3">
-                {[
-                  { client: "Northbeam Outdoors", task: "Q4 Performance Video Reel", time: "2h ago", text: "Approved second cut! Ready for campaign publication." },
-                  { client: "Fable Skincare", task: "Gen AI UGC Ad Concepts", time: "4h ago", text: "Requested color grading adjustment on slide 3 background." },
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 bg-black/60 rounded-2xl border border-white/20 flex items-center justify-between text-xs shadow-lg">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-white text-sm">{item.client}</span>
-                        <span className="text-white/40">•</span>
-                        <span className="text-[#ef4d23] font-extrabold">{item.task}</span>
-                      </div>
-                      <p className="text-white/90 font-medium">{item.text}</p>
-                    </div>
-                    <span className="text-xs text-white/70 font-extrabold bg-white/10 px-3 py-1 rounded-full">{item.time}</span>
-                  </div>
-                ))}
+        {/* ========================================================================= */}
+        {/* TAB 7: REPORTS VIEW */}
+        {/* ========================================================================= */}
+        {currentTab === "reports" && (
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 sm:p-8 shadow-2xl space-y-6 text-white">
+            <div className="border-b border-white/15 pb-4">
+              <h2 className="text-2xl font-extrabold text-white">Delivery Velocity & SLA Analytics</h2>
+              <p className="text-xs text-white/70 mt-1">Operational turnaround speeds and SLA breach prevention reporting.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg space-y-1">
+                <span className="text-xs text-white/70 font-bold uppercase">Average Delivery Speed</span>
+                <p className="text-3xl font-extrabold text-emerald-400">2.4 Days</p>
+                <span className="text-[10px] text-white/50 font-bold">Per creative deliverable</span>
+              </div>
+
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg space-y-1">
+                <span className="text-xs text-white/70 font-bold uppercase">Client SLA Compliance</span>
+                <p className="text-3xl font-extrabold text-[#ef4d23]">98.4%</p>
+                <span className="text-[10px] text-white/50 font-bold">Target: &gt; 95%</span>
+              </div>
+
+              <div className="bg-black/50 p-5 rounded-2xl border border-white/20 shadow-lg space-y-1">
+                <span className="text-xs text-white/70 font-bold uppercase">Revision Rate</span>
+                <p className="text-3xl font-extrabold text-sky-400">4.2%</p>
+                <span className="text-[10px] text-white/50 font-bold">Low client rework</span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 8: SETTINGS VIEW */}
+        {/* ========================================================================= */}
+        {currentTab === "settings" && (
+          <div className="bg-[#10121a]/95 backdrop-blur-3xl rounded-3xl border border-white/25 p-6 sm:p-8 shadow-2xl space-y-6 text-white">
+            <div className="border-b border-white/15 pb-4">
+              <h2 className="text-2xl font-extrabold text-white">Delivery Templates & Media Library</h2>
+              <p className="text-xs text-white/70 mt-1">Configure asset templates, media uploads, and team operational settings.</p>
+            </div>
+
+            <MediaManager />
           </div>
         )}
 
@@ -750,13 +951,14 @@ export default function DeliveryHubPage() {
           </div>
         )}
 
-        {/* TASK DETAIL SLIDE OVER */}
+        {/* TASK DETAIL SLIDE OVER MODAL (FULLY FUNCTIONAL UPDATE HANDLERS) */}
         <DeliveryTaskModal
           deliverable={selectedTask}
           isOpen={isTaskModalOpen}
           onClose={() => setIsTaskModalOpen(false)}
-          onSave={() => toast.success("Task updated!")}
-          onToggleSubtask={() => {}}
+          onSave={handleUpdateTask}
+          onUpdate={handleUpdateTask}
+          onToggleSubtask={handleToggleSubtask}
         />
       </div>
     </DeliveryLayoutShell>
