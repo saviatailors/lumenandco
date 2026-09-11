@@ -11,7 +11,7 @@ export function Table({
 }) {
   return (
     <div
-      className={`w-full overflow-x-auto border border-white/20 rounded-3xl bg-[#141520]/90 backdrop-blur-xl shadow-xl ${containerClassName}`}
+      className={`w-full overflow-x-auto border border-white/80 rounded-3xl bg-white/80 backdrop-blur-2xl shadow-xl shadow-black/5 ${containerClassName}`}
     >
       <table className={`w-full text-left text-xs ${className}`}>{children}</table>
     </div>
@@ -27,7 +27,7 @@ export function TableHeader({
 }) {
   return (
     <thead
-      className={`bg-white/10 border-b border-white/15 text-[11px] font-extrabold text-white/80 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md ${className}`}
+      className={`bg-slate-100/90 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-700 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md ${className}`}
     >
       {children}
     </thead>
@@ -35,7 +35,7 @@ export function TableHeader({
 }
 
 export function TableHead({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <th className={`px-4 py-3.5 font-extrabold align-middle text-white ${className}`}>{children}</th>;
+  return <th className={`px-4 py-3.5 font-extrabold align-middle text-slate-900 ${className}`}>{children}</th>;
 }
 
 export function TableBody({
@@ -45,7 +45,7 @@ export function TableBody({
   children: ReactNode;
   className?: string;
 }) {
-  return <tbody className={`divide-y divide-white/10 font-medium text-white ${className}`}>{children}</tbody>;
+  return <tbody className={`divide-y divide-slate-200/60 font-semibold text-slate-900 ${className}`}>{children}</tbody>;
 }
 
 export function TableRow({
@@ -60,7 +60,7 @@ export function TableRow({
   return (
     <tr
       onClick={onClick}
-      className={`h-12 min-h-[48px] hover:bg-white/10 transition-colors ${
+      className={`h-12 min-h-[48px] hover:bg-slate-50/80 transition-colors ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
     >
@@ -70,5 +70,5 @@ export function TableRow({
 }
 
 export function TableCell({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <td className={`px-4 py-3.5 align-middle ${className}`}>{children}</td>;
+  return <td className={`px-4 py-3.5 align-middle text-slate-900 ${className}`}>{children}</td>;
 }
