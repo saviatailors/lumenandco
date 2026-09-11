@@ -1337,14 +1337,14 @@ export default function ClientPortalPage() {
       {/* ========================================================================= */}
       {currentTab === "leads" && (
         <div className="space-y-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/25 p-5 rounded-3xl border border-white/40 backdrop-blur-3xl shadow-2xl text-white">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/80 p-5 rounded-3xl border border-white/90 backdrop-blur-3xl shadow-xl text-slate-900">
             <div>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-[#ef4d23]" />
-                <h2 className="text-xl font-black text-white">Business Leads Directory</h2>
+                <h2 className="text-xl font-extrabold text-slate-900">Business Leads Directory</h2>
               </div>
-              <p className="text-xs text-white/70 mt-1">
-                Leads collected through active ad campaigns for <strong className="text-white">{clientCompany}</strong>. Filter, search, and export.
+              <p className="text-xs text-slate-600 mt-1">
+                Leads collected through active ad campaigns for <strong className="text-slate-900">{clientCompany}</strong>. Filter, search, and export.
               </p>
             </div>
 
@@ -1358,15 +1358,15 @@ export default function ClientPortalPage() {
           </div>
 
           {/* Search & Filter Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/25 p-4 rounded-3xl border border-white/40 backdrop-blur-xl shadow-md">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/80 p-4 rounded-3xl border border-white/90 backdrop-blur-xl shadow-md">
             <div className="relative">
-              <Search className="absolute left-3.5 top-3 h-4 w-4 text-white/40" />
+              <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 value={leadSearchQuery}
                 onChange={(e) => setLeadSearchQuery(e.target.value)}
                 placeholder="Search leads by name, email, phone..."
-                className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-2xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+                className="w-full bg-white text-slate-900 placeholder-slate-400 border border-slate-200/90 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold focus:outline-none focus:border-[#ef4d23] shadow-xs"
               />
             </div>
 
@@ -1374,13 +1374,13 @@ export default function ClientPortalPage() {
               <select
                 value={leadFilterTemp}
                 onChange={(e) => setLeadFilterTemp(e.target.value)}
-                className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+                className="w-full bg-white text-slate-900 border border-slate-200/90 rounded-2xl px-3.5 py-2.5 text-xs font-extrabold focus:outline-none focus:border-[#ef4d23] shadow-xs"
               >
-                <option value="all" className="bg-[#181922]">Filter by Temperature (All)</option>
-                <option value="hot" className="bg-[#181922]">Hot Lead</option>
-                <option value="warm" className="bg-[#181922]">Warm Lead</option>
-                <option value="cold" className="bg-[#181922]">Cold Lead</option>
-                <option value="converted" className="bg-[#181922]">Converted</option>
+                <option value="all" className="bg-white text-slate-900">Filter by Temperature (All)</option>
+                <option value="hot" className="bg-white text-slate-900">Hot Lead</option>
+                <option value="warm" className="bg-white text-slate-900">Warm Lead</option>
+                <option value="cold" className="bg-white text-slate-900">Cold Lead</option>
+                <option value="converted" className="bg-white text-slate-900">Converted</option>
               </select>
             </div>
 
@@ -1388,68 +1388,66 @@ export default function ClientPortalPage() {
               <select
                 value={leadFilterDate}
                 onChange={(e) => setLeadFilterDate(e.target.value)}
-                className="w-full bg-white/10 text-white border border-white/20 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-[#ef4d23]"
+                className="w-full bg-white text-slate-900 border border-slate-200/90 rounded-2xl px-3.5 py-2.5 text-xs font-extrabold focus:outline-none focus:border-[#ef4d23] shadow-xs"
               >
-                <option value="all" className="bg-[#181922]">Date Range (All Time)</option>
-                <option value="7days" className="bg-[#181922]">Last 7 Days</option>
-                <option value="30days" className="bg-[#181922]">Last 30 Days</option>
+                <option value="all" className="bg-white text-slate-900">Date Range (All Time)</option>
+                <option value="7days" className="bg-white text-slate-900">Last 7 Days</option>
+                <option value="30days" className="bg-white text-slate-900">Last 30 Days</option>
               </select>
             </div>
           </div>
 
           {/* Leads Table */}
-          <div className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 overflow-hidden shadow-2xl">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-white/15 bg-white/10">
-                  <TableHead className="text-white/80 font-extrabold text-xs">Lead Name & Contact</TableHead>
-                  <TableHead className="text-white/80 font-extrabold text-xs">City</TableHead>
-                  <TableHead className="text-white/80 font-extrabold text-xs">Campaign Source</TableHead>
-                  <TableHead className="text-white/80 font-extrabold text-xs">Status</TableHead>
-                  <TableHead className="text-white/80 font-extrabold text-xs">Est. Value</TableHead>
-                  <TableHead className="text-white/80 font-extrabold text-xs">Date Collected</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lead Name & Contact</TableHead>
+                <TableHead>City</TableHead>
+                <TableHead>Campaign Source</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Est. Value</TableHead>
+                <TableHead>Date Collected</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {myClientLeads.map((lead) => (
+                <TableRow key={lead.id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-extrabold text-slate-900 text-xs">{lead.lead_name}</p>
+                      <p className="text-[11px] text-slate-600 font-semibold mt-0.5">
+                        {lead.email} • {lead.phone}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-slate-800 font-extrabold">{lead.city}</TableCell>
+                  <TableCell className="text-xs text-slate-800 font-extrabold">{lead.campaign_source}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        lead.temperature === "hot"
+                          ? "destructive"
+                          : lead.temperature === "warm"
+                          ? "warning"
+                          : lead.temperature === "converted"
+                          ? "success"
+                          : "secondary"
+                      }
+                      className="uppercase text-[9px] font-black"
+                    >
+                      {lead.temperature}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs font-black text-emerald-700">
+                    ₹{lead.estimated_deal_value_rupees.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-xs text-slate-600 font-semibold">
+                    {new Date(lead.created_at).toLocaleDateString()}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {myClientLeads.map((lead) => (
-                  <TableRow key={lead.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                    <TableCell>
-                      <div>
-                        <p className="font-bold text-white text-xs">{lead.lead_name}</p>
-                        <p className="text-[10px] text-white/60">
-                          {lead.email} • {lead.phone}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-white/80 font-medium">{lead.city}</TableCell>
-                    <TableCell className="text-xs text-white/80 font-medium">{lead.campaign_source}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          lead.temperature === "hot"
-                            ? "destructive"
-                            : lead.temperature === "warm"
-                            ? "warning"
-                            : lead.temperature === "converted"
-                            ? "success"
-                            : "secondary"
-                        }
-                        className="uppercase text-[9px] font-black"
-                      >
-                        {lead.temperature}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs font-bold text-emerald-400">
-                      ₹{lead.estimated_deal_value_rupees.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-xs text-white/60 font-medium">
-                      {new Date(lead.created_at).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -1639,25 +1637,25 @@ export default function ClientPortalPage() {
           </div>
 
           {/* Own Login History Table */}
-          <div className="bg-white/25 backdrop-blur-3xl rounded-3xl border border-white/40 p-6 space-y-4 shadow-2xl text-white">
-            <h3 className="font-extrabold text-white text-sm">Your Account Login Audit History</h3>
+          <div className="bg-white/80 backdrop-blur-3xl rounded-3xl border border-white/90 p-6 space-y-4 shadow-xl text-slate-900">
+            <h3 className="font-extrabold text-slate-900 text-sm">Your Account Login Audit History</h3>
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-white/15 bg-white/10">
-                  <TableHead className="text-white/80 font-bold text-xs">Timestamp</TableHead>
-                  <TableHead className="text-white/80 font-bold text-xs">IP Address</TableHead>
-                  <TableHead className="text-white/80 font-bold text-xs">Device & Browser Specs</TableHead>
-                  <TableHead className="text-white/80 font-bold text-xs">Auth Status</TableHead>
+                <TableRow>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>IP Address</TableHead>
+                  <TableHead>Device & Browser Specs</TableHead>
+                  <TableHead>Auth Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loginHistory.map((lh) => (
-                  <TableRow key={lh.id} className="border-b border-white/10 hover:bg-white/5">
-                    <TableCell className="text-xs text-white/80 font-medium">
+                  <TableRow key={lh.id}>
+                    <TableCell className="text-xs text-slate-700 font-semibold">
                       {new Date(lh.login_at).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-xs font-mono text-emerald-400 font-bold">{lh.ip_address}</TableCell>
-                    <TableCell className="text-xs text-white/70">{lh.device_browser}</TableCell>
+                    <TableCell className="text-xs font-mono text-emerald-700 font-black">{lh.ip_address}</TableCell>
+                    <TableCell className="text-xs text-slate-700 font-medium">{lh.device_browser}</TableCell>
                     <TableCell>
                       <Badge
                         variant={lh.status === "success" ? "success" : "warning"}
