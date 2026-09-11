@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { goToSection } from "./nav";
 import { openLeadForm } from "./LeadForm";
-import { ChevronDown, ChevronRight, Menu, ShoppingCart } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu } from "lucide-react";
 
 function Logo() {
   return (
@@ -53,7 +53,6 @@ export default function Navbar() {
 
 
           <div className="ml-auto flex items-center gap-2">
-            <ShoppingCart className="hidden md:block w-5 h-5 text-neutral-700" />
             <button
               onClick={openLeadForm}
               className="inline-flex items-center gap-2 rounded-full text-white pl-4 pr-1.5 py-2"
