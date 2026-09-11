@@ -1399,7 +1399,7 @@ export default function WhatsAppMessengerView({
         <div className="flex flex-col items-center gap-6">
           {/* Brand Logo */}
           <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center border border-white/25 shadow-md cursor-pointer hover:bg-white/20 transition-all overflow-hidden" title="Lumen & Co">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain scale-110" />
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain brightness-0 invert scale-110" />
           </div>
 
           {/* Nav Icons */}
@@ -2178,7 +2178,7 @@ export default function WhatsAppMessengerView({
           <div className="bg-[#1a1b24] border border-white/15 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 text-white isolate relative">
             <div className="text-center space-y-2">
               <div className="w-20 h-20 rounded-3xl bg-white/10 p-3 flex items-center justify-center mx-auto border border-white/25 shadow-xl overflow-hidden">
-                <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain scale-110" />
+                <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain brightness-0 invert scale-110" />
               </div>
               <h2 className="text-2xl font-extrabold tracking-tight text-white">Lumen & Co Messenger</h2>
               <p className="text-xs text-neutral-400">

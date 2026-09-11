@@ -457,7 +457,7 @@ export default function ClientPortalPage() {
   if (checking) {
     return (
       <div className="fixed inset-0 bg-[#0c0d12] text-white flex flex-col items-center justify-center space-y-4 font-sans">
-        <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-10 w-auto animate-pulse" />
+        <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-10 w-auto brightness-0 invert animate-pulse" />
         <div className="flex items-center gap-2 text-xs font-semibold text-[#ef4d23]">
           <Loader2 className="h-4 w-4 animate-spin text-[#ef4d23]" />
           <span>Authenticating Client Portal Session...</span>
@@ -490,7 +490,7 @@ export default function ClientPortalPage() {
           {/* Header Branding */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center p-3.5 bg-white/10 rounded-2xl border border-white/20 shadow-inner">
-              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto" />
+              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 w-auto brightness-0 invert" />
             </div>
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Client Portal Sign In</h1>
@@ -660,7 +660,7 @@ export default function ClientPortalPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto" />
+                  <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto brightness-0 invert" />
                   <span className="text-white/30">•</span>
                   <h2 className="text-xl font-black text-white tracking-tight">
                     Mandatory Policy & Consent Gate

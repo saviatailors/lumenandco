@@ -190,7 +190,8 @@ export type BillingInvoice = {
 };
 
 export type CommChannel = "whatsapp" | "email" | "call_note" | "suspension_notice";
-export type CommMessageType = "payment_reminder" | "suspension" | "welcome" | "onboarding" | "manual_note";
+export type CommMessageType = "payment_reminder" | "suspension" | "welcome" | "onboarding" | "manual_note" | "proposal" | "campaign_approval";
+export type CommDeliveryStatus = "delivered" | "read" | "sent" | "failed" | "pending";
 
 export type CommLogEntry = {
   id: string;
@@ -202,6 +203,10 @@ export type CommLogEntry = {
   content: string;
   sent_by_name: string;
   timestamp: string;
+  delivery_status?: CommDeliveryStatus;
+  sender_code?: string;
+  subject?: string;
+  attachments_count?: number;
 };
 
 export type MessageTemplate = {
@@ -411,6 +416,9 @@ export const INITIAL_COMM_LOG: CommLogEntry[] = [
     recipient: "+91 97012 34567 (Ananya Sen)",
     content: "Hi Ananya, retainer payment of ₹75,000 for August is overdue by 7 days. Please clear at earliest to avoid ad campaign suspension.",
     sent_by_name: "Sahit Sai",
+    sender_code: "EMP-100",
+    subject: "August Retainer Fee Reminder",
+    delivery_status: "read",
     timestamp: "2026-09-03T10:15:00Z",
   },
   {
@@ -422,6 +430,9 @@ export const INITIAL_COMM_LOG: CommLogEntry[] = [
     recipient: "karan@urbanfit.co.in",
     content: "OFFICIAL NOTICE: Lumen & Co ad account management & creative services suspended due to 38-day unpaid balance of ₹45,000.",
     sent_by_name: "Sahit Sai",
+    sender_code: "EMP-100",
+    subject: "Account Suspension Alert",
+    delivery_status: "delivered",
     timestamp: "2026-09-01T14:30:00Z",
   },
   {
@@ -431,9 +442,41 @@ export const INITIAL_COMM_LOG: CommLogEntry[] = [
     channel: "email",
     message_type: "onboarding",
     recipient: "mark@northbeam.io",
-    content: "Q4 Performance Video Reel & Hook Cuts delivered. Scaled ROAS reported.",
-    sent_by_name: "Sahit Sai",
+    content: "Q4 Performance Video Reel & Hook Cuts delivered. Scaled ROAS reported across Meta Ad Manager.",
+    sent_by_name: "Sarah Chen",
+    sender_code: "EMP-102",
+    subject: "Q4 Creative Vault & Campaign Delivery",
+    delivery_status: "delivered",
+    attachments_count: 3,
     timestamp: "2026-09-04T09:00:00Z",
+  },
+  {
+    id: "comm-104",
+    client_id: "client-103",
+    school_name: "Aura Home Decor",
+    channel: "call_note",
+    message_type: "manual_note",
+    recipient: "+91 98490 12345 (Vikram Mehta)",
+    content: "Phone Sync with Founder Vikram: Approved Q4 performance budget increase of ₹1.5L/mo. Requested UGC Reels for upcoming Diwali sale.",
+    sent_by_name: "Sarah Chen",
+    sender_code: "EMP-102",
+    subject: "Quarterly Review Call Log",
+    delivery_status: "read",
+    timestamp: "2026-09-05T16:20:00Z",
+  },
+  {
+    id: "comm-105",
+    client_id: "client-105",
+    school_name: "Zenith EdTech",
+    channel: "whatsapp",
+    message_type: "proposal",
+    recipient: "+91 91234 56789 (Priya Sharma)",
+    content: "Hi Priya, sharing the revised Retainer Proposal & SLA document for September. Total retainer: ₹1,20,000/mo.",
+    sent_by_name: "Sahit Sai",
+    sender_code: "EMP-100",
+    subject: "SLA Retainer Proposal",
+    delivery_status: "delivered",
+    timestamp: "2026-09-06T11:45:00Z",
   },
 ];
 

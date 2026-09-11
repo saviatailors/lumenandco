@@ -99,6 +99,7 @@ import RevenueAnalyticsView from "./components/RevenueAnalyticsView";
 import WhatsAppMessengerView from "./components/WhatsAppMessengerView";
 import CodeLibraryView from "./components/CodeLibraryView";
 import ClientOnboardingView from "./components/ClientOnboardingView";
+import CentralCommLogView from "./components/CentralCommLogView";
 import { exportRealtimeAnalyticsToExcel } from "@/lib/excelExport";
 
 export interface TeamMember {
@@ -2858,63 +2859,13 @@ export default function CrmPage() {
       {/* SCREEN 5: CENTRAL COMMUNICATION LOG (Phase 5) */}
       {/* ========================================================================= */}
       {currentTab === "billing" && (
-        <div className="space-y-4">
-          <div className="border-b border-neutral-300/60 pb-4">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
-              Central <span className="font-serif-italic text-[#ef4d23] font-normal">Communication Log</span>
-            </h1>
-            <p className="text-xs text-neutral-500 mt-0.5 font-normal">
-              Searchable history of every WhatsApp message, email, call note, & suspension notice
-            </p>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-md p-4 rounded-3xl border border-white/80 shadow-md flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-neutral-500">Channel:</span>
-              <select
-                value={commChannelFilter}
-                onChange={(e) => setCommChannelFilter(e.target.value)}
-                className="bg-white border border-neutral-300 rounded-xl px-3 py-1.5 font-bold"
-              >
-                <option value="all">All Channels</option>
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">Email</option>
-                <option value="suspension_notice">Suspension Notice</option>
-              </select>
-            </div>
-
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search log content..."
-                value={commSearchQuery}
-                onChange={(e) => setCommSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-white border border-neutral-300 rounded-xl font-bold w-64 text-xs"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/80 overflow-hidden shadow-xl p-4 space-y-3">
-            {filteredCommLogs.map((log) => (
-              <div key={log.id} className="p-4 rounded-2xl border bg-white border-neutral-200 text-xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-neutral-900">{log.school_name}</span>
-                  <span className="bg-neutral-100 font-medium px-2.5 py-0.5 rounded-full text-[10px] uppercase">
-                    {log.channel}
-                  </span>
-                </div>
-                <p className="text-neutral-700 font-normal leading-relaxed bg-neutral-50 p-3 rounded-xl border border-neutral-200">
-                  {log.content}
-                </p>
-                <div className="flex items-center justify-between text-[10px] text-neutral-500">
-                  <span>Sent by: <strong className="font-medium text-neutral-700">{log.sent_by_name}</strong></span>
-                  <span>{new Date(log.timestamp).toLocaleString()}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CentralCommLogView
+          commLogs={commLogs}
+          onAddCommLog={(newLog) => setCommLogs((prev) => [newLog, ...prev])}
+          clients={clients}
+          clientLeads={clientLeads}
+          onOpenMessenger={() => setCurrentTab("chat")}
+        />
       )}
 
       {/* ========================================================================= */}
