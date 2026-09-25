@@ -2,36 +2,32 @@ import { ReactNode, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  CheckCircle2,
+  Eye,
   Receipt,
+  Wallet,
   FileText,
-  MessageSquare,
-  Search,
-  Bell,
-  Mail,
-  ShieldCheck,
-  ChevronDown,
-  LogOut,
-  Sparkles,
-  PhoneCall,
-  UserCheck,
-  KeyRound,
-  Rocket,
-  Download,
   Users,
-  Video,
-  BarChart3,
-  Lock,
+  User,
+  Bell,
+  PhoneCall,
   Menu,
   X,
+  Plus,
+  ChevronRight,
+  LogOut,
+  Calendar as CalendarIcon,
+  ShieldCheck,
+  FolderDown,
 } from "lucide-react";
 import NotificationCenter from "./NotificationCenter";
 import EmailSenderModal from "./EmailSenderModal";
 import BuiltInMessengerModal from "./BuiltInMessengerModal";
+import { openLeadForm } from "./LeadForm";
 
 export type ClientTab =
   | "overview"
   | "approvals"
+  | "documents"
   | "leads"
   | "reports"
   | "creatives"
@@ -56,8 +52,8 @@ export default function ClientLayoutShell({
   currentTab,
   onTabChange,
   children,
-  clientName = "Mark Davis",
-  clientCompany = "Northbeam E-Commerce",
+  clientName = "Prudhivi",
+  clientCompany = "Lumen & Co Client",
   onSignOut = () => {},
   onOpenPrivacyPolicy,
   onOpenTermsOfService,
@@ -68,25 +64,31 @@ export default function ClientLayoutShell({
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const sidebarNavItems: { id: ClientTab; label: string; icon: typeof LayoutDashboard; badge?: string }[] = [
-    { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-    { id: "approvals", label: "Creative Approvals", icon: CheckCircle2, badge: "2 Pending" },
-    { id: "leads", label: "Business Leads", icon: Users, badge: "12 New" },
-    { id: "reports", label: "Campaign Analytics", icon: BarChart3 },
-    { id: "creatives", label: "Creative Vault & UGC", icon: Sparkles, badge: "Reels" },
-    { id: "notifications", label: "Notifications Feed", icon: Bell, badge: "3 Alerts" },
-    { id: "profile", label: "Profile & Account", icon: UserCheck },
-    { id: "invoices", label: "Invoices & Billing", icon: Receipt },
-    { id: "scope", label: "Retainer Scope & SLA", icon: FileText },
-    { id: "support", label: "Support & Grievance", icon: ShieldCheck, badge: "DPDP 2023" },
+  // Motion Labs style sidebar items matching reference screenshot
+  const sidebarNavItems: {
+    id: ClientTab;
+    label: string;
+    icon: typeof LayoutDashboard;
+    badge?: string;
+  }[] = [
+    { id: "overview", label: "Orders", icon: LayoutDashboard },
+    { id: "approvals", label: "Review", icon: Eye, badge: "2" },
+    { id: "documents", label: "Documents", icon: FolderDown, badge: "Vault" },
+    { id: "invoices", label: "Invoices", icon: Receipt },
+    { id: "scope", label: "Wallet", icon: Wallet },
+    { id: "reports", label: "Plans", icon: FileText },
+    { id: "leads", label: "Affiliate", icon: Users },
+    { id: "profile", label: "Profile", icon: User, badge: "!" },
   ];
 
+  const firstName = clientName.split(" ")[0] || "Client";
+
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#0c0d12] text-white flex flex-col font-sans isolate z-10">
-      {/* Background Video Stage (Vivid Ambient Motion Stage) */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]">
+    <div className="fixed inset-0 overflow-hidden bg-[#0c0d12] text-neutral-900 flex flex-col font-sans isolate z-10">
+      {/* Live Video Background Stage */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-70 transition-opacity duration-700"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-85 transition-opacity duration-700"
           autoPlay
           muted
           loop
@@ -95,118 +97,134 @@ export default function ClientLayoutShell({
           aria-hidden="true"
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
         />
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-xs" />
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. TOP BAR (64px Translucent Frosted Glass Header) */}
+      {/* 1. TOP HEADER (Motion Labs Aesthetic) */}
       {/* ========================================================================= */}
-      <header className="h-[64px] bg-[#121318]/70 backdrop-blur-2xl text-white border-b border-white/15 px-3 sm:px-5 flex items-center justify-between shrink-0 z-30 shadow-2xl">
-        {/* Left Branding & Client Company */}
-        <div className="flex items-center gap-2 sm:gap-4">
+      <header className="h-[72px] bg-transparent px-4 sm:px-8 flex items-center justify-between shrink-0 z-30 pt-3">
+        {/* Left: Agency Logo & Welcome Greeting */}
+        <div className="flex items-center gap-6">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-all cursor-pointer"
+            className="lg:hidden p-2 text-neutral-700 hover:text-black bg-white rounded-xl border border-neutral-200 shadow-2xs transition-all cursor-pointer"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity bg-white/95 rounded-xl px-3 py-1.5 border border-white/40 shadow-md">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-8 sm:h-10 w-auto object-contain transition-all" />
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <img
+              src="/lumen-and-co-logo.png"
+              alt="Lumen & Co"
+              className="h-9 sm:h-11 w-auto object-contain"
+            />
           </Link>
 
-          <span className="hidden sm:inline text-white/20 text-sm">|</span>
+          {/* Welcome greeting matching screenshot */}
+          <div className="hidden sm:block">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 leading-tight">
+              Welcome back,{" "}
+              <span
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                }}
+              >
+                {firstName}
+              </span>
+            </h1>
+            <p className="text-xs text-neutral-500 font-medium -mt-0.5">
+              {clientCompany || "No projects yet"}
+            </p>
+          </div>
+        </div>
 
-          <div className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
-            <UserCheck className="h-3.5 w-3.5 text-[#ef4d23]" />
-            <span className="text-xs font-bold text-white truncate max-w-[140px] md:max-w-none">{clientCompany}</span>
-            <span className="hidden md:inline-block text-[9px] font-extrabold uppercase bg-[#ef4d23] text-white px-2.5 py-0.5 rounded-full border border-white/30 tracking-wider shadow-md shadow-[#ef4d23]/30">
+        {/* Right Utilities: Wallet Balance, Notifications Bell, Avatar */}
+        <div className="flex items-center gap-3">
+          {/* Quick links to CRM / Delivery */}
+          <div className="hidden md:flex items-center gap-1.5 bg-white p-1 rounded-full border border-neutral-200/80 text-xs font-semibold shadow-2xs">
+            <Link
+              to="/sahit"
+              className="px-3 py-1 text-neutral-600 hover:text-black rounded-full transition-colors"
+            >
+              CRM
+            </Link>
+            <Link
+              to="/delivery"
+              className="px-3 py-1 text-neutral-600 hover:text-black rounded-full transition-colors"
+            >
+              Delivery
+            </Link>
+            <span className="px-3 py-1 bg-[#ef4d23] text-white rounded-full font-semibold">
               Client Portal
             </span>
           </div>
-        </div>
 
-        {/* Center Account Manager Info Chip */}
-        <div className="hidden lg:flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-xs text-white/90 shadow-inner">
-          <span className="text-white/60 text-[10px] uppercase font-bold">Account Manager:</span>
-          <span className="font-extrabold text-emerald-400">Sarah Chen</span>
-          <a
-            href="tel:+919849000000"
-            className="flex items-center gap-1 text-[11px] text-white hover:text-white bg-white/15 hover:bg-white/25 px-2.5 py-0.5 rounded-full transition-colors font-semibold ml-1 border border-white/20 shadow-xs"
-          >
-            <PhoneCall className="h-3 w-3 text-emerald-400" />
-            <span>Direct Call</span>
-          </a>
-        </div>
-
-        {/* Right Action Icons & User Menu */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Quick App Switcher Links */}
-          <div className="hidden xl:flex items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 text-[11px] font-semibold">
-            <Link to="/sahit" className="px-3 py-1 text-white/70 hover:text-white rounded-full transition-colors hover:bg-white/15">
-              CRM
-            </Link>
-            <Link to="/delivery" className="px-3 py-1 text-white/70 hover:text-white rounded-full transition-colors hover:bg-white/15">
-              Delivery Hub
-            </Link>
-            <Link to="/client" className="px-3 py-1 bg-[#ef4d23] text-white rounded-full shadow-lg shadow-[#ef4d23]/30 font-bold">
-              Client Portal
-            </Link>
+          {/* Wallet Balance Pill */}
+          <div className="flex items-center gap-1.5 bg-white border border-neutral-200/80 px-3.5 py-1.5 rounded-full text-xs font-semibold text-neutral-800 shadow-2xs">
+            <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[11px] font-bold">
+              $
+            </span>
+            <span>0</span>
           </div>
 
-          {/* Notifications Center */}
+          {/* Notification Bell */}
+          <button
+            onClick={() => setIsNotificationsOpen(true)}
+            className="w-9 h-9 rounded-full bg-white border border-neutral-200/80 flex items-center justify-center text-neutral-700 hover:text-black transition-all shadow-2xs cursor-pointer relative"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#ef4d23]" />
+          </button>
+
           <NotificationCenter
             isOpen={isNotificationsOpen}
             onOpenChange={setIsNotificationsOpen}
             onClose={() => setIsNotificationsOpen(false)}
           />
 
-          {/* User Profile */}
+          {/* User Profile Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all text-xs font-semibold text-white cursor-pointer shadow-xs"
+              className="w-9 h-9 rounded-full bg-purple-600 text-white font-semibold flex items-center justify-center text-sm shadow-xs cursor-pointer hover:opacity-90 transition-opacity"
             >
-              <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-[10px] font-bold shadow-md shadow-[#ef4d23]/30">
-                {clientName.charAt(0)}
-              </div>
-              <span className="hidden sm:inline font-bold">{clientName}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+              {firstName.charAt(0)}
             </button>
 
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-60 bg-white/95 backdrop-blur-3xl text-slate-900 rounded-3xl shadow-2xl border border-white/90 p-3 z-50 text-xs">
-                <div className="px-3 py-2 border-b border-slate-200/80 mb-1">
-                  <p className="font-extrabold text-slate-900">{clientName}</p>
-                  <p className="text-[10px] text-slate-600 font-semibold truncate">{clientCompany}</p>
-                  <span className="inline-block mt-1 bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase">
-                    Verified Client Account
-                  </span>
+              <div className="absolute right-0 mt-2 w-56 bg-white text-neutral-900 rounded-2xl shadow-xl border border-neutral-200 p-2 z-50 text-xs">
+                <div className="px-3 py-2 border-b border-neutral-100 mb-1">
+                  <p className="font-bold text-neutral-900">{clientName}</p>
+                  <p className="text-[11px] text-neutral-500 truncate">{clientCompany}</p>
                 </div>
                 <button
                   onClick={() => {
                     setIsProfileMenuOpen(false);
                     onTabChange("profile");
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-100 rounded-2xl font-bold flex items-center gap-2 transition-colors text-slate-800 hover:text-slate-950"
+                  className="w-full text-left px-3 py-2 hover:bg-neutral-100 rounded-xl font-medium flex items-center gap-2"
                 >
-                  <UserCheck className="h-3.5 w-3.5 text-[#ef4d23]" /> Account Settings
+                  <User className="h-3.5 w-3.5 text-[#ef4d23]" /> Profile & Account
                 </button>
                 <button
                   onClick={() => {
                     setIsProfileMenuOpen(false);
                     onTabChange("scope");
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-100 rounded-2xl font-bold flex items-center gap-2 transition-colors text-slate-800 hover:text-slate-950"
+                  className="w-full text-left px-3 py-2 hover:bg-neutral-100 rounded-xl font-medium flex items-center gap-2"
                 >
-                  <FileText className="h-3.5 w-3.5 text-[#ef4d23]" /> Retainer SLA & Scope
+                  <FileText className="h-3.5 w-3.5 text-[#ef4d23]" /> SLA & Retainer
                 </button>
                 <button
                   onClick={() => {
                     setIsProfileMenuOpen(false);
                     onSignOut();
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-2 mt-1 transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 rounded-xl font-bold flex items-center gap-2 mt-1"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Sign out
                 </button>
@@ -217,50 +235,29 @@ export default function ClientLayoutShell({
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. BODY LAYOUT: DESKTOP GLASS SIDEBAR + MOBILE DRAWER + MAIN CONTENT */}
+      {/* 2. BODY LAYOUT: DESKTOP MOTION LABS SIDEBAR + MAIN WORKSPACE */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex overflow-hidden h-[calc(100vh-64px)] relative">
-        {/* Mobile Navigation Drawer Backdrop & Menu */}
+      <div className="flex-1 flex overflow-hidden h-[calc(100vh-72px)] p-4 sm:p-6 gap-6 relative">
+        {/* Mobile Drawer */}
         {isMobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex">
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            <aside className="relative w-[280px] max-w-[85vw] bg-white/95 backdrop-blur-3xl text-slate-900 flex flex-col h-full z-50 border-r border-white/90 shadow-2xl overflow-y-auto p-4 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
-                <div className="flex items-center gap-2">
-                  <span className="bg-white/95 rounded-xl px-2 py-0.5 border border-slate-200/80 shadow-sm inline-block">
-                    <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="h-6 w-auto object-contain" />
-                  </span>
-                  <span className="text-xs font-black text-slate-900">Client Portal</span>
-                </div>
+            <aside className="relative w-[280px] max-w-[85vw] bg-white text-neutral-900 flex flex-col h-full z-50 border-r border-neutral-200 shadow-2xl p-4 space-y-4 overflow-y-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+                <span className="font-semibold text-sm">Client Navigation</span>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-full border border-slate-200"
+                  className="p-1 text-neutral-500 hover:text-black rounded-lg"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Mobile App Switcher */}
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 text-xs font-semibold">
-                <Link to="/sahit" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
-                  CRM
-                </Link>
-                <Link to="/delivery" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
-                  Delivery
-                </Link>
-                <Link to="/client" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 bg-[#ef4d23] text-white rounded-full font-bold">
-                  Client
-                </Link>
-              </div>
-
-              <div className="space-y-1.5 flex-1">
-                <span className="text-[10px] font-extrabold text-white/50 uppercase tracking-widest px-3 block mb-2">
-                  Client Portal Menu
-                </span>
+              <div className="space-y-1 flex-1">
                 {sidebarNavItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentTab === item.id;
@@ -271,18 +268,18 @@ export default function ClientLayoutShell({
                         onTabChange(item.id);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-extrabold transition-all duration-200 cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-semibold transition-all ${
                         isActive
-                          ? "bg-[#ef4d23] text-white border border-white/40 shadow-lg"
-                          : "bg-white/10 hover:bg-white/20 text-white/90 border border-white/20"
+                          ? "bg-[#ef4d23] text-white shadow-xs"
+                          : "text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className="h-4 w-4 text-white" />
+                        <Icon className="h-4 w-4" />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
+                        <span className="w-5 h-5 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-[10px] font-bold">
                           {item.badge}
                         </span>
                       )}
@@ -291,21 +288,25 @@ export default function ClientLayoutShell({
                 })}
               </div>
 
-              <div className="p-3 border-t border-white/15 text-[11px] space-y-2">
-                <p className="font-bold text-white/70">{clientCompany}</p>
-                <p className="text-[10px] text-emerald-400 font-semibold">AM: Sarah Chen (+91 98490 00000)</p>
+              <div className="pt-3 border-t border-neutral-100">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openLeadForm();
+                  }}
+                  className="w-full bg-[#ef4d23] text-white py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2"
+                >
+                  <PhoneCall className="w-3.5 h-3.5" /> Book a call
+                </button>
               </div>
             </aside>
           </div>
         )}
 
-        {/* Left Fixed Sidebar */}
-        <aside className="hidden lg:flex w-[240px] text-white flex-col justify-between shrink-0 z-20 h-full bg-transparent">
-          <div className="p-4 space-y-1.5 flex-1 overflow-y-auto">
-            <span className="text-[10px] font-extrabold text-white/50 uppercase tracking-widest px-3 block mb-2">
-              Client Portal Menu
-            </span>
-
+        {/* Left Desktop Sidebar (Motion Labs Card Layout) */}
+        <aside className="hidden lg:flex w-[240px] flex-col justify-between shrink-0 z-20 h-full">
+          {/* Menu Card */}
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-3 border border-white/60 shadow-md space-y-1 overflow-y-auto">
             {sidebarNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -314,23 +315,25 @@ export default function ClientLayoutShell({
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-extrabold transition-all duration-200 cursor-pointer select-none ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? "bg-[#ef4d23] text-white font-extrabold border border-white/40 backdrop-blur-xl"
-                      : "bg-white/20 hover:bg-white/35 backdrop-blur-xl text-white/90 hover:text-white border border-white/40 hover:border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                      ? "bg-[#ef4d23] text-white shadow-xs"
+                      : "text-neutral-700 hover:bg-neutral-100/90"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="h-4 w-4 text-white drop-shadow-sm" />
+                    <Icon className="h-4 w-4" />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                        isActive
-                          ? "bg-white/30 text-white border border-white/40 shadow-xs"
-                          : "bg-white/25 text-white/90 border border-white/35"
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        item.badge === "!"
+                          ? "bg-[#ef4d23] text-white rounded-full w-5 h-5 flex items-center justify-center"
+                          : isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-neutral-100 text-neutral-700"
                       }`}
                     >
                       {item.badge}
@@ -341,43 +344,41 @@ export default function ClientLayoutShell({
             })}
           </div>
 
-          {/* Persistent Footer Links (Privacy Policy & ToS) */}
-          <div className="p-4 border-t border-white/10 bg-transparent text-[11px] space-y-2 shrink-0">
-            <div className="flex items-center justify-between text-white/60">
-              <span className="font-bold">Lumen & Co Portal</span>
-              <span className="text-[9px] bg-white/15 px-2 py-0.5 rounded-full font-mono text-white/80 font-bold border border-white/20">
-                Policy v1.0
-              </span>
+          {/* Bottom Card Banner matching Screenshot ("Something bigger in mind?") */}
+          <div className="bg-[#ef4d23] text-white rounded-3xl p-5 shadow-sm relative overflow-hidden mt-4">
+            <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-white mb-3">
+              <PhoneCall className="w-4 h-4" />
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onOpenPrivacyPolicy}
-                className="text-white/80 hover:text-[#ef4d23] transition-colors underline font-semibold cursor-pointer"
+            <h4 className="text-base font-medium leading-snug tracking-tight">
+              <span
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                }}
               >
-                Privacy Policy
-              </button>
-              <span className="text-white/30">•</span>
-              <button
-                onClick={onOpenTermsOfService}
-                className="text-white/80 hover:text-[#ef4d23] transition-colors underline font-semibold cursor-pointer"
-              >
-                Terms of Service
-              </button>
-            </div>
+                Something bigger
+              </span>{" "}
+              in mind?
+            </h4>
+
+            <p className="mt-1.5 text-xs text-white/80 leading-relaxed font-normal">
+              Book a call and we will scope it with you properly.
+            </p>
 
             <button
-              onClick={() => onTabChange("support")}
-              className="w-full text-left flex items-center justify-between text-[10px] text-white/50 hover:text-white pt-1 transition-colors font-medium cursor-pointer"
+              onClick={openLeadForm}
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white hover:underline cursor-pointer group"
             >
-              <span>DPDP Act 2023 Grievance</span>
-              <ShieldCheck className="h-3 w-3 text-emerald-400" />
+              <span>Book a call</span>
+              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 relative overflow-y-auto p-4 sm:p-6 isolate h-full">
+        {/* Main Content Workspace */}
+        <main className="flex-1 relative overflow-y-auto isolate h-full px-1 sm:px-2 pb-6">
           {children}
         </main>
       </div>
@@ -386,7 +387,7 @@ export default function ClientLayoutShell({
       <EmailSenderModal
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
-        defaultRecipient="sahitsai7@gmail.com"
+        defaultRecipient="hello@lumenandco.in"
       />
 
       <BuiltInMessengerModal
@@ -401,4 +402,3 @@ export default function ClientLayoutShell({
     </div>
   );
 }
-

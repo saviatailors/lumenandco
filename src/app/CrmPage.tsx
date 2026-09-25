@@ -53,6 +53,7 @@ import {
 import CrmLayoutShell, { CrmTab } from "./components/CrmLayoutShell";
 import AdminGate from "./components/AdminGate";
 import { useAdminAuth } from "./components/useAdminAuth";
+import DocumentVaultView from "./components/DocumentVaultView";
 
 import {
   AdvancedLead,
@@ -1250,6 +1251,17 @@ export default function CrmPage() {
             if (code) setTargetChatCode(code);
             setCurrentTab("chat");
           }}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* SCREEN: MASTER DOCUMENT VAULT SECTION */}
+      {/* ========================================================================= */}
+      {currentTab === "documents" && (
+        <DocumentVaultView
+          isClientView={false}
+          clientName="Agency Internal Team"
+          clientCompany="Lumen & Co Master Accounts"
         />
       )}
 

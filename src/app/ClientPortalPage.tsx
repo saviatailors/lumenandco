@@ -53,6 +53,7 @@ import {
 import { getMyEnquiries, generateLeadsCsv, buildConsentAuditRecord, buildLoginHistoryRecord } from "@/lib/client-portal.functions";
 import ClientLayoutShell, { ClientTab } from "./components/ClientLayoutShell";
 import RigidGlassMetricCard from "./components/ui/RigidGlassMetricCard";
+import DocumentVaultView from "./components/DocumentVaultView";
 import { useToast } from "./components/ui/Toast";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "./components/ui/Table";
 import { Badge } from "./components/ui/Badge";
@@ -120,6 +121,7 @@ export default function ClientPortalPage() {
   const [viewPolicyModal, setViewPolicyModal] = useState<"privacy" | "terms" | null>(null);
 
   // Creative Approvals State
+  const [activeOrderTab, setActiveOrderTab] = useState<string>("active");
   const [creativeApprovals, setCreativeApprovals] = useState<CreativeApprovalItem[]>(INITIAL_CREATIVE_APPROVALS);
   const [rejectModalItem, setRejectModalItem] = useState<CreativeApprovalItem | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -1034,184 +1036,168 @@ export default function ClientPortalPage() {
       onOpenTermsOfService={() => setViewPolicyModal("terms")}
     >
       {/* ========================================================================= */}
-      {/* PAGE #3: DASHBOARD OVERVIEW */}
+      {/* PAGE #3: DASHBOARD OVERVIEW (MOTION LABS AESTHETIC REPLICA) */}
       {/* ========================================================================= */}
       {currentTab === "overview" && (
-        <div className="space-y-6">
-          {/* Welcome Banner */}
-          <div className="bg-white/80 backdrop-blur-3xl p-6 rounded-3xl border border-white/90 shadow-xl text-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="bg-[#ef4d23] text-white font-extrabold text-[10px] uppercase px-2.5 py-0.5 rounded-full border border-white/30 shadow-md shadow-[#ef4d23]/30">
-                  Client Portal
-                </span>
-                <span className="text-xs text-emerald-700 font-black flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Consent Active (v1.0)
-                </span>
+        <div className="space-y-6 font-sans">
+          {/* Top Row: Stat Cards & Mini Calendar Widget matching Motion Labs */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            {/* Active Projects Stat Card */}
+            <div className="md:col-span-4 bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-md flex flex-col justify-between h-[150px]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-neutral-500">Active projects</span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
               </div>
-              <h1 className="text-2xl font-black text-slate-900 mt-1">Welcome back, {clientName}!</h1>
-              <p className="text-xs text-slate-600 mt-0.5 font-semibold">
-                Here is your real-time campaign performance summary for <strong className="text-slate-900">{clientCompany}</strong>.
-              </p>
+              <div
+                className="text-4xl font-normal text-neutral-900"
+                style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+              >
+                0
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            {/* Waiting on you Stat Card */}
+            <div className="md:col-span-4 bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-md flex flex-col justify-between h-[150px]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-neutral-500">Waiting on you</span>
+                <div className="w-8 h-8 rounded-xl bg-amber-100/70 text-amber-800 flex items-center justify-center">
+                  <Eye className="w-4 h-4" />
+                </div>
+              </div>
+              <div
+                className="text-4xl font-normal text-neutral-900"
+                style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+              >
+                {pendingApprovalsCount}
+              </div>
+            </div>
+
+            {/* Calendar Widget Card (Right Panel) */}
+            <div className="md:col-span-4 bg-white/90 backdrop-blur-xl rounded-3xl p-5 border border-white/60 shadow-md flex flex-col justify-between row-span-2">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold text-neutral-800">Sep 2026</span>
+                  <Calendar className="w-4 h-4 text-neutral-400" />
+                </div>
+
+                <div className="grid grid-cols-7 text-center text-[10px] font-semibold text-neutral-400 mb-2">
+                  <span>S</span>
+                  <span>M</span>
+                  <span>T</span>
+                  <span>W</span>
+                  <span>T</span>
+                  <span>F</span>
+                  <span>S</span>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                  <span className="py-1 text-neutral-300">31</span>
+                  <span className="py-1 text-neutral-700">1</span>
+                  <span className="py-1 text-neutral-700">2</span>
+                  <span className="py-1 text-neutral-700">3</span>
+                  <span className="py-1 text-neutral-700">4</span>
+                  <span className="py-1 text-neutral-700">5</span>
+                  <span className="py-1 text-neutral-700">6</span>
+                  {[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].map((d) => (
+                    <span key={d} className="py-1 text-neutral-700 font-medium">
+                      {d}
+                    </span>
+                  ))}
+                  <span className="py-1 bg-[#ef4d23] text-white rounded-lg font-bold text-xs flex items-center justify-center shadow-2xs">
+                    25
+                  </span>
+                  {[26, 27, 28, 29, 30].map((d) => (
+                    <span key={d} className="py-1 text-neutral-700 font-medium">
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={() => setCurrentTab("approvals")}
-                className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg shadow-[#ef4d23]/30 transition-all flex items-center gap-2 cursor-pointer"
+                className="text-xs font-semibold text-[#ef4d23] hover:underline cursor-pointer pt-3 block text-left"
               >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Review Approvals ({pendingApprovalsCount})</span>
+                Open calendar
               </button>
-              <button
-                onClick={() => setCurrentTab("leads")}
-                className="bg-white/90 hover:bg-white text-slate-900 border border-slate-200/90 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs backdrop-blur-md"
-              >
-                <Users className="h-4 w-4 text-[#ef4d23]" />
-                <span>View Leads ({myClientLeads.length})</span>
-              </button>
+            </div>
+
+            {/* Middle Row: Next Delivery Card */}
+            <div className="md:col-span-8 bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-md flex items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold text-neutral-500 block mb-1">Next delivery</span>
+                <h3 className="text-2xl font-bold text-neutral-900 tracking-tight">Nothing yet</h3>
+              </div>
+              <div className="w-9 h-9 rounded-xl bg-orange-100/80 text-[#ef4d23] flex items-center justify-center">
+                <Calendar className="w-4.5 h-4.5" />
+              </div>
             </div>
           </div>
 
-          {/* Metric Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <RigidGlassMetricCard
-              title="Active Campaigns"
-              value="4 Live"
-              caption="Meta, Google & TikTok"
-              variant="ruby"
-            />
-            <RigidGlassMetricCard
-              title="Pending Approvals"
-              value={`${pendingApprovalsCount} Creatives`}
-              caption="Action required today"
-              variant={pendingApprovalsCount === 0 ? "emerald" : "speed"}
-            />
-            <RigidGlassMetricCard
-              title="Business Leads"
-              value={`${myClientLeads.length} Total`}
-              caption="+12 New this week"
-              variant="emerald"
-            />
-            <RigidGlassMetricCard
-              title="Blended Ad ROAS"
-              value="4.42x"
-              caption="+0.6x vs last month"
-              variant="context"
-            />
-          </div>
-
-          {/* Two-Column Grid: Approvals & Leads Snapshot */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Approvals Widget */}
-            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-[#ef4d23]" />
-                  <h3 className="font-extrabold text-slate-900 text-sm">Creative Approvals Awaiting Sign-off</h3>
-                </div>
-                <button
-                  onClick={() => setCurrentTab("approvals")}
-                  className="text-[11px] font-extrabold text-[#ef4d23] hover:underline cursor-pointer"
-                >
-                  View All ({creativeApprovals.length})
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {creativeApprovals.slice(0, 2).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900"
-                  >
-                    <img
-                      src={item.thumbnailUrl}
-                      alt={item.title}
-                      className="w-16 h-12 object-cover rounded-xl border border-slate-200/80 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-extrabold text-slate-900 truncate">{item.title}</h4>
-                      <p className="text-[11px] text-slate-600 font-semibold">
-                        {item.type} • v{item.current_version}
-                      </p>
-                    </div>
-                    <div className="shrink-0 flex items-center gap-1.5">
-                      {item.status === "pending" ? (
-                        <>
-                          <button
-                            onClick={() => handleApproveCreative(item.id)}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all shadow-md cursor-pointer"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => setRejectModalItem(item)}
-                            className="bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all shadow-xs cursor-pointer"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      ) : (
-                        <Badge
-                          variant={item.status === "approved" ? "success" : "destructive"}
-                          className="capitalize text-[9px] font-black"
-                        >
-                          {item.status}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Leads Snapshot */}
-            <div className="bg-white/80 backdrop-blur-3xl p-5 rounded-3xl border border-white/90 shadow-xl space-y-4 text-slate-900">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-emerald-600" />
-                  <h3 className="font-extrabold text-slate-900 text-sm">Recent Business Leads Snapshot</h3>
-                </div>
-                <button
-                  onClick={() => setCurrentTab("leads")}
-                  className="text-[11px] font-extrabold text-[#ef4d23] hover:underline cursor-pointer"
-                >
-                  Manage Leads
-                </button>
-              </div>
-
-              <div className="space-y-2.5">
-                {myClientLeads.slice(0, 3).map((lead) => (
-                  <div
-                    key={lead.id}
-                    className="flex items-center justify-between bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900"
-                  >
-                    <div>
-                      <p className="text-xs font-extrabold text-slate-900">{lead.lead_name}</p>
-                      <p className="text-[11px] text-slate-600 font-semibold">
-                        {lead.email} • {lead.campaign_source}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        lead.temperature === "hot"
-                          ? "destructive"
-                          : lead.temperature === "warm"
-                          ? "warning"
-                          : lead.temperature === "converted"
-                          ? "success"
-                          : "secondary"
-                      }
-                      className="uppercase text-[9px] font-black"
+          {/* Bottom Section: Order Filter Pills + New Order Button + Main Table / Empty State */}
+          <div className="pt-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {["Active", "Needs review", "Delivered", "All"].map((tabName) => {
+                  const isTabActive = activeOrderTab === tabName.toLowerCase();
+                  return (
+                    <button
+                      key={tabName}
+                      type="button"
+                      onClick={() => setActiveOrderTab(tabName.toLowerCase())}
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        isTabActive
+                          ? "bg-[#ef4d23] text-white shadow-2xs"
+                          : "bg-white/90 backdrop-blur-md text-neutral-700 hover:bg-white border border-white/60"
+                      }`}
                     >
-                      {lead.temperature}
-                    </Badge>
-                  </div>
-                ))}
+                      {tabName}
+                    </button>
+                  );
+                })}
               </div>
+
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new Event("convix:open-lead-form"));
+                }}
+                className="bg-[#ef4d23] hover:bg-[#d83f17] text-white px-5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+              >
+                <span>+ New order</span>
+              </button>
+            </div>
+
+            {/* Large Main Empty / Active Orders Container */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-12 text-center border border-white/60 shadow-md min-h-[280px] flex flex-col items-center justify-center">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center mb-3">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h3
+                className="text-xl font-normal text-neutral-900 mb-1"
+                style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+              >
+                Nothing here yet
+              </h3>
+              <p className="text-xs text-neutral-500 max-w-sm font-medium leading-relaxed">
+                Start a project and you will be able to track every stage of it from this tab.
+              </p>
             </div>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PAGE: DOCUMENT VAULT SECTION */}
+      {/* ========================================================================= */}
+      {currentTab === "documents" && (
+        <DocumentVaultView
+          isClientView={true}
+          clientName={clientName}
+          clientCompany={clientCompany}
+          clientEmail={userEmail}
+        />
       )}
 
       {/* ========================================================================= */}
