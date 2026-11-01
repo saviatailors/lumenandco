@@ -4,12 +4,7 @@ import { Contract, Invoice, Expense, SEED_STAFF_COST_RATES, ClientProfitability 
 import { INITIAL_SCHOOL_CLIENTS } from "@/lib/lumenandco.types";
 import { exportRealtimeAnalyticsToExcel } from "@/lib/excelExport";
 
-const DEFAULT_CONTRACTS: Contract[] = [
-  { id: "c1", client_id: "1", title: "Scale Retainer", status: "active", monthly_value: 6500, created_at: "" },
-  { id: "c2", client_id: "2", title: "Performance Marketing", status: "active", monthly_value: 4200, created_at: "" },
-  { id: "c3", client_id: "3", title: "Creative & Media", status: "active", monthly_value: 8900, created_at: "" },
-  { id: "c4", client_id: "4", title: "Full Funnel Agency", status: "active", monthly_value: 12500, created_at: "" },
-];
+const DEFAULT_CONTRACTS: Contract[] = [];
 
 export default function RevenueAnalyticsView({
   contracts = DEFAULT_CONTRACTS,
@@ -17,57 +12,16 @@ export default function RevenueAnalyticsView({
   expenses = [],
 }: {
   contracts?: Contract[];
-  invoices?: Invoice[];
+  invoices?: any[];
   expenses?: Expense[];
 }) {
   const mrr = contracts.reduce((acc, c) => acc + (c.status === "active" ? c.monthly_value : 0), 0);
   const arr = mrr * 12;
   const overdueInvoices = invoices.filter((i) => i.status === "overdue");
-  const overdueAmountCents = overdueInvoices.reduce((acc, i) => acc + i.amount_cents, 0);
+  const overdueAmountCents = overdueInvoices.reduce((acc, i) => acc + (i.amount_cents ?? (i.amount_rupees ? i.amount_rupees * 100 : 0)), 0);
 
   // Client Profitability Calculations (Consuming Delivery Hub Hours Logged)
-  const clientProfitabilityData: ClientProfitability[] = [
-    {
-      client_id: "client-1",
-      company_name: "Northbeam Outdoors",
-      monthly_revenue: 6500,
-      delivery_hub_hours_logged: 10.5,
-      labor_cost: 577.5, // 10.5 hrs @ avg $55/hr
-      allocated_expenses: 120, // Stape.io CAPI hosting
-      net_profit_margin: 5802.5,
-      margin_percentage: 89.2,
-    },
-    {
-      client_id: "client-2",
-      company_name: "Fable Skincare",
-      monthly_revenue: 4200,
-      delivery_hub_hours_logged: 8.0,
-      labor_cost: 400.0,
-      allocated_expenses: 35,
-      net_profit_margin: 3765.0,
-      margin_percentage: 89.6,
-    },
-    {
-      client_id: "client-3",
-      company_name: "Kite & Co",
-      monthly_revenue: 3500,
-      delivery_hub_hours_logged: 4.5,
-      labor_cost: 225.0,
-      allocated_expenses: 0,
-      net_profit_margin: 3275.0,
-      margin_percentage: 93.5,
-    },
-    {
-      client_id: "client-4",
-      company_name: "Verda Organics",
-      monthly_revenue: 2800,
-      delivery_hub_hours_logged: 4.0,
-      labor_cost: 180.0,
-      allocated_expenses: 0,
-      net_profit_margin: 2620.0,
-      margin_percentage: 93.5,
-    },
-  ];
+  const clientProfitabilityData: ClientProfitability[] = [];
 
   return (
     <div className="space-y-6">

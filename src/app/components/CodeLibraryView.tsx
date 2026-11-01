@@ -43,8 +43,25 @@ export default function CodeLibraryView({ onOpenMessengerWithChannel }: CodeLibr
   const [groupCode, setGroupCode] = useState("");
   const [selectedCodes, setSelectedCodes] = useState<string[]>([]);
 
-  const [staffList, setStaffList] = useState<StaffMember[]>(SEED_STAFF);
-  const [clientList, setClientList] = useState<ClientInfo[]>(SEED_CLIENTS);
+  const [staffList, setStaffList] = useState<StaffMember[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("lumen_staff_codes_v4");
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return SEED_STAFF;
+  });
+
+  const [clientList, setClientList] = useState<ClientInfo[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("lumen_client_codes_v4");
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return SEED_CLIENTS;
+  });
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -58,11 +75,19 @@ export default function CodeLibraryView({ onOpenMessengerWithChannel }: CodeLibr
     setStaffList((prev) => prev.filter((s) => s.id !== id));
   };
 
-  // Filtered lists
+  // Filtered and deduplicated lists
   const filteredStaff = useMemo(() => {
-    if (!searchQuery.trim()) return staffList;
+    const map = new Map<string, StaffMember>();
+    staffList.forEach((s) => {
+      const key = s.code.toUpperCase().trim() || s.id;
+      if (!map.has(key)) {
+        map.set(key, s);
+      }
+    });
+    const unique = Array.from(map.values());
+    if (!searchQuery.trim()) return unique;
     const q = searchQuery.toLowerCase();
-    return staffList.filter(
+    return unique.filter(
       (s) =>
         s.code.toLowerCase().includes(q) ||
         s.name.toLowerCase().includes(q) ||
@@ -72,9 +97,17 @@ export default function CodeLibraryView({ onOpenMessengerWithChannel }: CodeLibr
   }, [staffList, searchQuery]);
 
   const filteredClients = useMemo(() => {
-    if (!searchQuery.trim()) return clientList;
+    const map = new Map<string, ClientInfo>();
+    clientList.forEach((c) => {
+      const key = c.code.toUpperCase().trim() || c.id;
+      if (!map.has(key)) {
+        map.set(key, c);
+      }
+    });
+    const unique = Array.from(map.values());
+    if (!searchQuery.trim()) return unique;
     const q = searchQuery.toLowerCase();
-    return clientList.filter(
+    return unique.filter(
       (c) =>
         c.code.toLowerCase().includes(q) ||
         c.company_name.toLowerCase().includes(q) ||

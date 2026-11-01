@@ -98,14 +98,17 @@ export default function DeliveryTaskModal({
       updated_at: new Date().toISOString(),
     };
 
-    onUpdate(updated);
+    onUpdate?.(updated);
+    onSave?.(updated);
   };
 
   const handleToggleSubtask = (subtask: Subtask) => {
     const updatedSubtasks = deliverable.subtasks.map((s) =>
       s.id === subtask.id ? { ...s, completed: !s.completed } : s
     );
-    onUpdate({ ...deliverable, subtasks: updatedSubtasks });
+    const updated = { ...deliverable, subtasks: updatedSubtasks };
+    onUpdate?.(updated);
+    onSave?.(updated);
   };
 
   const handleAddSubtask = (e: React.FormEvent) => {
@@ -116,7 +119,9 @@ export default function DeliveryTaskModal({
       label: newSubtaskLabel.trim(),
       completed: false,
     };
-    onUpdate({ ...deliverable, subtasks: [...deliverable.subtasks, newSub] });
+    const updated = { ...deliverable, subtasks: [...deliverable.subtasks, newSub] };
+    onUpdate?.(updated);
+    onSave?.(updated);
     setNewSubtaskLabel("");
   };
 
@@ -132,10 +137,12 @@ export default function DeliveryTaskModal({
       content: newInternalComment.trim(),
       created_at: new Date().toISOString(),
     };
-    onUpdate({
+    const updated = {
       ...deliverable,
       internal_comments: [newComment, ...deliverable.internal_comments],
-    });
+    };
+    onUpdate?.(updated);
+    onSave?.(updated);
     setNewInternalComment("");
   };
 
@@ -150,10 +157,12 @@ export default function DeliveryTaskModal({
       content: newClientComment.trim(),
       created_at: new Date().toISOString(),
     };
-    onUpdate({
+    const updated = {
       ...deliverable,
       client_comments: [newComment, ...deliverable.client_comments],
-    });
+    };
+    onUpdate?.(updated);
+    onSave?.(updated);
     setNewClientComment("");
   };
 
@@ -164,6 +173,9 @@ export default function DeliveryTaskModal({
 
     const file = files[0];
     const nextVersionNumber = deliverable.attachments.length + 1;
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const fType: "image" | "video" | "pdf" | "doc" =
+      ext === "pdf" ? "pdf" : ext === "doc" || ext === "docx" ? "doc" : ext === "mp4" || ext === "mov" ? "video" : "image";
 
     setTimeout(() => {
       const newAtt: AttachmentVersion = {
@@ -172,6 +184,7 @@ export default function DeliveryTaskModal({
         filename: file.name,
         file_url: URL.createObjectURL(file),
         file_size_bytes: file.size,
+        file_type: fType,
         uploaded_by_staff_id: "staff-1",
         uploaded_by_name: "Alex Rivers",
         created_at: new Date().toISOString(),
@@ -188,11 +201,13 @@ export default function DeliveryTaskModal({
         timestamp: new Date().toISOString(),
       };
 
-      onUpdate({
+      const updated = {
         ...deliverable,
         attachments: [newAtt, ...deliverable.attachments],
         activity_logs: [newLog, ...deliverable.activity_logs],
-      });
+      };
+      onUpdate?.(updated);
+      onSave?.(updated);
       setUploading(false);
     }, 600);
   };
@@ -323,7 +338,7 @@ export default function DeliveryTaskModal({
                     Brief / Description
                   </h4>
                   <p className="text-xs text-neutral-700 bg-neutral-50 p-4 rounded-2xl border border-neutral-200 leading-relaxed">
-                    {deliverable.description || "No description provided."}
+                    {deliverable.brief_description || (deliverable as any).description || "No description provided."}
                   </p>
                 </div>
 

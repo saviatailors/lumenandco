@@ -63,11 +63,7 @@ export type StaffMember = {
 
 export const SEED_STAFF: StaffMember[] = [
   { id: "staff-6", code: "EMP-100", name: "Sahit Sai", email: "sahitsai6@gmail.com", role: "super_admin", role_label: "Founder & Super Admin", avatar_color: "#111827", capacity_limit: 10, weeks_at_high_capacity: 0 },
-  { id: "staff-1", code: "EMP-101", name: "Alex Rivers", email: "alex@lumenandco.in", role: "ops_manager", role_label: "Team Lead & Ops Manager", avatar_color: "#ef4d23", capacity_limit: 6, weeks_at_high_capacity: 1 },
-  { id: "staff-2", code: "EMP-102", name: "Sarah Chen", email: "sarah@lumenandco.in", role: "account_manager", role_label: "Account Manager Lead", avatar_color: "#8b5cf6", capacity_limit: 5, weeks_at_high_capacity: 0 },
-  { id: "staff-3", code: "EMP-103", name: "David Miller", email: "david@lumenandco.in", role: "designer", role_label: "Creative Director", avatar_color: "#3b82f6", capacity_limit: 4, weeks_at_high_capacity: 2 }, // Burnout risk!
-  { id: "staff-4", code: "EMP-104", name: "Elena Rostova", email: "elena@lumenandco.in", role: "content_writer", role_label: "Senior Copywriter", avatar_color: "#10b981", capacity_limit: 5, weeks_at_high_capacity: 0 },
-  { id: "staff-5", code: "EMP-105", name: "Michael Chang", email: "michael@lumenandco.in", role: "ad_specialist", role_label: "Performance Ad Specialist", avatar_color: "#f59e0b", capacity_limit: 4, weeks_at_high_capacity: 1 },
+  { id: "staff-1", code: "EMP-101", name: "Santhan Kumar", email: "santhan@lumenandco.in", role: "ops_manager", role_label: "Co-Founder & Ops Lead", avatar_color: "#ef4d23", capacity_limit: 8, weeks_at_high_capacity: 0 },
 ];
 
 export type ClientInfo = {
@@ -82,16 +78,7 @@ export type ClientInfo = {
   needs_attention_count?: number;
 };
 
-export const SEED_CLIENTS: ClientInfo[] = [
-  { id: "client-northbeam", code: "CLT-101", company_name: "Northbeam Outdoors", location: "Vancouver, BC", contacts_count: 5, open_queries_count: 1, needs_attention_count: 2, package_tier: "Scale Retainer ($6,500/mo)", account_manager_id: "staff-2" },
-  { id: "client-fable", code: "CLT-102", company_name: "Fable Skincare", location: "New York, NY", contacts_count: 4, open_queries_count: 2, needs_attention_count: 1, package_tier: "Growth Retainer ($4,200/mo)", account_manager_id: "staff-2" },
-  { id: "client-[#ef4d23]", code: "CLT-103", company_name: "Kite & Co", location: "London, UK", contacts_count: 3, open_queries_count: 0, needs_attention_count: 1, package_tier: "Creative Studio ($3,500/mo)", account_manager_id: "staff-2" },
-  { id: "client-verda", code: "CLT-104", company_name: "Verda Organics", location: "San Francisco, CA", contacts_count: 6, open_queries_count: 1, needs_attention_count: 0, package_tier: "SEO & Growth ($2,800/mo)", account_manager_id: "staff-2" },
-  { id: "client-orbit", code: "CLT-105", company_name: "Orbit Audio", location: "Austin, TX", contacts_count: 4, open_queries_count: 0, needs_attention_count: 3, package_tier: "Ad Scale ($5,000/mo)", account_manager_id: "staff-2" },
-  { id: "client-nimbus", code: "CLT-106", company_name: "Nimbus Health", location: "Boston, MA", contacts_count: 5, open_queries_count: 1, needs_attention_count: 1, package_tier: "Brand Retainer ($4,000/mo)", account_manager_id: "staff-2" },
-  { id: "client-pulse", code: "CLT-107", company_name: "Pulse Energy", location: "Denver, CO", contacts_count: 4, open_queries_count: 0, needs_attention_count: 2, package_tier: "DTC Retainer ($5,500/mo)", account_manager_id: "staff-2" },
-  { id: "client-aurora", code: "CLT-108", company_name: "Aurora Living", location: "Seattle, WA", contacts_count: 3, open_queries_count: 1, needs_attention_count: 1, package_tier: "Content Retainer ($3,800/mo)", account_manager_id: "staff-2" },
-];
+export const SEED_CLIENTS: ClientInfo[] = [];
 
 export type Subtask = {
   id: string;

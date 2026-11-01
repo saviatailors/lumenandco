@@ -127,118 +127,12 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
     role: "owner",
     crmAccess: true,
     email: "sahitsai6@gmail.com",
-    phone: "+91 98765 43210",
+    phone: "",
     department: "Executive Management",
-    assignedClients: ["All Enterprise Accounts"],
+    assignedClients: [],
     capacityLoad: "100%",
     avatarBg: "bg-neutral-900",
     initial: "S",
-  },
-  {
-    id: "tm-1",
-    name: "Alex Rivers",
-    title: "Team Lead & Ops Manager [Code: EMP-101]",
-    role: "admin",
-    crmAccess: true,
-    email: "alex@lumenandco.in",
-    phone: "+91 98765 43211",
-    department: "Client Operations",
-    assignedClients: ["Northbeam Outdoors", "Bloom Skincare"],
-    capacityLoad: "80%",
-    avatarBg: "bg-[#ef4d23]",
-    initial: "A",
-  },
-  {
-    id: "tm-[#santhan]",
-    name: "Santhan Kumar",
-    title: "Co-Founder & Director",
-    role: "owner",
-    crmAccess: true,
-    email: "santhan@lumenandco.com",
-  },
-  {
-    id: "tm-3",
-    name: "Alex Rivers",
-    title: "Operations Manager",
-    role: "ops_manager",
-    crmAccess: true,
-    email: "alex@lumenandco.com",
-    phone: "+91 98765 43212",
-    department: "Client Operations",
-    assignedClients: ["Apex Education"],
-    capacityLoad: "60%",
-    avatarBg: "bg-indigo-600",
-    initial: "A",
-  },
-  {
-    id: "tm-4",
-    name: "Sarah Chen",
-    title: "Account Manager Lead",
-    role: "account_manager",
-    crmAccess: true,
-    email: "sarah@lumenandco.com",
-    phone: "+91 98765 43214",
-    department: "Account Management",
-    assignedClients: ["Northbeam Outdoors"],
-    capacityLoad: "45%",
-    avatarBg: "bg-blue-600",
-    initial: "S",
-  },
-  {
-    id: "tm-5",
-    name: "David Miller",
-    title: "Graphic & Brand Designer",
-    role: "designer",
-    crmAccess: true,
-    email: "david@lumenandco.com",
-    phone: "+91 98765 43215",
-    department: "Creative Studio",
-    assignedClients: ["Bloom Skincare"],
-    capacityLoad: "75%",
-    avatarBg: "bg-amber-600",
-    initial: "D",
-  },
-  {
-    id: "tm-6",
-    name: "Michael Chang",
-    title: "Video Editor & Motion Lead",
-    role: "editor",
-    crmAccess: true,
-    email: "michael@lumenandco.com",
-    phone: "+91 98765 43216",
-    department: "Creative Studio",
-    assignedClients: ["UrbanFit Fitness"],
-    capacityLoad: "70%",
-    avatarBg: "bg-rose-600",
-    initial: "M",
-  },
-  {
-    id: "tm-7",
-    name: "Elena Rostova",
-    title: "Senior Copywriter",
-    role: "content_writer",
-    crmAccess: true,
-    email: "elena@lumenandco.com",
-    phone: "+91 98765 43217",
-    department: "Creative Studio",
-    assignedClients: ["Apex Education"],
-    capacityLoad: "55%",
-    avatarBg: "bg-cyan-600",
-    initial: "E",
-  },
-  {
-    id: "tm-8",
-    name: "Priya Sharma",
-    title: "Performance Ad Specialist",
-    role: "ad_specialist",
-    crmAccess: true,
-    email: "priya@lumenandco.com",
-    phone: "+91 98765 43213",
-    department: "Growth & Ads",
-    assignedClients: ["Horizon Real Estate"],
-    capacityLoad: "65%",
-    avatarBg: "bg-emerald-600",
-    initial: "P",
   },
 ];
 
@@ -364,29 +258,29 @@ export default function CrmPage() {
 
   // Role State (Owner Sahit/Santhan, Admin, Team Member)
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>("owner");
-  const currentUserName = currentUserRole === "owner" ? "Sahit Sai (Founder)" : currentUserRole === "admin" ? "Santhan Kumar (Founder)" : "Alex Rivers (Team)";
+  const currentUserName = currentUserRole === "owner" ? "Sahit Sai (Founder)" : currentUserRole === "admin" ? "Santhan Kumar (Co-Founder)" : "Operations Lead";
 
   // Active Screen Tab
   const [currentTab, setCurrentTab] = useState<CrmTab>("dashboard");
   const [targetChatCode, setTargetChatCode] = useState<string | undefined>();
 
-  // Datasets with Optimized Local DB Persistence
+  // Datasets with Optimized Local DB Persistence (Defaulting to empty arrays for real-time live data)
   const [schoolClients, setSchoolClients] = useState<SchoolClient[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_CLIENTS, INITIAL_SCHOOL_CLIENTS)
+    loadStoredData(STORAGE_KEYS.CRM_CLIENTS, [])
   );
-  const [auditLogs, setAuditLogs] = useState<AccessAuditEntry[]>(INITIAL_ACCESS_AUDIT_LOG);
+  const [auditLogs, setAuditLogs] = useState<AccessAuditEntry[]>([]);
   const [invoices, setInvoices] = useState<BillingInvoice[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_INVOICES, INITIAL_INVOICES)
+    loadStoredData(STORAGE_KEYS.CRM_INVOICES, [])
   );
   const [commLogs, setCommLogs] = useState<CommLogEntry[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_COMM_LOGS, INITIAL_COMM_LOG)
+    loadStoredData(STORAGE_KEYS.CRM_COMM_LOGS, [])
   );
   const [templates, setTemplates] = useState<MessageTemplate[]>(INITIAL_MESSAGE_TEMPLATES);
   const [tasks, setTasks] = useState<InternalTask[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_TASKS, INITIAL_INTERNAL_TASKS)
+    loadStoredData(STORAGE_KEYS.CRM_TASKS, [])
   );
   const [leads, setLeads] = useState<AdvancedLead[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_LEADS, INITIAL_ADVANCED_LEADS)
+    loadStoredData(STORAGE_KEYS.CRM_LEADS, [])
   );
   const [serviceCatalog, setServiceCatalog] = useState<ServicePricingCatalog[]>(() =>
     loadStoredData(STORAGE_KEYS.CRM_CATALOG, INITIAL_SERVICE_CATALOG)
@@ -397,7 +291,7 @@ export default function CrmPage() {
 
   // Client Business Leads State (End-Customer Tele-calling & Tier Pipeline)
   const [clientBusinessLeads, setClientBusinessLeads] = useState<ClientBusinessLead[]>(() =>
-    loadStoredData(STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS, INITIAL_CLIENT_BUSINESS_LEADS)
+    loadStoredData(STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS, [])
   );
 
   // Auto-Persistence DB Effects
@@ -563,25 +457,12 @@ export default function CrmPage() {
   const [autoRemindersEnabled, setAutoRemindersEnabled] = useState(true);
   const [autoLockOverdueEnabled, setAutoLockOverdueEnabled] = useState(true);
 
-  const [apiConnectors, setApiConnectors] = useState<ApiConnectorItem[]>(() => {
-    try {
-      const saved = localStorage.getItem("lumen_api_connectors_v2");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {
-      console.error("Failed to load saved API connectors", e);
-    }
-    return INITIAL_API_CONNECTORS;
-  });
+  const [apiConnectors, setApiConnectors] = useState<ApiConnectorItem[]>(() =>
+    loadStoredData(STORAGE_KEYS.CRM_API_CONNECTORS, INITIAL_API_CONNECTORS)
+  );
 
   useEffect(() => {
-    try {
-      localStorage.setItem("lumen_api_connectors_v2", JSON.stringify(apiConnectors));
-    } catch (e) {
-      console.error("Failed to persist API connectors", e);
-    }
+    saveStoredData(STORAGE_KEYS.CRM_API_CONNECTORS, apiConnectors);
   }, [apiConnectors]);
 
   const [editingConnector, setEditingConnector] = useState<ApiConnectorItem | null>(null);
@@ -995,7 +876,11 @@ export default function CrmPage() {
     if (newInvoice) {
       setInvoices([newInvoice, ...invoices]);
     }
-    toast.success(`Client "${newClient.school_name}" onboarded & initial retainer set!`);
+    setCurrentTab("clients");
+    setClientSearchQuery("");
+    setClientCityFilter("all");
+    setClientAccessFilter("all");
+    toast.success(`Client "${newClient.school_name}" successfully onboarded and added to Client Accounts!`);
   };
 
   const handleConfirmAccessToggle = (
@@ -1469,7 +1354,7 @@ export default function CrmPage() {
                       </div>
                       <p className="text-neutral-700 text-[11px] leading-snug line-clamp-2">"{log.content}"</p>
                       <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono pt-0.5">
-                        <span>By {log.sender_name}</span>
+                        <span>By {log.sent_by_name || "Staff"}</span>
                         <span>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                     </div>
@@ -1504,7 +1389,7 @@ export default function CrmPage() {
                       <div>
                         <span className="font-semibold text-neutral-900 block">{c.school_name}</span>
                         <span className="text-[10px] text-neutral-500 font-normal">
-                          {c.city} • Lead: <strong className="text-neutral-700 font-medium">{c.assigned_team_member}</strong>
+                          {c.city} • Lead: <strong className="text-neutral-700 font-medium">{c.assigned_staff_name || "Unassigned"}</strong>
                         </span>
                       </div>
 
@@ -1628,8 +1513,8 @@ export default function CrmPage() {
                                 ...prev,
                                 {
                                   id: `task-${Date.now()}`,
-                                  client_id: "client-101",
-                                  school_name: "Northbeam E-Commerce",
+                                  client_id: schoolClients[0]?.id || "client-1",
+                                  school_name: schoolClients[0]?.school_name || "General Client",
                                   assigned_to_id: activeStaff.id,
                                   assigned_to_name: activeStaff.name,
                                   task_title: title,
@@ -2122,7 +2007,7 @@ export default function CrmPage() {
       {/* ========================================================================= */}
       {currentTab === "analytics" && (
         <div className="space-y-6">
-          <RevenueAnalyticsView />
+          <RevenueAnalyticsView invoices={invoices} />
         </div>
       )}
 
@@ -2906,10 +2791,10 @@ export default function CrmPage() {
       {/* ========================================================================= */}
       {currentTab === "billing" && (
         <CentralCommLogView
-          commLogs={commLogs && commLogs.length > 0 ? commLogs : INITIAL_COMM_LOG}
+          commLogs={commLogs || []}
           onAddCommLog={(newLog) => setCommLogs((prev) => [newLog, ...(prev || [])])}
-          clients={schoolClients && schoolClients.length > 0 ? schoolClients : INITIAL_SCHOOL_CLIENTS}
-          clientLeads={clientBusinessLeads && clientBusinessLeads.length > 0 ? clientBusinessLeads : INITIAL_CLIENT_BUSINESS_LEADS}
+          clients={schoolClients || []}
+          clientLeads={clientBusinessLeads || []}
           onOpenMessenger={() => setCurrentTab("chat")}
         />
       )}

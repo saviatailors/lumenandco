@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HeartPulse, AlertTriangle, TrendingUp, ShieldAlert, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
-import { CompositeHealthScore, SEED_CLIENTS } from "@/lib/crm.functions";
+import { CompositeHealthScore } from "@/lib/crm.functions";
 
 export default function ChurnIntelligenceView() {
   const compositeScores: CompositeHealthScore[] = [

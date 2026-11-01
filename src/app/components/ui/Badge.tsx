@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export type BadgeVariant = "green" | "red" | "amber" | "blue" | "purple" | "neutral" | "brand";
+export type BadgeVariant = "green" | "red" | "amber" | "blue" | "purple" | "neutral" | "brand" | "success" | "warning" | "destructive" | "secondary";
 
 export function Badge({
   children,
@@ -23,6 +23,10 @@ export function Badge({
     purple: "bg-orange-100/80 text-orange-800 border-orange-300/60 shadow-2xs",
     neutral: "bg-neutral-200/70 text-neutral-800 border-neutral-300/60 shadow-2xs",
     brand: "bg-[#ef4d23]/10 text-[#ef4d23] border-[#ef4d23]/30 shadow-2xs",
+    success: "bg-emerald-100/80 text-emerald-800 border-emerald-300/60 shadow-2xs",
+    warning: "bg-amber-100/80 text-amber-900 border-amber-300/60 shadow-2xs",
+    destructive: "bg-red-100/80 text-red-800 border-red-300/60 shadow-2xs",
+    secondary: "bg-slate-100/80 text-slate-800 border-slate-300/60 shadow-2xs",
   };
 
   const sizes = {

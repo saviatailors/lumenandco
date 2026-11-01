@@ -295,9 +295,9 @@ export default function AddClientWizardModal({
                       key={item.tier}
                       onClick={() => {
                         setPackageTier(item.tier as SchoolClient["package_tier"]);
-                        if (item.tier === "Performance Starter") setRetainerAmount(45000);
-                        if (item.tier === "Growth Retainer") setRetainerAmount(75000);
-                        if (item.tier === "Scale Enterprise") setRetainerAmount(120000);
+                        if (item.tier === "Performance Starter") setMonthlyRetainer(45000);
+                        if (item.tier === "Growth Retainer") setMonthlyRetainer(75000);
+                        if (item.tier === "Scale Enterprise") setMonthlyRetainer(120000);
                       }}
                       className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                         packageTier === item.tier
@@ -324,12 +324,12 @@ export default function AddClientWizardModal({
                     { name: "Brand Portal Listing", desc: "Top Featured Placement on Lumen & Co Agency Hub" },
                     { name: "UGC Video Production", desc: "Monthly Creator Ad Creatives" },
                     { name: "SEO & Content Marketing", desc: "Organic Keyword Rankings" },
-                    { name: "WhatsApp Automation", desc: "Automated Lead Lead Nurturing" },
+                    { name: "WhatsApp Automation", desc: "Automated Lead Nurturing" },
                   ].map((srv) => (
                     <button
                       type="button"
                       key={srv.name}
-                      onClick={() => handleToggleService(srv.name)}
+                      onClick={() => handleServiceToggle(srv.name)}
                       className={`p-2.5 rounded-xl border text-left flex items-start justify-between ${
                         selectedServices.includes(srv.name)
                           ? "bg-emerald-50 border-emerald-400 text-emerald-900"
@@ -341,7 +341,7 @@ export default function AddClientWizardModal({
                         <span className="text-[9px] text-neutral-500">{srv.desc}</span>
                       </div>
                       {selectedServices.includes(srv.name) && (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 ml-1" />
+                        <Check className="h-4 w-4 text-emerald-600 shrink-0 ml-1" />
                       )}
                     </button>
                   ))}
@@ -358,8 +358,8 @@ export default function AddClientWizardModal({
                   <label className="block text-neutral-700 font-bold mb-1">Custom Retainer Amount (₹)</label>
                   <input
                     type="number"
-                    value={retainerAmount}
-                    onChange={(e) => setRetainerAmount(Number(e.target.value))}
+                    value={monthlyRetainer}
+                    onChange={(e) => setMonthlyRetainer(Number(e.target.value))}
                     className="w-full p-2.5 bg-neutral-50 border border-neutral-300 rounded-xl font-bold text-neutral-900 outline-none"
                   />
                 </div>
@@ -381,14 +381,12 @@ export default function AddClientWizardModal({
               <div>
                 <label className="block text-neutral-700 font-bold mb-1">Assigned Lumen & Co Team Lead</label>
                 <select
-                  value={assignedStaffName}
-                  onChange={(e) => setAssignedStaffName(e.target.value)}
+                  value={assignedStaff.name}
+                  onChange={(e) => setAssignedStaff({ id: "staff-1", name: e.target.value })}
                   className="w-full p-2.5 bg-neutral-50 border border-neutral-300 rounded-xl font-bold text-neutral-900 outline-none"
                 >
-                  <option value="Sahit Sai (Co-Founder)">Sahit Sai (Co-Founder)</option>
-                  <option value="Santhan Kumar (Co-Founder)">Santhan Kumar (Co-Founder)</option>
-                  <option value="Alex Rivers">Alex Rivers (Admissions Lead)</option>
-                  <option value="Priya Sharma">Priya Sharma (Creative Lead)</option>
+                  <option value="Sahit Sai">Sahit Sai (Co-Founder & Super Admin)</option>
+                  <option value="Santhan Kumar">Santhan Kumar (Co-Founder & Director)</option>
                 </select>
               </div>
 
@@ -396,8 +394,8 @@ export default function AddClientWizardModal({
                 <label className="flex items-center gap-2 font-bold cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={generateInvoice}
-                    onChange={(e) => setGenerateInvoice(e.target.checked)}
+                    checked={createInitialInvoice}
+                    onChange={(e) => setCreateInitialInvoice(e.target.checked)}
                     className="w-4 h-4 rounded text-[#ef4d23]"
                   />
                   <span>Generate Initial Retainer Invoice Instantly (15-Day Term)</span>
@@ -413,7 +411,7 @@ export default function AddClientWizardModal({
         {/* Modal Footer Controls */}
         <div className="bg-neutral-100 p-4 border-t border-neutral-200 flex items-center justify-between">
           {step > 1 ? (
-            <Button variant="ghost" onClick={() => setStep(step - 1)}>
+            <Button variant="ghost" onClick={() => setStep((step - 1) as 1 | 2 | 3)}>
               Back
             </Button>
           ) : (
@@ -422,14 +420,14 @@ export default function AddClientWizardModal({
 
           {step < 3 ? (
             <Button
-              onClick={() => setStep(step + 1)}
+              onClick={() => setStep((step + 1) as 1 | 2 | 3)}
               disabled={!schoolName.trim()}
               className="bg-[#ef4d23] text-white"
             >
               Continue to Step {step + 1} →
             </Button>
           ) : (
-            <Button onClick={handleSubmit} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button onClick={(e) => handleFinish(e)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
               <Sparkles className="h-4 w-4 mr-1.5" /> Onboard Client
             </Button>
           )}

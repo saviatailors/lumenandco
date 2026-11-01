@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { SlideOver } from "./ui/SlideOver";
 import { Badge } from "./ui/Badge";
-import { Button } from "./Button";
+import { Button } from "./ui/Button";
 import { Building2, Mail, Phone, Calendar, DollarSign, FileText, HeartPulse, Layers, ExternalLink } from "lucide-react";
-import { ClientInfo, Contract, Invoice, Deliverable } from "@/lib/crm.functions";
+import { Contract, Invoice } from "@/lib/crm.functions";
+import { ClientInfo, Deliverable } from "@/lib/delivery.functions";
 
 export default function ClientDetailSlideOver({
   client,

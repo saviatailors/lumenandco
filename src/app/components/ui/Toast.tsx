@@ -127,6 +127,7 @@ export interface ToastApi {
   success: (title: string, message?: string) => void;
   error: (title: string, message?: string) => void;
   info: (title: string, message?: string) => void;
+  show: (title: string, type?: ToastType) => void;
 }
 
 export function useToast(): ToastApi {
@@ -144,6 +145,7 @@ export function useToast(): ToastApi {
   api.success = (title: string, message?: string) => showToast(title, message, "success");
   api.error = (title: string, message?: string) => showToast(title, message, "error");
   api.info = (title: string, message?: string) => showToast(title, message, "info");
+  api.show = (title: string, type: ToastType = "success") => showToast(title, undefined, type);
 
   return api;
 }

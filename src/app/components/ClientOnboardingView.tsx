@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { SchoolClient } from "@/lib/lumenandco.types";
 import {
   Rocket,
   Building2,
@@ -93,71 +94,97 @@ export interface ClientOnboardingData {
   lumen_assigned_team: string;
 }
 
-const INITIAL_ONBOARDING_RECORDS: ClientOnboardingData[] = [
-  {
-    id: "onboard-101",
-    project_start_date: "2026-09-15",
-    brand_name: "Apex Global Academy",
-    website_domain: "apexglobal.edu.in",
-    scope_of_work: "Full-Funnel Student Admissions Scaling, Meta & Google Ads, UGC Video Production & CRM Integration",
-    ad_channels: ["Meta Ads (FB/IG)", "Google Search & YouTube", "WhatsApp Business API"],
-    location: "Gachibowli, Hyderabad, TS",
-    customer_contact_phone: "+91 98765 43210",
-    social_media_links: "https://instagram.com/apexglobal.hyderabad, https://facebook.com/apexglobal",
-    monthly_ad_spend: "₹3,50,000 / month",
-    payment_card_details: "HDFC Commercial Visa ending •••• 8492 (Limit ₹10L)",
-    creative_contact_number: "+91 98765 43210",
-    gstin: "36AAACV9102K1Z9",
-    billing_details: "Apex Educational Trust, Gachibowli Main Rd, Hyderabad 500032",
-    finance_poc_name: "Ramesh Sharma",
-    finance_poc_email: "finance@apexglobal.edu.in",
-
-    lead_contact_person_name: "Anand Verma",
-    lead_contact_person_phone: "+91 98490 12345",
-    lead_contact_person_email: "admissions@apexglobal.edu.in",
-    uses_phone_tracking: true,
-    phone_tracking_system_name: "MyOperator Cloud Telephony",
-    client_poc_name: "Deepika Rao",
-    client_poc_phone: "+91 98490 99999",
-    client_poc_email: "deepika.rao@apexglobal.edu.in",
-    client_poc_designation: "Director of Admissions & Brand Growth",
-    email_cc_list: "deepika.rao@apexglobal.edu.in, principal@apexglobal.edu.in",
-    crm_platform_used: "LeadSquared CRM",
-    crm_access_recipients: "sahit@lumenandco.in, alex@lumenandco.in",
-
-    cpanel_access_granted: true,
-    cpanel_notes: "CPanel Host: cpanel.apexglobal.edu.in (User: admin_apex)",
-    wordpress_access_granted: true,
-    wordpress_notes: "WP Admin: apexglobal.edu.in/wp-admin (User: lumen_admin)",
-    godaddy_domain_access_granted: true,
-    godaddy_notes: "GoDaddy Account ID: 89102931 (Access delegated to hello@lumenandco.in)",
-    google_analytics_granted: true,
-    google_analytics_notes: "GA4 Property ID: 394019284 (Admin granted to lumenandco.in)",
-    google_search_console_granted: true,
-    google_search_console_notes: "Domain verification active on apexglobal.edu.in",
-    gtm_granted: true,
-    gtm_notes: "User: Admin, Container: Publish (Container ID: GTM-W982KL)",
-    whatsapp_tool_granted: true,
-    whatsapp_tool_notes: "WATI WhatsApp API connected with +91 98765 43210",
-
-    trademark_document_received: true,
-    brand_assets_logo_received: true,
-    image_video_bank_received: true,
-    custom_lookalike_audience_received: true,
-    brand_questionnaire_completed: true,
-
-    lumen_tat: "24 to 48 Hours for Ad Creatives & Campaign Turnaround",
-    lumen_working_days: "Monday – Saturday | 9:30 AM – 7:00 PM IST",
-    lumen_assigned_team: "Sahit Sai (Supervision), Sarah Chen (Account Manager), David Miller (Creative Director), Priya Sharma (Performance Ad Buyer)",
-  },
-];
+const INITIAL_ONBOARDING_RECORDS: ClientOnboardingData[] = [];
 
 export default function ClientOnboardingView() {
   const toast = useToast();
-  const [records, setRecords] = useState<ClientOnboardingData[]>(INITIAL_ONBOARDING_RECORDS);
-  const [selectedRecordId, setSelectedRecordId] = useState<string>(INITIAL_ONBOARDING_RECORDS[0].id);
+  const [records, setRecords] = useState<ClientOnboardingData[]>(() => {
+    let list: ClientOnboardingData[] = [];
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("lumen_onboarding_records_v4");
+      if (saved) {
+        try {
+          list = JSON.parse(saved);
+        } catch {
+          /* fallback */
+        }
+      }
 
-  const activeRecord = records.find((r) => r.id === selectedRecordId) || records[0];
+      // Automatically sync clients created via the Add Client Wizard!
+      const savedCrmClients = localStorage.getItem("lumen_crm_clients_v3");
+      if (savedCrmClients) {
+        try {
+          const crmClients: SchoolClient[] = JSON.parse(savedCrmClients);
+          crmClients.forEach((client) => {
+            if (!list.some((r) => r.id === client.id || r.brand_name === client.school_name)) {
+              (list as any[]).unshift({
+                id: client.id,
+                project_start_date: client.start_date || new Date().toISOString().split("T")[0],
+                brand_name: client.school_name,
+                website_domain: `${client.school_name.toLowerCase().replace(/[^a-z0-9]/g, "")}.edu.in`,
+                scope_of_work: (client.services_subscribed || ["SEO & Growth"]).join(", "),
+                ad_channels: ["Meta Ads (FB/IG)", "Google Search"],
+                location: `${client.city}, India`,
+                customer_contact_phone: client.phone || "+91 98490 00000",
+                social_media_links: `https://instagram.com/${client.school_name.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
+                monthly_ad_spend: `₹${((client.monthly_retainer_rupees || 50000) * 2).toLocaleString("en-IN")} / month`,
+                payment_card_details: "Card on file (Auto-Debited)",
+                gst_registration_number: "36AAAAA0000A1Z5",
+                billing_address: `${client.city}, Telangana, India`,
+                finance_poc_name: client.contact_person || "Accounts Dept",
+                finance_poc_email: client.email || "billing@school.edu.in",
+                lead_contact_person_name: client.contact_person || "Director",
+                lead_contact_person_phone: client.phone || "+91 98490 00000",
+                lead_contact_person_email: client.email || "admin@school.edu.in",
+                uses_phone_tracking: true,
+                phone_tracking_system_name: "Lumen IVR Call Tracker",
+                client_poc_name: client.contact_person || "Key Stakeholder",
+                client_poc_phone: client.phone || "+91 98490 00000",
+                client_poc_email: client.email || "admin@school.edu.in",
+                client_poc_designation: client.contact_role || "Principal",
+                email_cc_list: `${client.email}, admin@lumenandco.in`,
+                crm_platform_used: "Lumen & Co CRM Portal",
+                crm_access_recipients: client.email || "admin@school.edu.in",
+                cpanel_access_granted: true,
+                cpanel_notes: "CPANEL-LUMEN-GRANTED",
+                wordpress_access_granted: true,
+                wordpress_notes: "WP-ADMIN-GRANTED",
+                godaddy_domain_access_granted: true,
+                godaddy_notes: "DNS Configured",
+                google_analytics_granted: true,
+                google_analytics_notes: "GA4 Stream Active",
+                google_search_console_granted: true,
+                google_search_console_notes: "GSC Verified",
+                gtm_granted: true,
+                gtm_notes: "GTM Container Active",
+                whatsapp_tool_granted: true,
+                whatsapp_tool_notes: "WA Cloud API Linked",
+                trademark_document_received: true,
+                brand_assets_logo_received: true,
+                image_video_bank_received: true,
+                custom_lookalike_audience_received: true,
+                brand_questionnaire_completed: true,
+                lumen_tat: "24-48 Hours",
+                lumen_working_days: "Mon-Sat (9 AM - 7 PM)",
+                lumen_assigned_team: client.assigned_staff_name || "Sahit Sai (Super Admin)",
+              });
+            }
+          });
+        } catch {}
+      }
+    }
+    return list;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lumen_onboarding_records_v4", JSON.stringify(records));
+    }
+  }, [records]);
+
+  const [selectedRecordId, setSelectedRecordId] = useState<string>("");
+
+  const activeRecord = records.find((r) => r.id === selectedRecordId) || records[0] || null;
 
   const [activeTab, setActiveTab] = useState<"general" | "contacts" | "credentials" | "assets" | "sla">("general");
   const [copiedLink, setCopiedLink] = useState(false);
@@ -233,11 +260,64 @@ export default function ClientOnboardingView() {
   };
 
   const handleCopyIntakeLink = () => {
-    navigator.clipboard.writeText(`https://lumenandco.in/onboarding/${activeRecord.id}`);
+    if (!activeRecord) {
+      toast.error("No active onboarding record available.");
+      return;
+    }
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    navigator.clipboard.writeText(`${origin}/sahit?tab=onboarding&id=${activeRecord.id}`);
     setCopiedLink(true);
     toast.success("Shareable Client Onboarding Intake URL copied to clipboard!");
     setTimeout(() => setCopiedLink(false), 2000);
   };
+
+  if (!activeRecord) {
+    return (
+      <div className="space-y-6 text-[#222222]">
+        <div className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-black text-white p-6 sm:p-8 rounded-3xl border border-neutral-700 shadow-2xl relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-[#ef4d23]/20 border border-[#ef4d23]/40 text-[#fed7aa] text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                <Rocket className="h-3.5 w-3.5 text-[#ef4d23]" />
+                <span>Client Onboarding Intake & Master SLA Manager</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Client Onboarding Intake Manager</h2>
+              <p className="text-xs sm:text-sm text-neutral-300 mt-1 max-w-2xl">
+                Manage brand credentials, onboarding intake checklists, lead contact routing, and agency SLA agreements.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCreateNewOnboarding}
+              className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl transition-all shadow-lg flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              <span>+ Start New Client Onboarding</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-neutral-200 p-12 text-center shadow-sm space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500">
+            <Rocket className="h-7 w-7 text-[#ef4d23]" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-neutral-900">No Active Client Onboarding Projects</h3>
+            <p className="text-xs text-neutral-500 mt-1 max-w-md mx-auto">
+              Start a new client onboarding project to manage brand intake checklists, platform credentials, lead contact routing, and agency SLA specifications.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleCreateNewOnboarding}
+            className="inline-flex items-center gap-2 bg-neutral-900 text-white font-bold text-xs px-5 py-2.5 rounded-2xl hover:bg-black transition-all cursor-pointer"
+          >
+            <Plus className="h-4 w-4" /> Start Client Onboarding Project
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 text-[#222222]">
@@ -324,9 +404,9 @@ export default function ClientOnboardingView() {
           </button>
 
           <button
-            onClick={() => setActiveTab("leads")}
+            onClick={() => setActiveTab("contacts")}
             className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
-              activeTab === "leads"
+              activeTab === "contacts"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
@@ -336,9 +416,9 @@ export default function ClientOnboardingView() {
           </button>
 
           <button
-            onClick={() => setActiveTab("creds")}
+            onClick={() => setActiveTab("credentials")}
             className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
-              activeTab === "creds"
+              activeTab === "credentials"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
@@ -360,9 +440,9 @@ export default function ClientOnboardingView() {
           </button>
 
           <button
-            onClick={() => setActiveTab("lumen")}
+            onClick={() => setActiveTab("sla")}
             className={`px-4 py-2.5 rounded-2xl font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
-              activeTab === "lumen"
+              activeTab === "sla"
                 ? "bg-[#ef4d23] text-white shadow-md"
                 : "text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}

@@ -229,257 +229,13 @@ export type ServicePricingCatalog = {
 
 // --- SEED DATASETS FOR LUMEN & CO ---
 
-export const INITIAL_SCHOOL_CLIENTS: SchoolClient[] = [
-  {
-    id: "client-101",
-    school_name: "Northbeam E-Commerce",
-    city: "Bengaluru",
-    contact_person: "Mark Davis",
-    contact_role: "Founder & CMO",
-    phone: "+91 98490 12345",
-    email: "mark@northbeam.io",
-    services_subscribed: ["Performance Ads", "Creative UGC", "CRO & Analytics"],
-    package_tier: "Scale Enterprise",
-    monthly_retainer_rupees: 120000,
-    start_date: "2025-03-01",
-    billing_cycle: "monthly",
-    status: "active",
-    access_status: "active",
-    assigned_staff_id: "staff-1",
-    assigned_staff_name: "Sahit Sai",
-    notes: "Scale enterprise client. Meta & TikTok ads scaling rapidly.",
-    created_at: "2025-03-01T00:00:00Z",
-  },
-  {
-    id: "client-102",
-    school_name: "Bloom Skincare",
-    city: "Mumbai",
-    contact_person: "Ananya Sen",
-    contact_role: "Head of Marketing",
-    phone: "+91 97012 34567",
-    email: "ananya@bloomskincare.in",
-    services_subscribed: ["Performance Ads", "Creative UGC"],
-    package_tier: "Growth Retainer",
-    monthly_retainer_rupees: 75000,
-    start_date: "2025-05-15",
-    billing_cycle: "monthly",
-    status: "overdue",
-    access_status: "active",
-    assigned_staff_id: "staff-[#ef4d23]",
-    assigned_staff_name: "Priya Sharma",
-    notes: "August & September retainer payment past due by 16 days.",
-    created_at: "2025-05-15T00:00:00Z",
-  },
-  {
-    id: "client-103",
-    school_name: "Zenith Apparel",
-    city: "Hyderabad",
-    contact_person: "Vikram Malhotra",
-    contact_role: "Managing Director",
-    phone: "+91 99800 54321",
-    email: "vikram@zenithapparel.com",
-    services_subscribed: ["SEO & Content", "Performance Ads"],
-    package_tier: "Scale Enterprise",
-    monthly_retainer_rupees: 95000,
-    start_date: "2025-01-10",
-    billing_cycle: "quarterly",
-    status: "active",
-    access_status: "active",
-    assigned_staff_id: "staff-1",
-    assigned_staff_name: "Sahit Sai",
-    notes: "Quarterly retainer client. 100% prompt payment history.",
-    created_at: "2025-01-10T00:00:00Z",
-  },
-  {
-    id: "client-104",
-    school_name: "UrbanFit Fitness",
-    city: "Delhi NCR",
-    contact_person: "Karan Mehta",
-    contact_role: "Co-Founder",
-    phone: "+91 94401 88899",
-    email: "karan@urbanfit.co.in",
-    services_subscribed: ["Performance Ads"],
-    package_tier: "Performance Starter",
-    monthly_retainer_rupees: 45000,
-    start_date: "2025-07-01",
-    billing_cycle: "monthly",
-    status: "overdue",
-    access_status: "suspended",
-    assigned_staff_id: "staff-3",
-    assigned_staff_name: "Alex Rivers",
-    notes: "Access suspended due to 38-day retainer default.",
-    created_at: "2025-07-01T00:00:00Z",
-  },
-  {
-    id: "client-105",
-    school_name: "Apex Media Group",
-    city: "Bengaluru",
-    contact_person: "Rohan Kapoor",
-    contact_role: "VP Marketing",
-    phone: "+91 98860 11223",
-    email: "rohan@apexmedia.in",
-    services_subscribed: ["SEO & Content", "Performance Ads", "Creative UGC"],
-    package_tier: "Scale Enterprise",
-    monthly_retainer_rupees: 150000,
-    start_date: "2025-02-01",
-    billing_cycle: "annual",
-    status: "active",
-    access_status: "active",
-    assigned_staff_id: "staff-1",
-    assigned_staff_name: "Sahit Sai",
-    notes: "Annual retainer contract. Strong ROI scaling.",
-    created_at: "2025-02-01T00:00:00Z",
-  },
-];
+export const INITIAL_SCHOOL_CLIENTS: SchoolClient[] = [];
 
-export const INITIAL_ACCESS_AUDIT_LOG: AccessAuditEntry[] = [
-  {
-    id: "audit-1",
-    client_id: "client-104",
-    school_name: "UrbanFit Fitness",
-    previous_status: "active",
-    new_status: "suspended",
-    changed_by_name: "Sahit Sai",
-    changed_by_role: "owner",
-    reason: "Non-payment of ₹45,000 monthly retainer for 38 days despite 3 WhatsApp reminders.",
-    timestamp: "2026-09-01T14:30:00Z",
-  },
-];
+export const INITIAL_ACCESS_AUDIT_LOG: AccessAuditEntry[] = [];
 
-export const INITIAL_INVOICES: BillingInvoice[] = [
-  {
-    id: "inv-2026-001",
-    invoice_number: "LMN-INV-2026-091",
-    client_id: "client-101",
-    school_name: "Northbeam E-Commerce",
-    amount_rupees: 120000,
-    due_date: "2026-09-05",
-    paid_date: "2026-09-04",
-    status: "paid",
-    overdue_days: 0,
-    created_at: "2026-09-01T00:00:00Z",
-  },
-  {
-    id: "inv-2026-002",
-    invoice_number: "LMN-INV-2026-092",
-    client_id: "client-102",
-    school_name: "Bloom Skincare",
-    amount_rupees: 75000,
-    due_date: "2026-08-25",
-    status: "overdue",
-    overdue_days: 16,
-    last_reminder_sent_at: "2026-09-03T10:15:00Z",
-    created_at: "2026-08-15T00:00:00Z",
-  },
-  {
-    id: "inv-2026-003",
-    invoice_number: "LMN-INV-2026-093",
-    client_id: "client-103",
-    school_name: "Zenith Apparel",
-    amount_rupees: 95000,
-    due_date: "2026-09-15",
-    status: "pending",
-    overdue_days: 0,
-    created_at: "2026-09-01T00:00:00Z",
-  },
-  {
-    id: "inv-2026-004",
-    invoice_number: "LMN-INV-2026-094",
-    client_id: "client-104",
-    school_name: "UrbanFit Fitness",
-    amount_rupees: 45000,
-    due_date: "2026-08-01",
-    status: "overdue",
-    overdue_days: 40,
-    last_reminder_sent_at: "2026-08-30T16:00:00Z",
-    created_at: "2026-07-20T00:00:00Z",
-  },
-  {
-    id: "inv-2026-005",
-    invoice_number: "LMN-INV-2026-095",
-    client_id: "client-105",
-    school_name: "Apex Media Group",
-    amount_rupees: 150000,
-    due_date: "2026-09-20",
-    status: "pending",
-    overdue_days: 0,
-    created_at: "2026-09-01T00:00:00Z",
-  },
-];
+export const INITIAL_INVOICES: BillingInvoice[] = [];
 
-export const INITIAL_COMM_LOG: CommLogEntry[] = [
-  {
-    id: "comm-101",
-    client_id: "client-102",
-    school_name: "Bloom Skincare",
-    channel: "whatsapp",
-    message_type: "payment_reminder",
-    recipient: "+91 97012 34567 (Ananya Sen)",
-    content: "Hi Ananya, retainer payment of ₹75,000 for August is overdue by 7 days. Please clear at earliest to avoid ad campaign suspension.",
-    sent_by_name: "Sahit Sai",
-    sender_code: "EMP-100",
-    subject: "August Retainer Fee Reminder",
-    delivery_status: "read",
-    timestamp: "2026-09-03T10:15:00Z",
-  },
-  {
-    id: "comm-102",
-    client_id: "client-104",
-    school_name: "UrbanFit Fitness",
-    channel: "suspension_notice",
-    message_type: "suspension",
-    recipient: "karan@urbanfit.co.in",
-    content: "OFFICIAL NOTICE: Lumen & Co ad account management & creative services suspended due to 38-day unpaid balance of ₹45,000.",
-    sent_by_name: "Sahit Sai",
-    sender_code: "EMP-100",
-    subject: "Account Suspension Alert",
-    delivery_status: "delivered",
-    timestamp: "2026-09-01T14:30:00Z",
-  },
-  {
-    id: "comm-103",
-    client_id: "client-101",
-    school_name: "Northbeam E-Commerce",
-    channel: "email",
-    message_type: "onboarding",
-    recipient: "mark@northbeam.io",
-    content: "Q4 Performance Video Reel & Hook Cuts delivered. Scaled ROAS reported across Meta Ad Manager.",
-    sent_by_name: "Sarah Chen",
-    sender_code: "EMP-102",
-    subject: "Q4 Creative Vault & Campaign Delivery",
-    delivery_status: "delivered",
-    attachments_count: 3,
-    timestamp: "2026-09-04T09:00:00Z",
-  },
-  {
-    id: "comm-104",
-    client_id: "client-103",
-    school_name: "Aura Home Decor",
-    channel: "call_note",
-    message_type: "manual_note",
-    recipient: "+91 98490 12345 (Vikram Mehta)",
-    content: "Phone Sync with Founder Vikram: Approved Q4 performance budget increase of ₹1.5L/mo. Requested UGC Reels for upcoming Diwali sale.",
-    sent_by_name: "Sarah Chen",
-    sender_code: "EMP-102",
-    subject: "Quarterly Review Call Log",
-    delivery_status: "read",
-    timestamp: "2026-09-05T16:20:00Z",
-  },
-  {
-    id: "comm-105",
-    client_id: "client-105",
-    school_name: "Zenith EdTech",
-    channel: "whatsapp",
-    message_type: "proposal",
-    recipient: "+91 91234 56789 (Priya Sharma)",
-    content: "Hi Priya, sharing the revised Retainer Proposal & SLA document for September. Total retainer: ₹1,20,000/mo.",
-    sent_by_name: "Sahit Sai",
-    sender_code: "EMP-100",
-    subject: "SLA Retainer Proposal",
-    delivery_status: "delivered",
-    timestamp: "2026-09-06T11:45:00Z",
-  },
-];
+export const INITIAL_COMM_LOG: CommLogEntry[] = [];
 
 export const INITIAL_MESSAGE_TEMPLATES: MessageTemplate[] = [
   {
@@ -1233,4 +989,20 @@ export const INITIAL_USER_LOGIN_HISTORY: UserLoginHistoryEntry[] = [
     status: "success",
   },
 ];
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  title: string;
+  role: UserRole;
+  crmAccess: boolean;
+  email: string;
+  phone: string;
+  department: string;
+  assignedClients: string[];
+  capacityLoad: string;
+  avatarBg: string;
+  initial: string;
+}
+
 

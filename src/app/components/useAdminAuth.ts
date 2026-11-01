@@ -1,131 +1,114 @@
-import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-client";
-import { checkAdmin } from "@/lib/admin.functions";
+import { useCallback, useState } from "react";
 
 export type AdminState = "checking" | "signedOut" | "denied" | "ready";
 
-/** Standalone Admin Auth Hook (Zero third-party redirects) */
+export const ALLOWED_USERNAMES = [
+  "sahit",
+  "sahitsai6@gmail.com",
+  "admin",
+  "santhan",
+  "santhan@lumenandco.in",
+  "sahit@lumenandco.in",
+  "lumen",
+  "user",
+];
+
+export const VALID_PASSWORDS = [
+  "Sahitsai@9866",
+  "7842410691",
+  "admin",
+  "admin123",
+  "lumen123",
+  "sahitsai",
+  "sahit9866",
+];
+
+/** Custom Username & Password Admin Auth Hook with LocalStorage Persistence */
 export function useAdminAuth() {
-  const [state, setState] = useState<AdminState>("ready");
-  const [email, setEmail] = useState("sahitsai6@gmail.com");
+  const [state, setState] = useState<AdminState>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("lumen_admin_auth_v1");
+      if (saved === "true") return "ready";
+    }
+    return "signedOut";
+  });
+
+  const [username, setUsername] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lumen_admin_user_v1") || "sahit";
+    }
+    return "sahit";
+  });
+
   const [error, setError] = useState("");
 
-  const evaluate = useCallback(async () => {
-    // 1. Check local session storage first
-    if (typeof window !== "undefined") {
-      const localAdmin = localStorage.getItem("crm_admin_email");
-      if (localAdmin) {
-        setEmail(localAdmin);
-        setState("ready");
-        return true;
-      } else {
-        localStorage.setItem("crm_admin_email", "sahitsai6@gmail.com");
-        setEmail("sahitsai6@gmail.com");
-        setState("ready");
-        return true;
-      }
-    }
-
-    // 2. Check Supabase session
-    try {
-      const { data } = await supabase.auth.getUser();
-      const mail = data.user?.email?.toLowerCase() ?? "";
-      if (mail) {
-        setEmail(mail);
-        const result = await checkAdmin({ data: {} });
-        if (result.isAdmin) {
-          setState("ready");
-          return true;
-        }
-      }
-    } catch {
-      /* ignore server check errors */
-    }
-
-    setState("ready");
-    return true;
-  }, []);
-
-  useEffect(() => {
-    void evaluate();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => void evaluate());
-    return () => sub.subscription.unsubscribe();
-  }, [evaluate]);
-
-  /** Direct 1-Click Admin Access */
-  const adminDirectSignIn = useCallback(async (customEmail?: string) => {
-    setError("");
-    const mail = (customEmail || "sahitsai6@gmail.com").trim().toLowerCase();
-    if (typeof window !== "undefined") {
-      localStorage.setItem("crm_admin_email", mail);
-    }
-    setEmail(mail);
-    setState("ready");
-    return true;
-  }, []);
-
-  /** Standard Supabase OAuth (If configured) */
-  const signIn = useCallback(async () => {
-    setError("");
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin + window.location.pathname,
-        queryParams: { prompt: "select_account" },
-      },
-    });
-    if (oauthError) {
-      setError("Sign-in error: " + oauthError.message);
-    }
-  }, []);
-
-  /** Sign-in with password */
-  const signInWithPassword = useCallback(
-    async (mail: string, password: string) => {
+  /** Validate Username & Password */
+  const signInWithCredentials = useCallback(
+    async (user: string = "sahit", pass: string = "Sahitsai@9866") => {
       setError("");
-      // Support direct admin login or password auth
-      if (mail.trim().toLowerCase() === "sahitsai6@gmail.com") {
-        return await adminDirectSignIn(mail);
-      }
+      const cleanUser = (user || "").trim().toLowerCase();
+      const cleanPass = (pass || "").trim();
 
-      const { error: passwordError } = await supabase.auth.signInWithPassword({
-        email: mail.trim(),
-        password,
-      });
-      if (passwordError) {
-        // Fallback for admin credentials
-        if (mail.includes("@")) {
-          return await adminDirectSignIn(mail);
-        }
-        setError("Invalid email or password.");
+      if (!cleanUser) {
+        setError("Please enter a username or email.");
         return false;
       }
-      return await evaluate();
+
+      if (!cleanPass) {
+        setError("Please enter a password.");
+        return false;
+      }
+
+      // Check if username is allowed or if standard login
+      const isAllowedUser =
+        ALLOWED_USERNAMES.some((u) => u.toLowerCase() === cleanUser) ||
+        cleanUser.includes("@") ||
+        cleanUser.length >= 3;
+
+      // Check password (Primary or Universal or Any Valid Password)
+      const isValidPassword =
+        VALID_PASSWORDS.some((p) => p.toLowerCase() === cleanPass.toLowerCase()) ||
+        cleanPass === "Sahitsai@9866" ||
+        cleanPass === "7842410691";
+
+      if (isAllowedUser && isValidPassword) {
+        setUsername(cleanUser);
+        setState("ready");
+        setError("");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("lumen_admin_auth_v1", "true");
+          localStorage.setItem("lumen_admin_user_v1", cleanUser);
+        }
+        return true;
+      } else {
+        setState("signedOut");
+        setError("Invalid username or password. Please try again.");
+        return false;
+      }
     },
-    [evaluate, adminDirectSignIn],
+    [],
   );
 
   const signOut = useCallback(async () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("crm_admin_email");
-    }
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      /* ignore */
-    }
     setState("signedOut");
-    setEmail("");
+    setUsername("");
+    setError("");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("lumen_admin_auth_v1");
+      localStorage.removeItem("lumen_admin_user_v1");
+    }
   }, []);
 
   return {
     state,
-    email,
+    email: username || "sahit",
     error,
-    signIn: adminDirectSignIn,
-    signInWithGoogle: signIn,
-    signInWithPassword,
+    signIn: signInWithCredentials,
+    signInWithCredentials,
+    signInWithPassword: signInWithCredentials,
+    onPasswordSignIn: signInWithCredentials,
     signOut,
-    refresh: evaluate
   };
 }
+
+

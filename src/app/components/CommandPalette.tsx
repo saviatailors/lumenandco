@@ -27,6 +27,7 @@ export interface CommandPaletteProps {
   onSelectDeliverable?: (task: Deliverable) => void;
   onCreateNew?: () => void;
   onNavigateTab?: (tab: string) => void;
+  onSelectAction?: () => void;
 }
 
 export default function CommandPalette({

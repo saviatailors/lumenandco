@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Calendar, ShieldCheck, Filter, ArrowRight, History, Layers } from "lucide-react";
-import { Contract, ContractHistory, SEED_CLIENTS } from "@/lib/crm.functions";
+import { Contract, ContractHistory } from "@/lib/crm.functions";
 
 export default function RenewalPipelineView({
   contracts,

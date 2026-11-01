@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Lock, ShieldCheck, UserCheck } from "lucide-react";
+import { Lock, ShieldCheck, AlertTriangle } from "lucide-react";
 
 import type { AdminState } from "./useAdminAuth";
 
@@ -19,22 +19,41 @@ export default function AdminGate({
   state: AdminState;
   email: string;
   error: string;
-  onSignIn: () => void;
+  onSignIn: (user?: string, pass?: string) => any;
   onPasswordSignIn?: (email: string, password: string) => Promise<boolean>;
   onSignOut: () => void;
   title: string;
 }) {
-  const [showPassword, setShowPassword] = useState(false);
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [localError, setLocalError] = useState("");
+
+  const activeError = localError || error;
 
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center bg-[#ededed] p-4"
+      className="relative flex min-h-screen w-full items-center justify-center p-4 overflow-hidden"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-      <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)] space-y-4">
+      {/* Live Background Video */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <video
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          disableRemotePlayback
+          {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
+          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+        />
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      </div>
+
+      <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-md p-7 text-center shadow-[0_20px_60px_-30px_rgba(0,0,0,0.5)] space-y-4 border border-white/20">
         <div className="mx-auto flex items-center justify-center pt-1 pb-2">
           <Link to="/">
             <img src="/lumen-and-co-logo.png" alt="Lumen & Co Agency" className="h-12 sm:h-14 w-auto object-contain transition-all hover:scale-105" />
@@ -50,6 +69,14 @@ export default function AdminGate({
           </h1>
           <p className="mt-1 text-xs text-neutral-500">Lumen & Co Private Operations Hub</p>
         </div>
+
+        {/* Error Notification Banner */}
+        {activeError ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50/90 p-3 text-left text-xs text-red-700 font-medium flex items-start gap-2.5 shadow-sm animate-shake">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
+            <div className="leading-snug">{activeError}</div>
+          </div>
+        ) : null}
 
         {state === "checking" ? (
           <p className="mt-3 inline-flex items-center gap-2 text-xs text-neutral-500">
@@ -68,65 +95,93 @@ export default function AdminGate({
             </button>
           </div>
         ) : (
-          <div className="space-y-3 pt-2">
-            {/* Primary Direct Admin Sign-in Button */}
+          <form
+            className="space-y-3 pt-1 text-left"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              setLocalError("");
+              const inputUser = mail.trim() || "sahit";
+              const inputPass = password.trim() || "Sahitsai@9866";
+              const authFn = onPasswordSignIn || onSignIn;
+              if (authFn) {
+                setBusy(true);
+                const success = await authFn(inputUser, inputPass);
+                setBusy(false);
+                if (!success) {
+                  setLocalError("Invalid username or password. Please check your credentials.");
+                }
+              }
+            }}
+          >
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-600 mb-1">
+                Username or Email
+              </label>
+              <input
+                type="text"
+                required
+                value={mail}
+                onChange={(event) => {
+                  setMail(event.target.value);
+                  setLocalError("");
+                }}
+                placeholder="sahit"
+                autoComplete="username"
+                className={`w-full rounded-xl border px-3.5 py-2.5 text-xs text-neutral-900 outline-none transition-all ${
+                  activeError
+                    ? "border-red-300 bg-red-50/30 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-neutral-200 focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400"
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-600 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setLocalError("");
+                }}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className={`w-full rounded-xl border px-3.5 py-2.5 text-xs text-neutral-900 outline-none transition-all ${
+                  activeError
+                    ? "border-red-300 bg-red-50/30 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-neutral-200 focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400"
+                }`}
+              />
+            </div>
+
             <button
-              onClick={onSignIn}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold text-white shadow-sm hover:opacity-95 transition-all"
+              type="submit"
+              disabled={busy}
+              className="w-full rounded-xl px-4 py-3 text-xs font-bold text-white shadow-sm hover:opacity-95 transition-all disabled:opacity-60 mt-1 cursor-pointer"
               style={{ background: ORANGE }}
             >
-              <UserCheck className="h-4 w-4" /> Sign In as Admin (sahitsai6@gmail.com)
+              {busy ? "Authenticating…" : "Sign In to CRM"}
             </button>
 
-            {onPasswordSignIn ? (
-              showPassword ? (
-                <form
-                  className="mt-3 space-y-2 text-left"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    setBusy(true);
-                    await onPasswordSignIn(mail, password);
-                    setBusy(false);
-                  }}
-                >
-                  <input
-                    type="email"
-                    required
-                    value={mail}
-                    onChange={(event) => setMail(event.target.value)}
-                    placeholder="Admin Email"
-                    autoComplete="username"
-                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-xs outline-none focus:border-neutral-400"
-                  />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Password (Optional)"
-                    autoComplete="current-password"
-                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-xs outline-none focus:border-neutral-400"
-                  />
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="w-full rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-60"
-                  >
-                    {busy ? "Signing in…" : "Sign in with Email"}
-                  </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setShowPassword(true)}
-                  className="text-xs text-neutral-500 underline hover:text-neutral-700"
-                >
-                  Sign in with custom email instead
-                </button>
-              )
-            ) : null}
-          </div>
+            {/* Demo / Quick Fill Credentials */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMail("sahit");
+                  setPassword("Sahitsai@9866");
+                  setLocalError("");
+                }}
+                className="w-full py-1.5 px-3 bg-neutral-100 hover:bg-neutral-200 text-[#ef4d23] text-[11px] font-bold rounded-xl border border-neutral-200 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🔑 Auto-Fill Admin Credentials (sahit)</span>
+              </button>
+            </div>
+          </form>
         )}
-
-        {error ? <p className="text-xs text-[#ef4d23] font-medium">{error}</p> : null}
 
         <div className="pt-2 border-t border-neutral-100">
           <Link to="/" className="text-xs text-neutral-400 hover:text-neutral-600">

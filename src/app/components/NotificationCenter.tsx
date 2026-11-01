@@ -11,7 +11,18 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { NotificationItem } from "@/lib/delivery.functions";
+export type NotificationItem = {
+  id: string;
+  staff_id: string;
+  type: string;
+  title: string;
+  body: string;
+  deliverable_id?: string;
+  read: boolean;
+  timestamp?: string;
+  created_at?: string;
+};
+
 import { supabase } from "@/lib/supabase-client";
 
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
@@ -221,7 +232,7 @@ export default function NotificationCenter({
                   key={n.id}
                   onClick={() => {
                     handleMarkRead(n.id);
-                    onSelectDeliverable(n.deliverable_id);
+                    if (n.deliverable_id) onSelectDeliverable(n.deliverable_id);
                     setOpen(false);
                   }}
                   className={`p-3 rounded-2xl border text-xs space-y-1 cursor-pointer transition-all ${
@@ -244,7 +255,7 @@ export default function NotificationCenter({
                       {n.title}
                     </span>
                     <span className="text-[10px] font-bold text-slate-500">
-                      {new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {n.created_at ? new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-600 font-semibold leading-snug">{n.body}</p>
