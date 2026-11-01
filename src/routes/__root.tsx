@@ -53,32 +53,78 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
+  head: () => {
+    const gscVerification =
+      typeof process !== "undefined" && process.env?.VITE_GSC_VERIFICATION
+        ? process.env.VITE_GSC_VERIFICATION
+        : (import.meta as any).env?.VITE_GSC_VERIFICATION || "";
+
+    const ga4Id =
+      typeof process !== "undefined" && process.env?.VITE_GA4_ID
+        ? process.env.VITE_GA4_ID
+        : (import.meta as any).env?.VITE_GA4_ID || "";
+
+    const clarityId =
+      typeof process !== "undefined" && process.env?.VITE_CLARITY_ID
+        ? process.env.VITE_CLARITY_ID
+        : (import.meta as any).env?.VITE_CLARITY_ID || "";
+
+    const metaList: Array<Record<string, string>> = [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "lumen&co" },
-      { name: "description", content: "lumen&co website" },
-      { name: "author", content: "lumen&co" },
-      { property: "og:title", content: "lumen&co" },
-      { property: "og:description", content: "lumen&co website" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#EF4D23" },
+      { title: "Lumen & Co | Creative Digital Marketing Agency in India" },
+      {
+        name: "description",
+        content:
+          "AI-powered creative agency from India. Gen AI ads, reels, SEO, Meta ads and CRO for brands in India and the US. Book a free strategy call.",
+      },
+      { name: "author", content: "Sahit Sai Pothala" },
+      { property: "og:site_name", content: "Lumen & Co" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap",
-      },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-    ],
-  }),
+    ];
+
+    if (gscVerification) {
+      metaList.push({ name: "google-site-verification", content: gscVerification });
+    }
+
+    const scriptList: Array<{ type?: string; src?: string; async?: boolean; children?: string }> = [];
+
+    if (ga4Id) {
+      scriptList.push({
+        src: `https://www.googletagmanager.com/gtag/js?id=${ga4Id}`,
+        async: true,
+      });
+      scriptList.push({
+        children: `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '${ga4Id}');`,
+      });
+    }
+
+    if (clarityId) {
+      scriptList.push({
+        children: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "${clarityId}");`,
+      });
+    }
+
+    return {
+      meta: metaList,
+      links: [
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap",
+        },
+        { rel: "icon", href: "/favicon.png", type: "image/png" },
+      ],
+      scripts: scriptList,
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Lock, ShieldCheck, AlertTriangle } from "lucide-react";
+import LiveBackgroundVideo from "./LiveBackgroundVideo";
 
 import type { AdminState } from "./useAdminAuth";
 
@@ -37,21 +38,7 @@ export default function AdminGate({
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       {/* Live Background Video */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          disableRemotePlayback
-          {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
-          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-        />
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      </div>
+      <LiveBackgroundVideo overlayClassName="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-md p-7 text-center shadow-[0_20px_60px_-30px_rgba(0,0,0,0.5)] space-y-4 border border-white/20">
         <div className="mx-auto flex items-center justify-center pt-1 pb-2">

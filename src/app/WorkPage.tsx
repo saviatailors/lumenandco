@@ -1,6 +1,7 @@
 import { ChevronRight, ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import Navbar from "./components/Navbar";
+import LiveBackgroundVideo from "./components/LiveBackgroundVideo";
 import LeadFormDialog, { openLeadForm } from "./components/LeadForm";
 import {
   Eyebrow,
@@ -112,21 +113,7 @@ export default function WorkPage() {
       className="relative min-h-screen w-full p-3 sm:p-4"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          disableRemotePlayback
-          {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
-          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-        />
-        <div className="absolute inset-0 bg-white/25" />
-      </div>
+      <LiveBackgroundVideo />
 
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl">
         <div className="absolute inset-0 bg-white/5" />

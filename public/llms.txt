@@ -1,0 +1,76 @@
+# Lumen & Co — Agency Profile & Knowledge Graph (llms.txt)
+
+> Lumen & Co is a creative, AI-powered digital marketing agency based in India offering Gen AI ads, video editing, creatives, performance ads, SEO and CRO for brands in India and the US.
+
+## Key Facts
+- **Brand Name**: Lumen & Co (also known as Lumen and Co Agency)
+- **Primary Website**: https://www.lumenandco.com/
+- **Brand Color**: #EF4D23
+- **Headquarters**: Visakhapatnam, Andhra Pradesh, India (IN)
+- **Founder & Head of Growth**: Sahit Sai Pothala
+- **Contact Email**: sahitsai6@gmail.com
+- **Telephone / WhatsApp**: +91-7842410691
+- **Target Markets**: India (INR billing, D2C, local clinics) & United States (USD billing, offshore creative team, medical spas)
+- **Core Positioning**: "Judge us on profit, not on decks." Embedded growth partners measuring success in contribution margin and ROAS.
+- **Pricing Context**: Dedicated US offshore retainers starting from $600/month. Custom Indian packages starting from ₹35,000/month. Month-to-month flexibility after initial 90-day sprint.
+
+---
+
+## Core Service Offerings
+
+### 1. Gen AI Advertising
+- **URL**: https://www.lumenandco.com/services/gen-ai-ads/
+- **Description**: Scroll-stopping AI video and image ads produced in days instead of weeks for D2C brands, clinics, and startups. Rapid multivariant hook testing using generative AI models with human creative direction.
+
+### 2. Video & Reels Editing
+- **URL**: https://www.lumenandco.com/services/video-editing/
+- **Description**: High-retention short-form video editing for Instagram Reels, TikTok, YouTube Shorts, and paid Meta video ads. Includes kinetic captions, motion graphics, sound design, and 3-second opening hook iterations.
+
+### 3. Social Media Creatives
+- **URL**: https://www.lumenandco.com/services/creatives/
+- **Description**: Direct-response static ads, multi-slide educational carousels, and conversion-focused brand graphics delivered on predictable weekly cadences.
+
+### 4. Meta & Google Performance Ads
+- **URL**: https://www.lumenandco.com/services/performance-ads/
+- **Description**: Paid search and social campaigns engineered around profit margins, server-side Conversions API (CAPI) attribution, and weekly creative testing.
+
+### 5. Search Engine Optimization (SEO)
+- **URL**: https://www.lumenandco.com/services/seo/
+- **Description**: Technical SEO, bottom-of-the-funnel topic clusters, and Google Maps Local 3-Pack optimization that attracts high-intent organic commercial buyers.
+
+### 6. Conversion Rate Optimization (CRO) & Analytics
+- **URL**: https://www.lumenandco.com/services/analytics-cro/
+- **Description**: GA4 tracking clean-up, server-side CAPI event matching, user session replay audits, and high-converting landing page redesigns.
+
+---
+
+## United States Operations & Medical Spa Cluster
+
+### Offshore Agency Hub
+- **URL**: https://www.lumenandco.com/us/
+- **Summary**: High-velocity offshore creative and performance marketing team based in India serving US brands and agencies on overlapping US time zones (EST, CST, PST). Plans from $600/month.
+
+### Med Spa Marketing Hub
+- **URL**: https://www.lumenandco.com/us/med-spa-marketing/
+- **Summary**: Full-funnel patient acquisition for aesthetic clinics, medical spas, and plastic surgeons. Compliant video ads, Local 3-Pack SEO, and 2-minute automated SMS lead follow-ups.
+
+### Med Spa Local SEO
+- **URL**: https://www.lumenandco.com/us/med-spa-seo/
+- **Summary**: Local SEO and Google Business Profile ranking for high-intent searches like "Botox near me", lip fillers, and laser hair removal.
+
+### Med Spa Meta & Instagram Ads
+- **URL**: https://www.lumenandco.com/us/med-spa-ads/
+- **Summary**: Policy-compliant Facebook and Instagram ad campaigns showcasing injector authority and generating pre-qualified consultation bookings.
+
+---
+
+## Key Locations & Commercial Pages
+
+- **Visakhapatnam HQ**: https://www.lumenandco.com/locations/visakhapatnam/
+- **Pricing & Packages**: https://www.lumenandco.com/pricing/
+- **Case Studies & Work**: https://www.lumenandco.com/work/
+- **Blog & Growth Guides**: https://www.lumenandco.com/blog/
+- **About Lumen & Co**: https://www.lumenandco.com/about/
+- **Contact & Book a Strategy Call**: https://www.lumenandco.com/contact/
+- **XML Sitemap**: https://www.lumenandco.com/sitemap.xml
+

@@ -104,31 +104,37 @@ const SERVICES = [
     icon: Clapperboard,
     title: "Video editing",
     body: "Short-form edits, motion graphics and platform-native cuts built for retention, not just views.",
+    href: "/services/video-editing",
   },
   {
     icon: Brain,
     title: "Gen AI advertising",
     body: "AI-generated concepts, copy and creative variants scaled into real campaigns with human oversight.",
+    href: "/services/gen-ai-ads",
   },
   {
     icon: Palette,
     title: "Creatives",
     body: "Statics, carousels, UGC-style hooks and brand assets shipped weekly and plugged into ad sets.",
+    href: "/services/creatives",
   },
   {
     icon: Megaphone,
     title: "Ads",
     body: "Paid search and social campaigns rebuilt around profit, with weekly testing and budget guardrails.",
+    href: "/services/performance-ads",
   },
   {
     icon: Search,
     title: "SEO",
     body: "Technical fixes, content clusters and authority building for the terms your buyers actually search.",
+    href: "/services/seo",
   },
   {
     icon: BarChart3,
     title: "Analytics & CRO",
     body: "Clean attribution, server-side tracking and landing pages tuned until the conversion rate moves.",
+    href: "/services/analytics-cro",
   },
 ];
 
@@ -159,6 +165,14 @@ function Services() {
                 <p className="mt-1 sm:mt-2 text-neutral-600 text-[11px] sm:text-sm leading-snug sm:leading-relaxed">
                   {s.body}
                 </p>
+              </div>
+              <div className="mt-3 pt-2">
+                <Link
+                  to={s.href as any}
+                  className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-neutral-800 hover:text-[#ef4d23] transition-colors"
+                >
+                  Explore service →
+                </Link>
               </div>
             </div>
           );
@@ -628,32 +642,43 @@ export function Footer() {
             Sections
           </p>
           <ul className="mt-3 space-y-2" style={{ fontSize: 14 }}>
-            <li><a href="#top" onClick={(e) => goToSection(e, "top")} className="text-neutral-700 hover:text-black">Home</a></li>
-            <li><a href="#services" onClick={(e) => goToSection(e, "services")} className="text-neutral-700 hover:text-black">Services</a></li>
-            <li><Link to="/work" className="text-neutral-700 hover:text-black">Work</Link></li>
-            <li><a href="#about" onClick={(e) => goToSection(e, "about")} className="text-neutral-700 hover:text-black">About</a></li>
-            <li><a href="#contact" onClick={(e) => goToSection(e, "contact")} className="text-neutral-700 hover:text-black">Contact</a></li>
-            <li><Link to="/client" className="text-neutral-700 hover:text-black">Client sign in</Link></li>
+            <li><Link to="/" className="text-neutral-700 hover:text-black">Home</Link></li>
+            <li><Link to="/work/" className="text-neutral-700 hover:text-black">Case Studies</Link></li>
+            <li><Link to="/pricing/" className="text-neutral-700 hover:text-black">Pricing</Link></li>
+            <li><Link to="/blog/" className="text-neutral-700 hover:text-black">Blog &amp; Playbooks</Link></li>
+            <li><Link to="/about/" className="text-neutral-700 hover:text-black">About Us</Link></li>
+            <li><Link to="/contact/" className="text-neutral-700 hover:text-black">Contact</Link></li>
+            <li><Link to="/client/" className="text-neutral-700 hover:text-black">Client Portal</Link></li>
           </ul>
         </div>
         <div>
           <p className="text-neutral-500" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            Services
+            Core Services
           </p>
           <ul className="mt-3 space-y-2 text-neutral-700" style={{ fontSize: 14 }}>
-            <li>Paid search</li>
-            <li>Paid social</li>
-            <li>SEO & content</li>
-            <li>Analytics & CRO</li>
+            <li><Link to="/services/gen-ai-ads/" className="hover:text-black">Gen AI Ads</Link></li>
+            <li><Link to="/services/video-editing/" className="hover:text-black">Video &amp; Reels Editing</Link></li>
+            <li><Link to="/services/creatives/" className="hover:text-black">Social Creatives</Link></li>
+            <li><Link to="/services/performance-ads/" className="hover:text-black">Meta &amp; Google Ads</Link></li>
+            <li><Link to="/services/seo/" className="hover:text-black">SEO Services</Link></li>
+            <li><Link to="/services/analytics-cro/" className="hover:text-black">Analytics &amp; CRO</Link></li>
           </ul>
         </div>
         <div>
           <p className="text-neutral-500" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            Contact
+            US Hub &amp; Locations
           </p>
           <ul className="mt-3 space-y-2 text-neutral-700" style={{ fontSize: 14 }}>
-            <li>hello@lumenandco.in</li>
-            <li>Mon–Fri, 9–6</li>
+            <li><Link to="/us/" className="hover:text-black">US Offshore Agency</Link></li>
+            <li><Link to="/us/med-spa-marketing/" className="hover:text-black">Med Spa Marketing</Link></li>
+            <li><Link to="/us/med-spa-seo/" className="hover:text-black">Med Spa SEO</Link></li>
+            <li><Link to="/us/med-spa-ads/" className="hover:text-black">Med Spa Meta Ads</Link></li>
+            <li><Link to="/locations/visakhapatnam/" className="hover:text-black">Visakhapatnam HQ</Link></li>
+            <li className="pt-2 text-xs text-neutral-500">
+              Founder: Sahit Sai Pothala<br />
+              <a href="tel:+917842410691" className="hover:text-black">+91-7842410691</a><br />
+              <a href="mailto:sahitsai6@gmail.com" className="hover:text-black">sahitsai6@gmail.com</a>
+            </li>
           </ul>
         </div>
       </div>

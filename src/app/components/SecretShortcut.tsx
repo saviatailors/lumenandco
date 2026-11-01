@@ -29,7 +29,7 @@ export function SecretShortcut() {
 
       if (buffer.toLowerCase() === SEQUENCE) {
         buffer = "";
-        void router.navigate({ to: "/sahit" });
+        void router.navigate({ to: "/sahit/" });
       }
     };
 

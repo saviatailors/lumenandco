@@ -10,16 +10,37 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ClientRouteImport } from './routes/client'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as SahitRouteImport } from './routes/sahit'
 import { Route as WorkRouteImport } from './routes/work'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as LocationsVisakhapatnamRouteImport } from './routes/locations.visakhapatnam'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as SahitVideosRouteImport } from './routes/sahit_.videos'
+import { Route as ServicesAnalyticsCroRouteImport } from './routes/services.analytics-cro'
+import { Route as ServicesCreativesRouteImport } from './routes/services.creatives'
+import { Route as ServicesGenAiAdsRouteImport } from './routes/services.gen-ai-ads'
+import { Route as ServicesPerformanceAdsRouteImport } from './routes/services.performance-ads'
+import { Route as ServicesSeoRouteImport } from './routes/services.seo'
+import { Route as ServicesVideoEditingRouteImport } from './routes/services.video-editing'
+import { Route as UsIndexRouteImport } from './routes/us.index'
+import { Route as UsMedSpaAdsRouteImport } from './routes/us.med-spa-ads'
+import { Route as UsMedSpaMarketingRouteImport } from './routes/us.med-spa-marketing'
+import { Route as UsMedSpaSeoRouteImport } from './routes/us.med-spa-seo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientRoute = ClientRouteImport.update({
@@ -27,9 +48,19 @@ const ClientRoute = ClientRouteImport.update({
   path: '/client',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SahitRoute = SahitRouteImport.update({
@@ -42,6 +73,21 @@ const WorkRoute = WorkRouteImport.update({
   path: '/work',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsVisakhapatnamRoute = LocationsVisakhapatnamRouteImport.update({
+  id: '/locations/visakhapatnam',
+  path: '/locations/visakhapatnam',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortalTokenRoute = PortalTokenRouteImport.update({
   id: '/portal/$token',
   path: '/portal/$token',
@@ -52,73 +98,235 @@ const SahitVideosRoute = SahitVideosRouteImport.update({
   path: '/sahit/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesAnalyticsCroRoute = ServicesAnalyticsCroRouteImport.update({
+  id: '/services/analytics-cro',
+  path: '/services/analytics-cro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesCreativesRoute = ServicesCreativesRouteImport.update({
+  id: '/services/creatives',
+  path: '/services/creatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesGenAiAdsRoute = ServicesGenAiAdsRouteImport.update({
+  id: '/services/gen-ai-ads',
+  path: '/services/gen-ai-ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesPerformanceAdsRoute = ServicesPerformanceAdsRouteImport.update({
+  id: '/services/performance-ads',
+  path: '/services/performance-ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSeoRoute = ServicesSeoRouteImport.update({
+  id: '/services/seo',
+  path: '/services/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesVideoEditingRoute = ServicesVideoEditingRouteImport.update({
+  id: '/services/video-editing',
+  path: '/services/video-editing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsIndexRoute = UsIndexRouteImport.update({
+  id: '/us/',
+  path: '/us/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsMedSpaAdsRoute = UsMedSpaAdsRouteImport.update({
+  id: '/us/med-spa-ads',
+  path: '/us/med-spa-ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsMedSpaMarketingRoute = UsMedSpaMarketingRouteImport.update({
+  id: '/us/med-spa-marketing',
+  path: '/us/med-spa-marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsMedSpaSeoRoute = UsMedSpaSeoRouteImport.update({
+  id: '/us/med-spa-seo',
+  path: '/us/med-spa-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/client': typeof ClientRoute
+  '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/pricing': typeof PricingRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/locations/visakhapatnam': typeof LocationsVisakhapatnamRoute
   '/portal/$token': typeof PortalTokenRoute
   '/sahit/videos': typeof SahitVideosRoute
+  '/services/analytics-cro': typeof ServicesAnalyticsCroRoute
+  '/services/creatives': typeof ServicesCreativesRoute
+  '/services/gen-ai-ads': typeof ServicesGenAiAdsRoute
+  '/services/performance-ads': typeof ServicesPerformanceAdsRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/video-editing': typeof ServicesVideoEditingRoute
+  '/us/med-spa-ads': typeof UsMedSpaAdsRoute
+  '/us/med-spa-marketing': typeof UsMedSpaMarketingRoute
+  '/us/med-spa-seo': typeof UsMedSpaSeoRoute
+  '/blog/': typeof BlogIndexRoute
+  '/us/': typeof UsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/client': typeof ClientRoute
+  '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/pricing': typeof PricingRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/locations/visakhapatnam': typeof LocationsVisakhapatnamRoute
   '/portal/$token': typeof PortalTokenRoute
   '/sahit/videos': typeof SahitVideosRoute
+  '/services/analytics-cro': typeof ServicesAnalyticsCroRoute
+  '/services/creatives': typeof ServicesCreativesRoute
+  '/services/gen-ai-ads': typeof ServicesGenAiAdsRoute
+  '/services/performance-ads': typeof ServicesPerformanceAdsRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/video-editing': typeof ServicesVideoEditingRoute
+  '/us/med-spa-ads': typeof UsMedSpaAdsRoute
+  '/us/med-spa-marketing': typeof UsMedSpaMarketingRoute
+  '/us/med-spa-seo': typeof UsMedSpaSeoRoute
+  '/blog': typeof BlogIndexRoute
+  '/us': typeof UsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/client': typeof ClientRoute
+  '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/pricing': typeof PricingRoute
   '/sahit': typeof SahitRoute
   '/work': typeof WorkRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/locations/visakhapatnam': typeof LocationsVisakhapatnamRoute
   '/portal/$token': typeof PortalTokenRoute
   '/sahit_/videos': typeof SahitVideosRoute
+  '/services/analytics-cro': typeof ServicesAnalyticsCroRoute
+  '/services/creatives': typeof ServicesCreativesRoute
+  '/services/gen-ai-ads': typeof ServicesGenAiAdsRoute
+  '/services/performance-ads': typeof ServicesPerformanceAdsRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/video-editing': typeof ServicesVideoEditingRoute
+  '/us/med-spa-ads': typeof UsMedSpaAdsRoute
+  '/us/med-spa-marketing': typeof UsMedSpaMarketingRoute
+  '/us/med-spa-seo': typeof UsMedSpaSeoRoute
+  '/blog/': typeof BlogIndexRoute
+  '/us/': typeof UsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/client'
+    | '/contact'
     | '/delivery'
+    | '/pricing'
     | '/sahit'
     | '/work'
+    | '/blog/$slug'
+    | '/locations/visakhapatnam'
     | '/portal/$token'
     | '/sahit/videos'
+    | '/services/analytics-cro'
+    | '/services/creatives'
+    | '/services/gen-ai-ads'
+    | '/services/performance-ads'
+    | '/services/seo'
+    | '/services/video-editing'
+    | '/us/med-spa-ads'
+    | '/us/med-spa-marketing'
+    | '/us/med-spa-seo'
+    | '/blog/'
+    | '/us/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/client'
+    | '/contact'
     | '/delivery'
+    | '/pricing'
     | '/sahit'
     | '/work'
+    | '/blog/$slug'
+    | '/locations/visakhapatnam'
     | '/portal/$token'
     | '/sahit/videos'
+    | '/services/analytics-cro'
+    | '/services/creatives'
+    | '/services/gen-ai-ads'
+    | '/services/performance-ads'
+    | '/services/seo'
+    | '/services/video-editing'
+    | '/us/med-spa-ads'
+    | '/us/med-spa-marketing'
+    | '/us/med-spa-seo'
+    | '/blog'
+    | '/us'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/client'
+    | '/contact'
     | '/delivery'
+    | '/pricing'
     | '/sahit'
     | '/work'
+    | '/blog/$slug'
+    | '/locations/visakhapatnam'
     | '/portal/$token'
     | '/sahit_/videos'
+    | '/services/analytics-cro'
+    | '/services/creatives'
+    | '/services/gen-ai-ads'
+    | '/services/performance-ads'
+    | '/services/seo'
+    | '/services/video-editing'
+    | '/us/med-spa-ads'
+    | '/us/med-spa-marketing'
+    | '/us/med-spa-seo'
+    | '/blog/'
+    | '/us/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   ClientRoute: typeof ClientRoute
+  ContactRoute: typeof ContactRoute
   DeliveryRoute: typeof DeliveryRoute
+  PricingRoute: typeof PricingRoute
   SahitRoute: typeof SahitRoute
   WorkRoute: typeof WorkRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  LocationsVisakhapatnamRoute: typeof LocationsVisakhapatnamRoute
   PortalTokenRoute: typeof PortalTokenRoute
   SahitVideosRoute: typeof SahitVideosRoute
+  ServicesAnalyticsCroRoute: typeof ServicesAnalyticsCroRoute
+  ServicesCreativesRoute: typeof ServicesCreativesRoute
+  ServicesGenAiAdsRoute: typeof ServicesGenAiAdsRoute
+  ServicesPerformanceAdsRoute: typeof ServicesPerformanceAdsRoute
+  ServicesSeoRoute: typeof ServicesSeoRoute
+  ServicesVideoEditingRoute: typeof ServicesVideoEditingRoute
+  UsMedSpaAdsRoute: typeof UsMedSpaAdsRoute
+  UsMedSpaMarketingRoute: typeof UsMedSpaMarketingRoute
+  UsMedSpaSeoRoute: typeof UsMedSpaSeoRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+  UsIndexRoute: typeof UsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -130,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/client': {
       id: '/client'
       path: '/client'
@@ -137,11 +352,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delivery': {
       id: '/delivery'
       path: '/delivery'
       fullPath: '/delivery'
       preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sahit': {
@@ -158,6 +387,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/visakhapatnam': {
+      id: '/locations/visakhapatnam'
+      path: '/locations/visakhapatnam'
+      fullPath: '/locations/visakhapatnam'
+      preLoaderRoute: typeof LocationsVisakhapatnamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portal/$token': {
       id: '/portal/$token'
       path: '/portal/$token'
@@ -172,17 +422,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SahitVideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/analytics-cro': {
+      id: '/services/analytics-cro'
+      path: '/services/analytics-cro'
+      fullPath: '/services/analytics-cro'
+      preLoaderRoute: typeof ServicesAnalyticsCroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/creatives': {
+      id: '/services/creatives'
+      path: '/services/creatives'
+      fullPath: '/services/creatives'
+      preLoaderRoute: typeof ServicesCreativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/gen-ai-ads': {
+      id: '/services/gen-ai-ads'
+      path: '/services/gen-ai-ads'
+      fullPath: '/services/gen-ai-ads'
+      preLoaderRoute: typeof ServicesGenAiAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/performance-ads': {
+      id: '/services/performance-ads'
+      path: '/services/performance-ads'
+      fullPath: '/services/performance-ads'
+      preLoaderRoute: typeof ServicesPerformanceAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/seo': {
+      id: '/services/seo'
+      path: '/services/seo'
+      fullPath: '/services/seo'
+      preLoaderRoute: typeof ServicesSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/video-editing': {
+      id: '/services/video-editing'
+      path: '/services/video-editing'
+      fullPath: '/services/video-editing'
+      preLoaderRoute: typeof ServicesVideoEditingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/us/': {
+      id: '/us/'
+      path: '/us'
+      fullPath: '/us/'
+      preLoaderRoute: typeof UsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/us/med-spa-ads': {
+      id: '/us/med-spa-ads'
+      path: '/us/med-spa-ads'
+      fullPath: '/us/med-spa-ads'
+      preLoaderRoute: typeof UsMedSpaAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/us/med-spa-marketing': {
+      id: '/us/med-spa-marketing'
+      path: '/us/med-spa-marketing'
+      fullPath: '/us/med-spa-marketing'
+      preLoaderRoute: typeof UsMedSpaMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/us/med-spa-seo': {
+      id: '/us/med-spa-seo'
+      path: '/us/med-spa-seo'
+      fullPath: '/us/med-spa-seo'
+      preLoaderRoute: typeof UsMedSpaSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   ClientRoute: ClientRoute,
+  ContactRoute: ContactRoute,
   DeliveryRoute: DeliveryRoute,
+  PricingRoute: PricingRoute,
   SahitRoute: SahitRoute,
   WorkRoute: WorkRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  LocationsVisakhapatnamRoute: LocationsVisakhapatnamRoute,
   PortalTokenRoute: PortalTokenRoute,
   SahitVideosRoute: SahitVideosRoute,
+  ServicesAnalyticsCroRoute: ServicesAnalyticsCroRoute,
+  ServicesCreativesRoute: ServicesCreativesRoute,
+  ServicesGenAiAdsRoute: ServicesGenAiAdsRoute,
+  ServicesPerformanceAdsRoute: ServicesPerformanceAdsRoute,
+  ServicesSeoRoute: ServicesSeoRoute,
+  ServicesVideoEditingRoute: ServicesVideoEditingRoute,
+  UsMedSpaAdsRoute: UsMedSpaAdsRoute,
+  UsMedSpaMarketingRoute: UsMedSpaMarketingRoute,
+  UsMedSpaSeoRoute: UsMedSpaSeoRoute,
+  BlogIndexRoute: BlogIndexRoute,
+  UsIndexRoute: UsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

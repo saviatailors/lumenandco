@@ -28,27 +28,38 @@ export default function Navbar() {
           </div>
 
           <div
-            className="hidden md:flex items-center gap-6"
-            style={{ fontSize: 15 }}
+            className="hidden md:flex items-center gap-5 lg:gap-6"
+            style={{ fontSize: 14 }}
           >
-            <a href="#top" onClick={(e) => goToSection(e, "top")} className="inline-flex items-center gap-1.5">
+            <Link to="/" className="inline-flex items-center gap-1.5 hover:text-black text-neutral-800 transition-colors">
               <span
                 className="inline-block rounded-full bg-black"
                 style={{ width: 1.5, height: 1.5 }}
               />
               Home
+            </Link>
+            <a href="#services" onClick={(e) => goToSection(e, "services")} className="hover:text-black text-neutral-800 transition-colors">
+              Services
             </a>
-            <a href="#services" onClick={(e) => goToSection(e, "services")}>Services</a>
-            <Link to="/work">Work</Link>
-            <a href="#about" onClick={(e) => goToSection(e, "about")}>About</a>
-            <a
-              href="#contact" onClick={(e) => goToSection(e, "contact")}
-              className="inline-flex items-center gap-1"
+            <Link to="/work/" className="hover:text-black text-neutral-800 transition-colors">
+              Work
+            </Link>
+            <Link to="/pricing/" className="hover:text-black text-neutral-800 transition-colors">
+              Pricing
+            </Link>
+            <Link to="/blog/" className="hover:text-black text-neutral-800 transition-colors">
+              Blog
+            </Link>
+            <Link to="/about/" className="hover:text-black text-neutral-800 transition-colors">
+              About
+            </Link>
+            <Link
+              to="/contact/"
+              className="inline-flex items-center gap-1 font-medium transition-colors"
               style={{ color: "#ef4d23" }}
             >
               Contact
-              <ChevronDown className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
 
 
@@ -75,10 +86,11 @@ export default function Navbar() {
         </div>
 
         {open && (
-          <div className="absolute top-full left-2 right-2 mt-2 bg-white rounded-2xl shadow-lg border border-neutral-200 p-3 z-20 md:hidden">
+          <div className="absolute top-full left-2 right-2 mt-2 bg-white rounded-2xl shadow-lg border border-neutral-200 p-4 z-20 md:hidden">
             <div className="flex flex-col gap-3" style={{ fontSize: 15 }}>
-              <a
-                href="#top" onClick={(e) => { setOpen(false); goToSection(e, "top"); }}
+              <Link
+                to="/"
+                onClick={() => setOpen(false)}
                 className="inline-flex items-center gap-1.5"
               >
                 <span
@@ -86,24 +98,30 @@ export default function Navbar() {
                   style={{ width: 1.5, height: 1.5 }}
                 />
                 Home
-              </a>
+              </Link>
               <a href="#services" onClick={(e) => { setOpen(false); goToSection(e, "services"); }}>
                 Services
               </a>
-              <Link to="/work" onClick={() => setOpen(false)}>
+              <Link to="/work/" onClick={() => setOpen(false)}>
                 Work
               </Link>
-              <a href="#about" onClick={(e) => { setOpen(false); goToSection(e, "about"); }}>
+              <Link to="/pricing/" onClick={() => setOpen(false)}>
+                Pricing
+              </Link>
+              <Link to="/blog/" onClick={() => setOpen(false)}>
+                Blog
+              </Link>
+              <Link to="/about/" onClick={() => setOpen(false)}>
                 About
-              </a>
-              <a
-                href="#contact" onClick={(e) => { setOpen(false); goToSection(e, "contact"); }}
+              </Link>
+              <Link
+                to="/contact/"
+                onClick={() => setOpen(false)}
                 className="inline-flex items-center gap-1"
                 style={{ color: "#ef4d23" }}
               >
                 Contact
-                <ChevronDown className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           </div>
         )}

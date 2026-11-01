@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import LiveBackgroundVideo from "./LiveBackgroundVideo";
 import {
   LayoutDashboard,
   Users,
@@ -105,18 +106,11 @@ export default function CrmLayoutShell({
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#121318] text-[#222222] flex flex-col font-sans isolate z-10">
       {/* Stage Background Video Overlay (Viewport-wide glass stage) */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#121318] via-[#181924] to-[#0c0d12]">
-        <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-80 transition-opacity duration-700"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-        />
-      </div>
+      <LiveBackgroundVideo
+        containerClassName="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#121318] via-[#181924] to-[#0c0d12]"
+        className="opacity-80"
+        overlayClassName=""
+      />
 
       {/* ========================================================================= */}
       {/* 1. TOP BAR (64px Glass Header) */}
@@ -164,14 +158,14 @@ export default function CrmLayoutShell({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Quick App Switcher Links */}
           <div className="hidden xl:flex items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 text-[11px] font-semibold">
-            <Link to="/sahit" className="px-3 py-1 bg-[#ef4d23] text-white rounded-full shadow-lg shadow-[#ef4d23]/30 font-extrabold">
+            <Link to="/sahit/" className="px-3 py-1 bg-[#ef4d23] text-white rounded-full shadow-lg shadow-[#ef4d23]/30 font-extrabold">
               CRM
             </Link>
-            <Link to="/delivery" className="px-3 py-1 text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10 flex items-center gap-1">
+            <Link to="/delivery/" className="px-3 py-1 text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10 flex items-center gap-1">
               <Rocket className="h-3 w-3 text-[#ef4d23]" />
               <span>Delivery Hub</span>
             </Link>
-            <Link to="/client" className="px-3 py-1 text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10">
+            <Link to="/client/" className="px-3 py-1 text-white/80 hover:text-white rounded-full transition-colors hover:bg-white/10">
               Client Portal
             </Link>
           </div>
@@ -215,7 +209,7 @@ export default function CrmLayoutShell({
                   </span>
                 </div>
                 <Link
-                  to="/delivery"
+                  to="/delivery/"
                   onClick={() => setIsProfileMenuOpen(false)}
                   className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-2xl font-semibold flex items-center gap-2 transition-colors text-[#ef4d23]"
                 >
@@ -274,13 +268,13 @@ export default function CrmLayoutShell({
 
               {/* App Switcher for Mobile */}
               <div className="flex items-center gap-1 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20 text-xs font-semibold">
-                <Link to="/sahit" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 bg-[#ef4d23] text-white rounded-full font-bold">
+                <Link to="/sahit/" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 bg-[#ef4d23] text-white rounded-full font-bold">
                   CRM
                 </Link>
-                <Link to="/delivery" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
+                <Link to="/delivery/" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
                   Delivery
                 </Link>
-                <Link to="/client" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
+                <Link to="/client/" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 text-center py-1.5 text-white/80 hover:text-white rounded-full">
                   Client
                 </Link>
               </div>

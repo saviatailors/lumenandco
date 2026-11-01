@@ -73,7 +73,7 @@ export default function PortalPage() {
             <EnquiryDashboard enquiries={enquiries} initialId={activeId} />
             <p className="px-2 pb-10 text-xs text-neutral-500">
               Prefer signing in?{" "}
-              <Link to="/client" className="underline">
+              <Link to="/client/" className="underline">
                 Use your email address
               </Link>{" "}
               to reach this dashboard any time.

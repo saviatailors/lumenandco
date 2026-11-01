@@ -191,7 +191,7 @@ export default function VideoLibraryPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link
-              to="/sahit"
+              to="/sahit/"
               className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Enquiries

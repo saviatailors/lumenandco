@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
+import LiveBackgroundVideo from "./components/LiveBackgroundVideo";
 import {
   Loader2,
   LogOut,
@@ -477,18 +478,11 @@ export default function ClientPortalPage() {
     return (
       <div className="fixed inset-0 overflow-hidden bg-[#0c0d12] text-white flex items-center justify-center p-4 font-sans isolate">
         {/* Background Motion Stage */}
-        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]">
-          <video
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-70 transition-opacity duration-700"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-          />
-        </div>
+        <LiveBackgroundVideo
+          containerClassName="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]"
+          className="opacity-70"
+          overlayClassName=""
+        />
 
         <div className="w-full max-w-md bg-white/25 backdrop-blur-3xl border border-white/40 rounded-3xl p-8 shadow-2xl space-y-6 relative isolate text-white">
           {/* Header Branding */}
@@ -641,18 +635,11 @@ export default function ClientPortalPage() {
     return (
       <div className="fixed inset-0 overflow-y-auto bg-[#0c0d12] text-white flex flex-col items-center justify-center p-4 sm:p-6 font-sans isolate z-50">
         {/* Background Motion Stage */}
-        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]">
-          <video
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-70 transition-opacity duration-700"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-          />
-        </div>
+        <LiveBackgroundVideo
+          containerClassName="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-gradient-to-br from-[#0c0d12] via-[#12131c] to-[#08090d]"
+          className="opacity-70"
+          overlayClassName=""
+        />
 
         {/* Full Size Frosted Dark Glass Container */}
         <div className="w-full max-w-5xl bg-white/25 backdrop-blur-3xl border border-white/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto flex flex-col max-h-[95vh] text-white isolate">

@@ -1,17 +1,13 @@
 import { Link } from "@tanstack/react-router";
+import LiveBackgroundVideo from "../app/components/LiveBackgroundVideo";
 
 export default function NotFoundPage() {
   return (
     <main className="relative min-h-[100svh] w-full bg-black overflow-x-hidden select-none">
       {/* BACKGROUND VIDEO */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover opacity-100 z-0"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+      <LiveBackgroundVideo
+        containerClassName="absolute inset-0 h-full w-full pointer-events-none z-0"
+        overlayClassName=""
       />
 
       {/* HEADER LOGO */}
@@ -67,6 +63,23 @@ export default function NotFoundPage() {
             The path may be broken, but the journey isn't. Let's get you back.
           </span>
         </p>
+
+        {/* HELPFUL NAVIGATION BUTTONS */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Link
+            to="/"
+            className="rounded-full px-5 py-2.5 text-xs font-semibold text-white shadow-lg transition-transform hover:scale-105"
+            style={{ backgroundColor: "#ef4d23" }}
+          >
+            Return to Home
+          </Link>
+          <Link
+            to="/work/"
+            className="rounded-full border border-white/20 bg-white/10 backdrop-blur px-5 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+          >
+            Explore Case Studies
+          </Link>
+        </div>
       </div>
     </main>
   );

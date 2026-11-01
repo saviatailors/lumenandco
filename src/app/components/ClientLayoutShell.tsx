@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import LiveBackgroundVideo from "./LiveBackgroundVideo";
 import {
   LayoutDashboard,
   Eye,
@@ -86,19 +87,11 @@ export default function ClientLayoutShell({
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#0c0d12] text-neutral-900 flex flex-col font-sans isolate z-10">
       {/* Live Video Background Stage */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-85 transition-opacity duration-700"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-        />
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-xs" />
-      </div>
+      <LiveBackgroundVideo
+        containerClassName="fixed inset-0 pointer-events-none -z-10 overflow-hidden"
+        className="opacity-85"
+        overlayClassName="absolute inset-0 bg-white/20 backdrop-blur-xs"
+      />
 
       {/* ========================================================================= */}
       {/* 1. TOP HEADER (Motion Labs Aesthetic) */}
@@ -147,13 +140,13 @@ export default function ClientLayoutShell({
           {/* Quick links to CRM / Delivery */}
           <div className="hidden md:flex items-center gap-1.5 bg-white p-1 rounded-full border border-neutral-200/80 text-xs font-semibold shadow-2xs">
             <Link
-              to="/sahit"
+              to="/sahit/"
               className="px-3 py-1 text-neutral-600 hover:text-black rounded-full transition-colors"
             >
               CRM
             </Link>
             <Link
-              to="/delivery"
+              to="/delivery/"
               className="px-3 py-1 text-neutral-600 hover:text-black rounded-full transition-colors"
             >
               Delivery
