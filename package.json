@@ -15,6 +15,9 @@
   "overrides": {
     "rolldown": "1.2.1"
   },
+  "allowScripts": {
+    "core-js": true
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@modelcontextprotocol/sdk": "^1.30.1",
