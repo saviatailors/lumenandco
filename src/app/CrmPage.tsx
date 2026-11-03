@@ -2068,7 +2068,7 @@ export default function CrmPage() {
       {/* SCREEN: DEDICATED WHATSAPP WEB CHAT MESSENGER */}
       {/* ========================================================================= */}
       {currentTab === "chat" && (
-        <div className="h-[calc(100vh-112px)] w-full flex flex-col overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
+        <div className="h-full w-full flex flex-col overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
           <WhatsAppMessengerView
             currentUserRole={currentUserRole === "owner" ? "founder" : (currentUserRole as any)}
             currentUserName="Sahit Sai"

@@ -520,7 +520,13 @@ export default function CrmLayoutShell({
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 relative overflow-y-auto overflow-x-hidden isolate h-full px-1 sm:px-2 pb-6">
+        <main
+          className={`flex-1 min-w-0 relative isolate h-full px-1 sm:px-2 ${
+            currentTab === "chat"
+              ? "overflow-hidden pb-0"
+              : "overflow-y-auto overflow-x-hidden pb-6"
+          }`}
+        >
           {children}
         </main>
       </div>

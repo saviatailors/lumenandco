@@ -1,4 +1,4 @@
-import { Modal } from "./ui/Modal";
+import { useEffect } from "react";
 import WhatsAppMessengerView from "./WhatsAppMessengerView";
 import { UserRoleType } from "@/lib/messenger.types";
 
@@ -21,11 +21,33 @@ export default function BuiltInMessengerModal({
   clientBrandId,
   clientBrandName,
 }: BuiltInMessengerProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    // Prevent background scrolling while modal is active
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="" maxWidth="max-w-6xl">
-      <div className="-m-6 h-[85vh] max-h-[780px] overflow-hidden rounded-3xl flex flex-col">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-6xl h-[88vh] max-h-[820px] rounded-3xl shadow-2xl overflow-hidden border border-white/40 flex flex-col animate-in zoom-in-95 duration-150">
         <WhatsAppMessengerView
           currentUserRole={currentUserRole}
           currentUserId={currentUserId}
@@ -36,6 +58,6 @@ export default function BuiltInMessengerModal({
           isEmbeddedModal={true}
         />
       </div>
-    </Modal>
+    </div>
   );
 }

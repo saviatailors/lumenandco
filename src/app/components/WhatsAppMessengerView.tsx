@@ -1401,14 +1401,12 @@ export default function WhatsAppMessengerView({
 
   return (
     <div
-      className={`w-full h-full flex bg-white/90 backdrop-blur-2xl text-neutral-900 font-sans overflow-hidden border border-white/80 shadow-2xl relative isolate ${
-        isEmbeddedModal ? "min-h-[640px] rounded-3xl" : "rounded-3xl"
-      }`}
+      className="w-full h-full flex bg-white/90 backdrop-blur-2xl text-neutral-900 font-sans overflow-hidden border border-white/80 shadow-2xl relative isolate rounded-3xl"
     >
       {/* ========================================================================= */}
       {/* COLUMN 1: LEFTMOST NARROW VERTICAL ICON NAVBAR (Lumen Glass) */}
       {/* ========================================================================= */}
-      <div className="hidden sm:flex w-16 bg-neutral-100/80 backdrop-blur-xl border-r border-neutral-200/80 flex-col items-center justify-between py-5 shrink-0 z-20">
+      <div className="hidden sm:flex w-16 bg-neutral-100/80 backdrop-blur-xl border-r border-neutral-200/80 flex-col items-center justify-between py-5 shrink-0 z-20 overflow-hidden">
         <div className="flex flex-col items-center gap-6">
           {/* Brand Logo */}
           <div className="w-11 h-11 rounded-2xl bg-white p-1.5 flex items-center justify-center border border-neutral-200/80 shadow-xs cursor-pointer hover:scale-105 transition-all overflow-hidden" title="Lumen & Co">
@@ -1478,7 +1476,7 @@ export default function WhatsAppMessengerView({
       {/* ========================================================================= */}
       {/* COLUMN 2: CONVERSATION LIST SIDEBAR ("Chats") */}
       {/* ========================================================================= */}
-      <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-white/70 backdrop-blur-xl border-r border-neutral-200/80 flex-col shrink-0 isolate`}>
+      <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-white/70 backdrop-blur-xl border-r border-neutral-200/80 flex-col shrink-0 isolate overflow-hidden`}>
         {/* Chats Header */}
         <div className="h-16 px-5 flex items-center justify-between border-b border-neutral-200/80 shrink-0 bg-white/40">
           <div className="flex items-center gap-2">
@@ -1655,7 +1653,7 @@ export default function WhatsAppMessengerView({
       {/* ========================================================================= */}
       {/* COLUMN 3: MAIN CHAT WINDOW (Lumen Canvas) */}
       {/* ========================================================================= */}
-      <div className={`${!activeChannelId ? "hidden md:flex" : "flex"} flex-1 flex-col bg-[#f9fafb] overflow-hidden relative isolate`}>
+      <div className={`${!activeChannelId ? "hidden md:flex" : "flex"} flex-1 flex-col bg-[#f9fafb] overflow-hidden relative isolate h-full`}>
         {activeChannel ? (
           <>
             {/* Chat Header */}
@@ -1858,7 +1856,7 @@ export default function WhatsAppMessengerView({
             </div>
 
             {/* Bottom Input Bar Footer */}
-            <div className="p-3 sm:p-4 bg-white/95 border-t border-neutral-200/80">
+            <div className="p-3 sm:p-4 bg-white/95 border-t border-neutral-200/80 shrink-0">
               <form onSubmit={handleSendMessage} className="bg-neutral-50/90 border border-neutral-300/80 p-2 sm:p-2.5 rounded-2xl flex items-center gap-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#ef4d23]/20 focus-within:border-[#ef4d23] transition-all shadow-xs">
                 <button
                   type="button"
