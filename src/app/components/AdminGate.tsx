@@ -126,7 +126,7 @@ export default function AdminGate({
             setBusy(false);
             if (!ok) {
               setLocalError(
-                "Access Denied: This Google account is not on the authorized admin roster."
+                "Could not sign in with Google. Please try again."
               );
             }
           }
@@ -159,9 +159,7 @@ export default function AdminGate({
     const res = await effectiveSignIn(targetEmail, name);
     setBusy(false);
     if (!res) {
-      setLocalError(
-        `Access Denied: Google account (${targetEmail}) is not authorized.`
-      );
+      setLocalError("Could not sign in with Google account. Please try again.");
     }
   };
 
@@ -254,27 +252,9 @@ export default function AdminGate({
           </div>
         ) : effectiveState === "denied" ? (
           /* ========================================================================= */
-          /* ACCESS DENIED STATE */
+          /* SIGN OUT / RE-AUTHENTICATE */
           /* ========================================================================= */
           <div className="space-y-4 py-2">
-            <div className="rounded-2xl border border-red-200 bg-red-50/95 p-4 text-left text-xs text-red-900 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-red-950">
-                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
-                <span>Access Denied</span>
-              </div>
-              <p>
-                Google account <span className="font-semibold text-neutral-900">{effectiveEmail}</span> is not on the authorized whitelist.
-              </p>
-              <div className="pt-1 text-[11px] text-red-800">
-                Authorized accounts include:
-                <ul className="list-disc pl-4 mt-1 space-y-0.5 text-neutral-700 font-mono text-[10px]">
-                  <li>sahitsai6@gmail.com (Super Admin)</li>
-                  <li>saviatailors@gmail.com (Admin)</li>
-                  <li>*@lumenandco.in (Lumen & Co Staff)</li>
-                </ul>
-              </div>
-            </div>
-
             <button
               onClick={() => {
                 setLocalError("");
@@ -283,7 +263,7 @@ export default function AdminGate({
               className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <GoogleIcon className="h-4 w-4" />
-              <span>Sign in with a different Google account</span>
+              <span>Sign in with Google</span>
             </button>
           </div>
         ) : (
@@ -334,18 +314,18 @@ export default function AdminGate({
               </button>
             </div>
 
-            {/* Secondary team options: Login as Savia Tailors or custom company email */}
+            {/* Secondary options: Sign in with another Google account */}
             {showManualGoogle ? (
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50/90 p-3.5 text-left space-y-2.5 animate-fadeIn">
                 <label className="block text-[11px] font-semibold text-neutral-700">
-                  Sign in with Team Google Account
+                  Enter Google Account Email
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="email"
                     value={customEmail}
                     onChange={(e) => setCustomEmail(e.target.value)}
-                    placeholder="name@lumenandco.in"
+                    placeholder="your-email@gmail.com"
                     className="flex-1 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 outline-none focus:border-[#ef4d23]"
                   />
                   <button
@@ -377,7 +357,7 @@ export default function AdminGate({
                 onClick={() => setShowManualGoogle(true)}
                 className="text-[11px] text-neutral-500 hover:text-neutral-800 transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
               >
-                <span>Sign in with another authorized Google account</span>
+                <span>Sign in with another Google account</span>
                 <ChevronDown className="h-3 w-3" />
               </button>
             )}

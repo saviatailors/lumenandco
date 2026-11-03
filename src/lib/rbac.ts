@@ -95,10 +95,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
 
 /**
  * Returns the assigned RBAC role for a given email address.
- * Returns null if the email is unauthorized.
+ * Defaults to 'admin' for any authenticated Google account,
+ * while reserving 'super_admin' exclusively for authorized ownership.
  */
-export function getRoleForEmail(email?: string | null): UserRole | null {
-  if (!email) return null;
+export function getRoleForEmail(email?: string | null): UserRole {
+  if (!email) return "admin";
   const clean = email.trim().toLowerCase();
 
   // 1. Super Admin: strictly restricted to authorized super admin email
@@ -114,43 +115,21 @@ export function getRoleForEmail(email?: string | null): UserRole | null {
     return "super_admin";
   }
 
-  // 3. Admin list
-  if (ADMIN_EMAILS_LIST.some((e) => e.toLowerCase() === clean)) {
-    return "admin";
-  }
-
-  // 4. Check ADMIN_EMAILS environment variable
-  const envAdmins =
-    (typeof process !== "undefined" && process.env?.["ADMIN_EMAILS"]) ||
-    (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_ADMIN_EMAILS);
-  if (envAdmins) {
-    const list = String(envAdmins)
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    if (list.includes(clean)) {
-      return "admin";
-    }
-  }
-
-  // 5. Manager list
+  // 3. Manager list
   if (MANAGER_EMAILS_LIST.some((e) => e.toLowerCase() === clean)) {
     return "manager";
   }
 
-  // 6. Company domain addresses default to employee role if not elevated above
-  if (clean.endsWith("@lumenandco.in") || clean.endsWith("@lumenandco.com")) {
-    return "employee";
-  }
-
-  return null;
+  // All other authenticated Google accounts are granted admin access
+  return "admin";
 }
 
 /**
- * Checks whether an email is pre-approved for any Command Center access.
+ * Checks whether an email is authorized for Command Center access.
+ * Any authenticated Google account is permitted.
  */
 export function isAuthorizedEmail(email?: string | null): boolean {
-  return getRoleForEmail(email) !== null;
+  return typeof email === "string" && email.trim().length > 0;
 }
 
 /**
@@ -198,3 +177,4 @@ export function getRoleBadgeClass(role: UserRole): string {
       return "bg-neutral-500/20 text-neutral-300 border border-neutral-500/40";
   }
 }
+
