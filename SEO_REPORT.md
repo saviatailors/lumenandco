@@ -123,3 +123,4 @@ LIGHTHOUSE-EQUIVALENT SEO SCORE: 100/100
   - LinkedIn: `https://linkedin.com/company/lumenandco`
   - X / Twitter: `https://x.com/lumenandco`
 - [ ] **OG Images:** Custom branded 1200×630 share graphics can be uploaded to `public/og-image.jpg` and `public/og-medspa.jpg`.
+
