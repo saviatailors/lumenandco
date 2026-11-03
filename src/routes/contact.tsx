@@ -157,11 +157,11 @@ function ContactPage() {
 
               <div>
                 <button
-                  onClick={openLeadForm}
-                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-full text-white py-3 text-sm font-semibold shadow hover-lift transition-transform"
+                  onClick={() => openLeadForm("calendar")}
+                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-full text-white py-3 text-sm font-semibold shadow hover-lift transition-transform cursor-pointer"
                   style={{ backgroundColor: "#ef4d23" }}
                 >
-                  Open Booking Form
+                  Schedule 30-Min Call
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

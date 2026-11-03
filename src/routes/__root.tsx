@@ -147,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 import { ToastProvider } from "@/app/components/ui/Toast";
+import CalendlyWidget from "@/app/components/CalendlyWidget";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -155,6 +156,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <SecretShortcut />
+        <CalendlyWidget />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
       </ToastProvider>

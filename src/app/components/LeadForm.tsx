@@ -10,15 +10,19 @@ import {
   Calendar as CalendarIcon,
   Check,
   User,
+  ExternalLink,
+  Sparkles,
+  PhoneCall,
 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase-client";
 import { captureInboundLead } from "@/lib/lead-capture";
+import { buildCalendlyUrl, CALENDLY_BRANDED_URL } from "./CalendlyWidget";
 
 const OPEN_EVENT = "convix:open-lead-form";
 
-export function openLeadForm() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
+export function openLeadForm(tab: "form" | "calendar" = "form") {
+  window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: { tab } }));
 }
 
 const schema = z.object({
@@ -53,38 +57,6 @@ const GOALS = [
   "Brand & PR",
 ];
 
-const TIMEZONES = [
-  "Asia/Kolkata",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Europe/London",
-  "Europe/Paris",
-  "Asia/Singapore",
-  "Australia/Sydney",
-];
-
-const TIME_SLOTS_12H = [
-  "09:30am",
-  "10:00am",
-  "11:30am",
-  "02:00pm",
-  "03:30pm",
-  "05:00pm",
-  "06:30pm",
-  "11:30pm",
-];
-
-const TIME_SLOTS_24H = [
-  "09:30",
-  "10:00",
-  "11:30",
-  "14:00",
-  "15:30",
-  "17:00",
-  "18:30",
-  "23:30",
-];
-
 const inputClass =
   "w-full rounded-2xl border border-neutral-200/90 bg-white px-4 py-3 outline-none focus:border-[#ef4d23] focus:ring-1 focus:ring-[#ef4d23] text-sm text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs";
 
@@ -96,19 +68,12 @@ export default function LeadFormDialog() {
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
 
-  // Calendar state matching Image 2
-  const [selectedDay, setSelectedDay] = useState(25);
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(8); // September (0-indexed 8)
-  const [selectedYear] = useState(2026);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState("11:30pm");
-  const [timeFormat, setTimeFormat] = useState<"12h" | "24h">("12h");
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
-
   useEffect(() => {
-    const onOpen = () => {
+    const onOpen = (e: Event) => {
+      const custom = e as CustomEvent<{ tab?: "form" | "calendar" }>;
       setDone(false);
       setError(null);
-      setActiveTab("form");
+      setActiveTab(custom.detail?.tab || "form");
       setOpen(true);
     };
     window.addEventListener(OPEN_EVENT, onOpen);
@@ -132,11 +97,6 @@ export default function LeadFormDialog() {
 
   const set = (key: keyof typeof EMPTY, v: string) =>
     setValues((prev) => ({ ...prev, [key]: v }));
-
-  const monthsList = [
-    "January", "February", "March", "April", "May", "June", 
-    "July", "August", "September", "October", "November", "December"
-  ];
 
   async function submitForm(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -167,41 +127,37 @@ export default function LeadFormDialog() {
     setDone(true);
   }
 
-  async function confirmBooking() {
+  async function confirmBooking(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     setError(null);
-    if (!values.name || !values.name.trim()) {
-      setError("Please enter your name so we know who to meet with");
-      return;
-    }
-    if (!values.email || !values.email.trim() || !values.email.includes("@")) {
-      setError("Please enter a valid work email for your calendar invite");
-      return;
-    }
-
     setSending(true);
-    const monthName = monthsList[selectedMonthIndex] || "September";
-    const dateStr = `${monthName} ${selectedDay}, ${selectedYear} at ${selectedTimeSlot} (${timezone})`;
 
-    try {
-      await captureInboundLead({
-        name: values.name.trim(),
-        email: values.email.trim(),
-        phone: values.phone?.trim() || undefined,
-        company: values.company?.trim() || undefined,
-        website: values.website?.trim() || undefined,
-        budget: values.budget?.trim() || undefined,
-        goal: values.goal?.trim() || "30-min Strategy & Audit Meeting",
-        message: values.message?.trim()
-          ? `Scheduled 30-min meeting for ${dateStr}. Note: ${values.message.trim()}`
-          : `Scheduled 30-min strategy meeting for ${dateStr}.`,
-        scheduled_meeting_date: dateStr,
-        is_booking: true,
-      });
-    } catch (err) {
-      console.warn("Booking lead capture error:", err);
+    if (values.name.trim() || values.email.trim()) {
+      try {
+        await captureInboundLead({
+          name: values.name.trim() || "Website Visitor",
+          email: values.email.trim() || "visitor@calendly.com",
+          phone: values.phone?.trim() || undefined,
+          company: values.company?.trim() || undefined,
+          website: values.website?.trim() || undefined,
+          budget: values.budget?.trim() || undefined,
+          goal: "30-min Strategy Call (Calendly)",
+          message: values.message?.trim() || "Requested 30-min growth strategy audit meeting via Calendly.",
+          scheduled_meeting_date: "Pending Calendly Selection",
+          is_booking: true,
+        });
+      } catch (err) {
+        console.warn("Booking lead capture error:", err);
+      }
     }
+
     setSending(false);
-    setDone(true);
+    const targetUrl = buildCalendlyUrl({
+      name: values.name,
+      email: values.email,
+    });
+    // Redirect directly to Calendly with signature Lumen & Co brand colors (#ef4d23)
+    window.location.href = targetUrl;
   }
 
   return (
@@ -262,7 +218,7 @@ export default function LeadFormDialog() {
 
         {/* Done State */}
         {done ? (
-          <div className="py-10 text-center max-w-md mx-auto">
+          <div className="py-10 text-center max-w-lg mx-auto">
             <span
               className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-xs border border-neutral-200/60"
               style={{ fontSize: 13 }}
@@ -289,16 +245,22 @@ export default function LeadFormDialog() {
               </span>
             </h2>
             <p className="mt-3 text-neutral-600 text-sm leading-relaxed">
-              {activeTab === "calendar"
-                ? `Your 30-minute audit meeting is reserved for Sep ${selectedDay}, ${selectedYear} at ${selectedTimeSlot} (${timezone}). A calendar invite has been dispatched.`
-                : "A senior growth strategist will review your details and send your free audit roadmap within 24 hours."}
+              Your details have been received and saved. You can also pick a direct 30-minute growth strategy time slot on our calendar right now:
             </p>
-            <button
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#0b0f1a] text-white px-7 py-3 hover-lift text-sm font-medium shadow-md"
-              onClick={() => setOpen(false)}
-            >
-              Back to site
-            </button>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={buildCalendlyUrl({ name: values.name, email: values.email })}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#ef4d23] hover:bg-[#d83f17] text-white px-7 py-3 text-sm font-bold shadow-md shadow-[#ef4d23]/25 transition-all cursor-pointer"
+              >
+                <CalendarIcon className="w-4 h-4" /> Pick 30-Min Call Slot on Calendly →
+              </a>
+              <button
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white border border-neutral-300 text-neutral-700 px-6 py-3 text-sm font-medium hover:bg-neutral-50 shadow-xs cursor-pointer"
+                onClick={() => setOpen(false)}
+              >
+                Done
+              </button>
+            </div>
           </div>
         ) : activeTab === "form" ? (
           /* TAB 1: FORM VIEW (IMAGE 1 EXACT MATCH) */
@@ -466,263 +428,159 @@ export default function LeadFormDialog() {
             </form>
           </div>
         ) : (
-          /* TAB 2: CALENDAR SCHEDULER VIEW (IMAGE 2 EXACT MATCH) */
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-neutral-200/80 shadow-md relative overflow-hidden">
+          /* TAB 2: 30-MIN STRATEGY CALL SCHEDULER VIEW */
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-md relative overflow-hidden">
             {/* Top Brand Accent Bar */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#ef4d23]" />
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-2">
-              {/* Left Column: Host info */}
-              <div className="md:col-span-3 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-neutral-200/80 pb-5 md:pb-0">
-                <div className="w-11 h-11 rounded-full bg-neutral-800 text-white flex items-center justify-center font-bold text-sm overflow-hidden border border-neutral-200 shadow-xs">
-                  <span className="text-xs bg-gradient-to-tr from-emerald-600 to-teal-400 w-full h-full flex items-center justify-center">
-                    MP
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-2 items-center">
+              {/* Left Column: Host & Meeting Details */}
+              <div className="md:col-span-5 pr-0 md:pr-6 border-b md:border-b-0 md:border-r border-neutral-200/80 pb-6 md:pb-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#ef4d23] text-white flex items-center justify-center font-bold text-sm shadow-sm ring-4 ring-[#ef4d23]/10">
+                    SP
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-neutral-900">Sahit Sai Pothala</h4>
+                    <p className="text-xs text-neutral-500">Founder &amp; Growth Lead • Lumen &amp; Co</p>
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ef4d23]/10 text-[#ef4d23] text-[11px] font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#ef4d23]" />
+                    30-Minute Growth Strategy Call
                   </span>
+                  <h3 className="text-2xl font-bold text-neutral-900 mt-2 tracking-tight">
+                    Scale Your Performance &amp; Creatives
+                  </h3>
+                  <p className="mt-2 text-xs text-neutral-600 leading-relaxed">
+                    A private 1-on-1 strategy session to audit your current marketing funnel, creative velocity, and paid acquisition bottlenecks.
+                  </p>
                 </div>
-                <p className="mt-2.5 text-xs font-semibold text-neutral-600">Mohit Pandey</p>
-                <h3 className="text-xl font-bold text-neutral-900 leading-snug">30 min meeting</h3>
 
-                <div className="mt-4 space-y-2.5 text-xs font-medium text-neutral-600">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-neutral-500" />
-                    <span>30m</span>
+                <div className="mt-5 space-y-2.5 text-xs font-medium text-neutral-700 bg-neutral-50 p-4 rounded-2xl border border-neutral-200/70">
+                  <div className="flex items-center gap-2.5">
+                    <Clock className="w-4 h-4 text-[#ef4d23]" />
+                    <span>30 Minutes duration</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4 text-neutral-500" />
-                    <span>Cal Video</span>
+                  <div className="flex items-center gap-2.5">
+                    <Video className="w-4 h-4 text-[#ef4d23]" />
+                    <span>Google Meet (web conferencing)</span>
                   </div>
-                  <div className="pt-2">
-                    <div className="relative inline-block w-full">
-                      <select
-                        value={timezone}
-                        onChange={(e) => setTimezone(e.target.value)}
-                        className="w-full appearance-none bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-neutral-700 pr-7 cursor-pointer hover:bg-neutral-100 transition-colors"
-                      >
-                        {TIMEZONES.map((tz) => (
-                          <option key={tz} value={tz}>
-                            {tz}
-                          </option>
-                        ))}
-                      </select>
-                      <Globe className="w-3.5 h-3.5 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
+                  <div className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#ef4d23]" />
+                    <span>Live ROAS audit &amp; actionable recommendations</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Globe className="w-4 h-4 text-[#ef4d23]" />
+                    <span>Auto-adjusts to your local timezone</span>
                   </div>
                 </div>
               </div>
 
-              {/* Middle Column: Calendar Month View */}
-              <div className="md:col-span-5 px-0 md:px-3 border-b md:border-b-0 md:border-r border-neutral-200/80 pb-5 md:pb-0">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-sm font-semibold text-neutral-900">
-                    {monthsList[selectedMonthIndex]} <span className="text-neutral-500 font-normal">{selectedYear}</span>
-                  </h4>
-                  <div className="flex items-center gap-1 text-neutral-500">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMonthIndex((prev) => Math.max(0, prev - 1))}
-                      className="p-1 hover:text-black hover:bg-neutral-100 rounded-md transition-all"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMonthIndex((prev) => Math.min(11, prev + 1))}
-                      className="p-1 hover:text-black hover:bg-neutral-100 rounded-md transition-all"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Days of week header */}
-                <div className="grid grid-cols-7 text-center text-[10px] font-bold text-neutral-400 tracking-wider mb-2">
-                  <span>SUN</span>
-                  <span>MON</span>
-                  <span>TUE</span>
-                  <span>WED</span>
-                  <span>THU</span>
-                  <span>FRI</span>
-                  <span>SAT</span>
-                </div>
-
-                {/* Date Grid matching Image 2 */}
-                <div className="grid grid-cols-7 gap-1.5 text-center text-xs">
-                  {/* Empty cells before month starts */}
-                  <div className="py-2.5" />
-                  <div className="py-2.5" />
-
-                  {/* Days 8 to 24 */}
-                  {[8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setSelectedDay(d)}
-                      className={`py-2 rounded-xl text-neutral-700 font-medium transition-all hover:bg-neutral-100 ${
-                        selectedDay === d ? "bg-neutral-200 font-bold" : ""
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-
-                  {/* Active Selected Day (25th) */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDay(25)}
-                    className={`py-2 rounded-xl text-white font-semibold transition-all relative flex flex-col items-center justify-center ${
-                      selectedDay === 25 ? "bg-[#ef4d23] shadow-xs" : "bg-[#ef4d23]/80 text-white"
-                    }`}
-                  >
-                    <span>25</span>
-                    <span className="w-1 h-1 rounded-full bg-white mt-0.5" />
-                  </button>
-
-                  {/* Day 26 */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDay(26)}
-                    className={`py-2 rounded-xl font-medium transition-all ${
-                      selectedDay === 26 ? "bg-[#ef4d23] text-white" : "bg-[#f5f3ee] text-neutral-800 hover:bg-[#eae6de]"
-                    }`}
-                  >
-                    26
-                  </button>
-
-                  {/* Days 27, 28, 29, 30 with grey background pills */}
-                  {[27, 28, 29, 30].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setSelectedDay(d)}
-                      className={`py-2 rounded-xl font-medium transition-all ${
-                        selectedDay === d ? "bg-[#ef4d23] text-white" : "bg-[#f5f3ee] text-neutral-800 hover:bg-[#eae6de]"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-
-                  {/* Next month days OCT 1 to 10 */}
-                  {[{ num: 1, tag: "OCT" }, { num: 2 }, { num: 3 }, { num: 4 }, { num: 5 }, { num: 6 }, { num: 7 }, { num: 8 }, { num: 9 }, { num: 10 }].map((item, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setSelectedDay(item.num)}
-                      className={`py-1.5 rounded-xl font-medium transition-all flex flex-col items-center justify-center ${
-                        selectedDay === item.num ? "bg-[#ef4d23] text-white" : "bg-[#f5f3ee] text-neutral-800 hover:bg-[#eae6de]"
-                      }`}
-                    >
-                      {item.tag && (
-                        <span className="text-[8px] tracking-tighter uppercase font-semibold text-neutral-500 leading-none">
-                          {item.tag}
-                        </span>
-                      )}
-                      <span className="text-xs">{item.num}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Column: Time Slots & Contact */}
-              <div className="md:col-span-4 pl-0 md:pl-3 flex flex-col justify-between">
+              {/* Right Column: Pre-fill & Instant Redirect to Calendly */}
+              <div className="md:col-span-7 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-neutral-800">
-                      {monthsList[selectedMonthIndex]?.slice(0, 3)} {selectedDay}th
-                    </span>
-                    <div className="inline-flex bg-neutral-100 p-0.5 rounded-lg border border-neutral-200/80 text-[11px] font-medium">
-                      <button
-                        type="button"
-                        onClick={() => setTimeFormat("12h")}
-                        className={`px-2 py-0.5 rounded-md transition-all ${
-                          timeFormat === "12h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
-                        }`}
-                      >
-                        12h
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTimeFormat("24h")}
-                        className={`px-2 py-0.5 rounded-md transition-all ${
-                          timeFormat === "24h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
-                        }`}
-                      >
-                        24h
-                      </button>
+                  <h4 className="text-base font-bold text-neutral-900">Enter details to pick your slot</h4>
+                  <p className="text-xs text-neutral-500 mt-0.5 mb-4">
+                    We'll pre-fill your information on Calendly and record your audit request in our CRM.
+                  </p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
+                        Your Name <span className="text-[#ef4d23]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3.5 py-2.5 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                        placeholder="e.g. Alex Morgan"
+                        value={values.name}
+                        maxLength={100}
+                        required
+                        onChange={(e) => set("name", e.target.value)}
+                      />
                     </div>
-                  </div>
 
-                  <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
-                    {(timeFormat === "12h" ? TIME_SLOTS_12H : TIME_SLOTS_24H).map((slot) => {
-                      const isSelected = selectedTimeSlot === slot;
-                      return (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setSelectedTimeSlot(slot)}
-                          className={`w-full py-1.5 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer ${
-                            isSelected
-                              ? "bg-[#ef4d23] text-white border-[#ef4d23] shadow-md font-semibold"
-                              : "bg-white border-neutral-200 text-neutral-800 hover:border-[#ef4d23] hover:text-[#ef4d23] hover:bg-[#ef4d23]/5"
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
+                        Work Email <span className="text-[#ef4d23]">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3.5 py-2.5 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                        placeholder="e.g. alex@company.com"
+                        value={values.email}
+                        maxLength={255}
+                        required
+                        onChange={(e) => set("email", e.target.value)}
+                      />
+                    </div>
 
-                {/* Direct Contact Inputs for Instant Booking */}
-                <div className="mt-3 pt-3 border-t border-neutral-200/80 space-y-2">
-                  <div className="space-y-1.5">
-                    <input
-                      type="text"
-                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
-                      placeholder="Your full name *"
-                      value={values.name}
-                      maxLength={100}
-                      required
-                      onChange={(e) => set("name", e.target.value)}
-                    />
-                    <input
-                      type="email"
-                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
-                      placeholder="Work email *"
-                      value={values.email}
-                      maxLength={255}
-                      required
-                      onChange={(e) => set("email", e.target.value)}
-                    />
-                    <input
-                      type="tel"
-                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
-                      placeholder="Phone / WhatsApp (optional)"
-                      value={values.phone}
-                      maxLength={30}
-                      onChange={(e) => set("phone", e.target.value)}
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
+                          Phone / WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3.5 py-2.5 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                          placeholder="+91 / +1 ..."
+                          value={values.phone}
+                          maxLength={30}
+                          onChange={(e) => set("phone", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
+                          Company / Website
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3.5 py-2.5 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                          placeholder="e.g. brand.com"
+                          value={values.company}
+                          maxLength={100}
+                          onChange={(e) => set("company", e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {error && (
-                    <p className="text-[#ef4d23] text-[11px] font-medium" role="alert">
+                    <p className="text-[#ef4d23] text-xs font-medium mt-3" role="alert">
                       {error}
                     </p>
                   )}
+                </div>
 
+                <div className="mt-6 pt-5 border-t border-neutral-200/80 space-y-3">
                   <button
                     type="button"
                     onClick={confirmBooking}
                     disabled={sending}
-                    className="w-full bg-[#ef4d23] hover:bg-[#d83f17] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-60"
+                    className="w-full bg-[#ef4d23] hover:bg-[#d83f17] text-white font-bold text-sm py-3 px-5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-[#ef4d23]/25 disabled:opacity-60 hover:scale-[1.01] active:scale-[0.99]"
                   >
                     {sending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <Check className="w-4 h-4" />
+                      <CalendarIcon className="w-4 h-4" />
                     )}
-                    {sending ? "Reserving slot..." : `Confirm for ${selectedTimeSlot}`}
+                    {sending ? "Connecting to Calendly..." : "Choose 30-Min Time Slot on Calendly →"}
                   </button>
+
+                  <div className="flex items-center justify-between text-[11px] text-neutral-500 px-1">
+                    <span>Branded Calendly Integration</span>
+                    <a
+                      href={CALENDLY_BRANDED_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#ef4d23] font-medium hover:underline inline-flex items-center gap-1"
+                    >
+                      Open directly in new tab ↗
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
