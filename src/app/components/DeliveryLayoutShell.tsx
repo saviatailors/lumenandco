@@ -195,7 +195,7 @@ export default function DeliveryLayoutShell({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="inline-block bg-purple-500/30 text-purple-300 border border-purple-500/40 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                      Operations Admin
+                      {admin.roleLabel || "Operations Admin"}
                     </span>
                     <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-medium px-2 py-0.5 rounded-full">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

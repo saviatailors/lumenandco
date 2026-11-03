@@ -8,6 +8,7 @@ export const checkAdmin = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .validator((data: unknown) => z.object({}).parse(data ?? {}))
   .handler(async ({ context }) => {
-    const email = (context.claims as { email?: string } | null)?.email?.toLowerCase() ?? "";
+    const claims = (context as any)?.claims as { email?: string } | undefined;
+    const email = claims?.email?.toLowerCase() ?? "";
     return { email, isAdmin: await isAdminEmail(email) };
   });

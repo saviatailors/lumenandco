@@ -227,25 +227,50 @@ export default function AdminGate({
               Verifying Google Security Token…
             </p>
           </div>
-        ) : effectiveState === "denied" ? (
+        ) : effectiveState === "expired" ? (
           /* ========================================================================= */
-          /* ACCESS DENIED STATE */
+          /* SESSION EXPIRED / TIMEOUT STATE */
           /* ========================================================================= */
           <div className="space-y-4 py-2">
             <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-left text-xs text-amber-900 space-y-2">
               <div className="flex items-center gap-2 font-bold text-amber-950">
                 <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
-                <span>Unauthorized Account</span>
+                <span>Session Timed Out</span>
+              </div>
+              <p>
+                Your secure session has expired for security compliance. Please sign in again with your authorized Google account.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => handleQuickGoogleSignIn("sahitsai6@gmail.com", "Sahit Sai Pothala")}
+              className="w-full rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <GoogleIcon className="h-4 w-4" />
+              <span>Re-authenticate with Google</span>
+            </button>
+          </div>
+        ) : effectiveState === "denied" ? (
+          /* ========================================================================= */
+          /* ACCESS DENIED STATE */
+          /* ========================================================================= */
+          <div className="space-y-4 py-2">
+            <div className="rounded-2xl border border-red-200 bg-red-50/95 p-4 text-left text-xs text-red-900 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-red-950">
+                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                <span>Access Denied</span>
               </div>
               <p>
                 Google account <span className="font-semibold text-neutral-900">{effectiveEmail}</span> is not on the authorized whitelist.
               </p>
-              <div className="pt-1 text-[11px] text-amber-800">
+              <div className="pt-1 text-[11px] text-red-800">
                 Authorized accounts include:
                 <ul className="list-disc pl-4 mt-1 space-y-0.5 text-neutral-700 font-mono text-[10px]">
-                  <li>sahitsai6@gmail.com</li>
-                  <li>saviatailors@gmail.com</li>
-                  <li>*@lumenandco.in</li>
+                  <li>sahitsai6@gmail.com (Super Admin)</li>
+                  <li>saviatailors@gmail.com (Admin)</li>
+                  <li>*@lumenandco.in (Lumen & Co Staff)</li>
                 </ul>
               </div>
             </div>

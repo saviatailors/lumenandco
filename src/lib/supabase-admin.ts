@@ -4,6 +4,8 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { isAuthorizedEmail, getRoleForEmail, type UserRole } from "./rbac";
+import { verifyTokenOnBackend } from "./auth-server";
 
 const SUPABASE_URL = "https://ufgucizbwhsoctkvexvw.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_1KvW2POsLGSC-Q2I-9_v2A__C_E_iuj";
@@ -55,15 +57,34 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
   if (!token) throw new Error("Unauthorized: No bearer token");
 
-  const { data, error } = await supabaseAdmin().auth.getUser(token);
-  if (error || !data.user) throw new Error("Unauthorized");
+  // 1. First try Google OAuth backend verification
+  const googleUser = await verifyTokenOnBackend(token);
+  if (googleUser) {
+    return next({
+      context: {
+        claims: { email: googleUser.email, sub: googleUser.sub || googleUser.email, role: googleUser.role },
+        userId: googleUser.sub || googleUser.email,
+        role: googleUser.role,
+      },
+    });
+  }
 
-  return next({
-    context: {
-      claims: { email: data.user.email ?? undefined, sub: data.user.id },
-      userId: data.user.id,
-    },
-  });
+  // 2. Fallback to Supabase auth client if active
+  try {
+    const { data, error } = await supabaseAdmin().auth.getUser(token);
+    if (!error && data?.user?.email && isAuthorizedEmail(data.user.email)) {
+      const userRole: UserRole = getRoleForEmail(data.user.email) || "employee";
+      return next({
+        context: {
+          claims: { email: data.user.email, sub: data.user.id, role: userRole },
+          userId: data.user.id,
+          role: userRole,
+        },
+      });
+    }
+  } catch {}
+
+  throw new Error("Unauthorized: Access denied. Authorized Google account required.");
 });
 
 /** Client acting as the signed-in user (row level security applies). */
@@ -82,10 +103,11 @@ export function adminEmailList() {
     .filter(Boolean);
 }
 
-/** True when the address holds the admin role in admin_users, or is in ADMIN_EMAILS. */
+/** True when the address holds an authorized role in RBAC or ADMIN_EMAILS. */
 export async function isAdminEmail(email: string) {
   const mail = email.trim().toLowerCase();
   if (!mail) return false;
+  if (isAuthorizedEmail(mail)) return true;
   if (adminEmailList().includes(mail)) return true;
   try {
     const client = supabaseAdmin() as unknown as {

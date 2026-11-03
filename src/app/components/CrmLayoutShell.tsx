@@ -231,7 +231,7 @@ export default function CrmLayoutShell({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="inline-block bg-[#ef4d23]/30 text-[#fed7aa] border border-[#ef4d23]/40 text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase">
-                      Founder / Owner
+                      {admin.roleLabel || "Super Admin (Owner)"}
                     </span>
                     <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-medium px-2 py-0.5 rounded-full">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

@@ -15,7 +15,8 @@ import {
 export const getMyEnquiries = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .handler(async ({ context }) => {
-    const email = (context.claims as { email?: string } | null)?.email ?? "";
+    const claims = (context as any)?.claims as { email?: string } | undefined;
+    const email = claims?.email ?? "";
     if (!email) return { email: "", enquiries: [] };
 
     const { data, error } = await supabaseAdmin()
