@@ -55,6 +55,11 @@ export type AdvancedLead = {
   lost_reason?: string;
   converted_client_id?: string;
   created_at: string;
+  website?: string;
+  budget?: string;
+  goal?: string;
+  notes?: string;
+  scheduled_meeting_date?: string;
 };
 
 // --- CONTRACT & HISTORY ---

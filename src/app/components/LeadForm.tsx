@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase-client";
+import { captureInboundLead } from "@/lib/lead-capture";
 
 const OPEN_EVENT = "convix:open-lead-form";
 
@@ -23,6 +24,7 @@ export function openLeadForm() {
 const schema = z.object({
   name: z.string().trim().min(1, "Please tell us your name").max(100, "Name is too long"),
   email: z.string().trim().email("Enter a valid email address").max(255, "Email is too long"),
+  phone: z.string().trim().max(30).optional(),
   company: z.string().trim().max(120, "Company name is too long"),
   website: z.string().trim().max(200, "Website is too long"),
   budget: z.string().trim().max(60),
@@ -33,6 +35,7 @@ const schema = z.object({
 const EMPTY = {
   name: "",
   email: "",
+  phone: "",
   company: "",
   website: "",
   budget: "",
@@ -130,6 +133,11 @@ export default function LeadFormDialog() {
   const set = (key: keyof typeof EMPTY, v: string) =>
     setValues((prev) => ({ ...prev, [key]: v }));
 
+  const monthsList = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+  ];
+
   async function submitForm(e?: React.FormEvent) {
     if (e) e.preventDefault();
     setError(null);
@@ -140,44 +148,61 @@ export default function LeadFormDialog() {
     }
     setSending(true);
     const v = parsed.data;
-    const { error: dbError } = await supabase.from("leads").insert({
-      name: v.name,
-      email: v.email,
-      company: v.company || null,
-      website: v.website || null,
-      budget: v.budget || null,
-      goal: v.goal || null,
-      message: v.message || null,
-    });
-    setSending(false);
-    if (dbError) {
-      console.warn("Supabase lead submission note:", dbError.message);
+    try {
+      await captureInboundLead({
+        name: v.name,
+        email: v.email,
+        phone: v.phone || undefined,
+        company: v.company || undefined,
+        website: v.website || undefined,
+        budget: v.budget || undefined,
+        goal: v.goal || undefined,
+        message: v.message || undefined,
+        is_booking: false,
+      });
+    } catch (err) {
+      console.warn("Lead form capture error:", err);
     }
+    setSending(false);
     setDone(true);
   }
 
   async function confirmBooking() {
+    setError(null);
+    if (!values.name || !values.name.trim()) {
+      setError("Please enter your name so we know who to meet with");
+      return;
+    }
+    if (!values.email || !values.email.trim() || !values.email.includes("@")) {
+      setError("Please enter a valid work email for your calendar invite");
+      return;
+    }
+
     setSending(true);
-    const dateStr = `September ${selectedDay}, ${selectedYear} at ${selectedTimeSlot} (${timezone})`;
-    if (values.name && values.email) {
-      await supabase.from("leads").insert({
-        name: values.name,
-        email: values.email,
-        company: values.company || null,
-        website: values.website || null,
-        budget: values.budget || null,
-        goal: values.goal || "30-min Audit Meeting",
-        message: `Scheduled meeting for ${dateStr}. ${values.message || ""}`,
+    const monthName = monthsList[selectedMonthIndex] || "September";
+    const dateStr = `${monthName} ${selectedDay}, ${selectedYear} at ${selectedTimeSlot} (${timezone})`;
+
+    try {
+      await captureInboundLead({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        phone: values.phone?.trim() || undefined,
+        company: values.company?.trim() || undefined,
+        website: values.website?.trim() || undefined,
+        budget: values.budget?.trim() || undefined,
+        goal: values.goal?.trim() || "30-min Strategy & Audit Meeting",
+        message: values.message?.trim()
+          ? `Scheduled 30-min meeting for ${dateStr}. Note: ${values.message.trim()}`
+          : `Scheduled 30-min strategy meeting for ${dateStr}.`,
+        scheduled_meeting_date: dateStr,
+        is_booking: true,
       });
+    } catch (err) {
+      console.warn("Booking lead capture error:", err);
     }
     setSending(false);
     setDone(true);
   }
-
-  const monthsList = [
-    "January", "February", "March", "April", "May", "June", 
-    "July", "August", "September", "October", "November", "December"
-  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -327,6 +352,18 @@ export default function LeadFormDialog() {
                     autoComplete="email"
                     onChange={(e) => set("email", e.target.value)}
                     placeholder="ana@brand.com"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium text-neutral-600 mb-1.5 block">Phone / WhatsApp</span>
+                  <input
+                    className={inputClass}
+                    type="tel"
+                    value={values.phone}
+                    maxLength={30}
+                    autoComplete="tel"
+                    onChange={(e) => set("phone", e.target.value)}
+                    placeholder="+91 98765 43210"
                   />
                 </label>
                 <label className="block">
@@ -586,67 +623,107 @@ export default function LeadFormDialog() {
                 </div>
               </div>
 
-              {/* Right Column: Time Slots */}
-              <div className="md:col-span-4 pl-0 md:pl-3">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-neutral-800">
-                    Fri {selectedDay}th
-                  </span>
-                  <div className="inline-flex bg-neutral-100 p-0.5 rounded-lg border border-neutral-200/80 text-[11px] font-medium">
-                    <button
-                      type="button"
-                      onClick={() => setTimeFormat("12h")}
-                      className={`px-2 py-0.5 rounded-md transition-all ${
-                        timeFormat === "12h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
-                      }`}
-                    >
-                      12h
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTimeFormat("24h")}
-                      className={`px-2 py-0.5 rounded-md transition-all ${
-                        timeFormat === "24h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
-                      }`}
-                    >
-                      24h
-                    </button>
+              {/* Right Column: Time Slots & Contact */}
+              <div className="md:col-span-4 pl-0 md:pl-3 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-neutral-800">
+                      {monthsList[selectedMonthIndex]?.slice(0, 3)} {selectedDay}th
+                    </span>
+                    <div className="inline-flex bg-neutral-100 p-0.5 rounded-lg border border-neutral-200/80 text-[11px] font-medium">
+                      <button
+                        type="button"
+                        onClick={() => setTimeFormat("12h")}
+                        className={`px-2 py-0.5 rounded-md transition-all ${
+                          timeFormat === "12h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
+                        }`}
+                      >
+                        12h
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTimeFormat("24h")}
+                        className={`px-2 py-0.5 rounded-md transition-all ${
+                          timeFormat === "24h" ? "bg-white text-neutral-900 shadow-xs font-semibold" : "text-neutral-500"
+                        }`}
+                      >
+                        24h
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
+                    {(timeFormat === "12h" ? TIME_SLOTS_12H : TIME_SLOTS_24H).map((slot) => {
+                      const isSelected = selectedTimeSlot === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => setSelectedTimeSlot(slot)}
+                          className={`w-full py-1.5 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer ${
+                            isSelected
+                              ? "bg-[#ef4d23] text-white border-[#ef4d23] shadow-md font-semibold"
+                              : "bg-white border-neutral-200 text-neutral-800 hover:border-[#ef4d23] hover:text-[#ef4d23] hover:bg-[#ef4d23]/5"
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-                  {(timeFormat === "12h" ? TIME_SLOTS_12H : TIME_SLOTS_24H).map((slot) => {
-                    const isSelected = selectedTimeSlot === slot;
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setSelectedTimeSlot(slot)}
-                        className={`w-full py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-medium transition-all text-center cursor-pointer ${
-                          isSelected
-                            ? "bg-[#ef4d23] text-white border-[#ef4d23] shadow-md font-semibold"
-                            : "bg-white border-neutral-200 text-neutral-800 hover:border-[#ef4d23] hover:text-[#ef4d23] hover:bg-[#ef4d23]/5"
-                        }`}
-                      >
-                        {slot}
-                      </button>
-                    );
-                  })}
-                </div>
+                {/* Direct Contact Inputs for Instant Booking */}
+                <div className="mt-3 pt-3 border-t border-neutral-200/80 space-y-2">
+                  <div className="space-y-1.5">
+                    <input
+                      type="text"
+                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                      placeholder="Your full name *"
+                      value={values.name}
+                      maxLength={100}
+                      required
+                      onChange={(e) => set("name", e.target.value)}
+                    />
+                    <input
+                      type="email"
+                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                      placeholder="Work email *"
+                      value={values.email}
+                      maxLength={255}
+                      required
+                      onChange={(e) => set("email", e.target.value)}
+                    />
+                    <input
+                      type="tel"
+                      className="w-full text-xs rounded-xl border border-neutral-200/90 bg-neutral-50/70 px-3 py-2 outline-none focus:bg-white focus:border-[#ef4d23] text-neutral-900 placeholder:text-neutral-400 transition-all shadow-2xs"
+                      placeholder="Phone / WhatsApp (optional)"
+                      value={values.phone}
+                      maxLength={30}
+                      onChange={(e) => set("phone", e.target.value)}
+                    />
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={confirmBooking}
-                  disabled={sending}
-                  className="mt-4 w-full bg-[#ef4d23] hover:bg-[#d83f17] text-white font-medium text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-60"
-                >
-                  {sending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Check className="w-4 h-4" />
+                  {error && (
+                    <p className="text-[#ef4d23] text-[11px] font-medium" role="alert">
+                      {error}
+                    </p>
                   )}
-                  {sending ? "Booking call..." : `Confirm for ${selectedTimeSlot}`}
-                </button>
+
+                  <button
+                    type="button"
+                    onClick={confirmBooking}
+                    disabled={sending}
+                    className="w-full bg-[#ef4d23] hover:bg-[#d83f17] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-60"
+                  >
+                    {sending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4" />
+                    )}
+                    {sending ? "Reserving slot..." : `Confirm for ${selectedTimeSlot}`}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

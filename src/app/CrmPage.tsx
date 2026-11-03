@@ -91,6 +91,7 @@ import AddClientWizardModal from "./components/AddClientWizardModal";
 import { AccessToggleModal, AccessAuditLogDrawer } from "./components/AccessAuditLogModal";
 import AutoMessagingModal from "./components/AutoMessagingModal";
 import ProposalGeneratorModal from "./components/ProposalGeneratorModal";
+import LeadDetailSlideOver from "./components/LeadDetailSlideOver";
 import RigidGlassMetricCard from "./components/ui/RigidGlassMetricCard";
 import { useToast } from "./components/ui/Toast";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "./components/ui/Table";
@@ -306,7 +307,56 @@ export default function CrmPage() {
   const [clientLeadSearch, setClientLeadSearch] = useState("");
   const [selectedClientFilter, setSelectedClientFilter] = useState<string>("all");
   const [selectedTierFilter, setSelectedTierFilter] = useState<string>("all");
-  const [leadsViewMode, setLeadsViewMode] = useState<"client_campaign" | "agency_b2b">("client_campaign");
+  const [leadsViewMode, setLeadsViewMode] = useState<"client_campaign" | "agency_b2b">("agency_b2b");
+  const [selectedAgencyLead, setSelectedAgencyLead] = useState<AdvancedLead | null>(null);
+
+  // Real-time synchronization for inbound website leads and cross-window events
+  useEffect(() => {
+    const handleNewLead = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        advancedLead?: AdvancedLead;
+        clientBusinessLead?: ClientBusinessLead;
+      }>;
+      const detail = customEvent.detail;
+      if (detail?.advancedLead) {
+        setLeads((prev) => {
+          if (prev.some((l) => l.id === detail.advancedLead!.id)) return prev;
+          return [detail.advancedLead!, ...prev];
+        });
+      }
+      if (detail?.clientBusinessLead) {
+        setClientBusinessLeads((prev) => {
+          if (prev.some((l) => l.id === detail.clientBusinessLead!.id)) return prev;
+          return [detail.clientBusinessLead!, ...prev];
+        });
+      }
+      toast.success(
+        `🎉 New Website Lead: ${detail?.advancedLead?.contact_name || "New Inbound Inquiry"}`,
+        `Company: ${detail?.advancedLead?.company_name || "Direct Inquiry"} • Est: ₹${((detail?.advancedLead?.estimated_deal_value || 5000) * 80).toLocaleString()}`
+      );
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.key || e.key === STORAGE_KEYS.CRM_LEADS) {
+        const freshLeads = loadStoredData<AdvancedLead[]>(STORAGE_KEYS.CRM_LEADS, []);
+        if (freshLeads.length > 0) setLeads(freshLeads);
+      }
+      if (!e.key || e.key === STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS) {
+        const freshClientLeads = loadStoredData<ClientBusinessLead[]>(
+          STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS,
+          []
+        );
+        if (freshClientLeads.length > 0) setClientBusinessLeads(freshClientLeads);
+      }
+    };
+
+    window.addEventListener("lumen:new-lead", handleNewLead);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("lumen:new-lead", handleNewLead);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   // Call Logger & Details Modal state
   const [talkLeadModal, setTalkLeadModal] = useState<ClientBusinessLead | null>(null);
@@ -1128,6 +1178,7 @@ export default function CrmPage() {
       onRoleChange={setCurrentUserRole}
       clients={schoolClients}
       clientLeads={clientBusinessLeads}
+      leads={leads}
     >
       {/* ========================================================================= */}
       {/* SCREEN 0: CODE LIBRARY (Identity Codes & Master Registry) */}
@@ -2696,6 +2747,17 @@ export default function CrmPage() {
                         </TableRow>
                       );
                     })}
+                    {filteredClientLeads.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-12 text-neutral-500">
+                          <div className="flex flex-col items-center justify-center space-y-2">
+                            <Users className="h-8 w-8 text-neutral-400 opacity-60" />
+                            <p className="font-extrabold text-neutral-700 text-sm">No Client Campaign Leads Found</p>
+                            <p className="text-xs text-neutral-500">Add incoming leads or view the Agency B2B Sales Pipeline tab.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -2734,10 +2796,16 @@ export default function CrmPage() {
                   </TableHeader>
                   <TableBody className="divide-y divide-neutral-200/50 text-xs text-neutral-900">
                     {filteredAgencyLeads.map((lead) => (
-                      <TableRow key={lead.id} className="hover:bg-white/80 backdrop-blur-sm border-b border-neutral-200/50 transition-colors">
+                      <TableRow
+                        key={lead.id}
+                        onClick={() => setSelectedAgencyLead(lead)}
+                        className="hover:bg-white/80 backdrop-blur-sm border-b border-neutral-200/50 transition-colors cursor-pointer group"
+                      >
                         <TableCell className="py-3.5 pl-6">
                           <div>
-                            <p className="font-extrabold text-neutral-900 text-sm tracking-tight">{lead.company_name}</p>
+                            <p className="font-extrabold text-neutral-900 text-sm tracking-tight group-hover:text-[#ef4d23] transition-colors">
+                              {lead.company_name}
+                            </p>
                             <span className="inline-block mt-0.5 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-neutral-100/80 text-neutral-700 uppercase border border-neutral-300/80 shadow-2xs">
                               {lead.source}
                             </span>
@@ -2771,15 +2839,35 @@ export default function CrmPage() {
                         </TableCell>
 
                         <TableCell className="py-3.5 pr-6 text-right">
-                          <Button
-                            onClick={() => handleConvertLeadToClient(lead)}
-                            className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-[11px] px-3.5 py-1.5 rounded-xl shadow-md inline-flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <UserCheck className="h-3.5 w-3.5" /> Convert to Active Client
-                          </Button>
+                          <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="secondary"
+                              onClick={() => setSelectedAgencyLead(lead)}
+                              className="bg-white/80 hover:bg-white text-neutral-800 font-bold text-[11px] px-2.5 py-1.5 rounded-xl border border-neutral-200/80 shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-neutral-600" /> View Details
+                            </Button>
+                            <Button
+                              onClick={() => handleConvertLeadToClient(lead)}
+                              className="bg-[#ef4d23] hover:bg-[#d93c14] text-white font-extrabold text-[11px] px-3.5 py-1.5 rounded-xl shadow-md inline-flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <UserCheck className="h-3.5 w-3.5" /> Convert to Active Client
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
+                    {filteredAgencyLeads.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-12 text-neutral-500">
+                          <div className="flex flex-col items-center justify-center space-y-2">
+                            <Users className="h-8 w-8 text-neutral-400 opacity-60" />
+                            <p className="font-extrabold text-neutral-700 text-sm">No Inbound Agency Leads Yet</p>
+                            <p className="text-xs text-neutral-500">When visitors fill the website lead form or book a call, they appear here instantly.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -4609,6 +4697,13 @@ export default function CrmPage() {
           </div>
         </div>
       )}
+      {/* Lead Detail SlideOver Modal */}
+      <LeadDetailSlideOver
+        lead={selectedAgencyLead}
+        isOpen={!!selectedAgencyLead}
+        onClose={() => setSelectedAgencyLead(null)}
+        onConvertToClient={handleConvertLeadToClient}
+      />
     </CrmLayoutShell>
   );
 }

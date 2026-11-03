@@ -35,6 +35,7 @@ import { useAdminAuth } from "./useAdminAuth";
 
 import { UserRole, SchoolClient, ClientBusinessLead, INITIAL_SCHOOL_CLIENTS, INITIAL_CLIENT_BUSINESS_LEADS } from "@/lib/lumenandco.types";
 import { Deliverable, INITIAL_DELIVERABLES } from "@/lib/delivery.functions";
+import { AdvancedLead } from "@/lib/crm.functions";
 
 export type CrmTab =
   | "codes"
@@ -62,6 +63,7 @@ interface CrmLayoutShellProps {
   onRoleChange?: (role: UserRole) => void;
   clients?: SchoolClient[];
   clientLeads?: ClientBusinessLead[];
+  leads?: AdvancedLead[];
   deliverables?: Deliverable[];
 }
 
@@ -74,6 +76,7 @@ export default function CrmLayoutShell({
   onRoleChange = () => {},
   clients = [],
   clientLeads = [],
+  leads = [],
   deliverables = [],
 }: CrmLayoutShellProps) {
   const admin = useAdminAuth();
@@ -85,6 +88,8 @@ export default function CrmLayoutShell({
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const totalLeadsCount = (leads?.length || 0) + (clientLeads?.length || 0);
+
   const sidebarNavItems: { id: CrmTab; label: string; icon: typeof LayoutDashboard; badge?: string }[] = [
     { id: "codes", label: "Code Library", icon: KeyRound, badge: "Codes" },
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -92,8 +97,8 @@ export default function CrmLayoutShell({
     { id: "planner", label: "My Workday Planner", icon: CheckSquare, badge: "My Tasks" },
     { id: "onboarding", label: "Client Onboarding", icon: Rocket, badge: "New" },
     { id: "stage", label: "Performance", icon: Sparkles, badge: "AI" },
-    { id: "leads", label: "Leads", icon: Users, badge: "5" },
-    { id: "clients", label: "Clients", icon: Building2, badge: "5" },
+    { id: "leads", label: "Leads", icon: Users, badge: totalLeadsCount > 0 ? String(totalLeadsCount) : undefined },
+    { id: "clients", label: "Clients", icon: Building2, badge: clients?.length > 0 ? String(clients.length) : undefined },
     { id: "chat", label: "Lumen & Co Messenger", icon: MessageSquare, badge: "Live" },
     { id: "contracts", label: "Billing & Dues", icon: CreditCard, badge: "₹" },
     { id: "billing", label: "Comm Log", icon: MessageSquare },
