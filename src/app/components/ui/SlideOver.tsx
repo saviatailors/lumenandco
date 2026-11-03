@@ -34,9 +34,9 @@ export function SlideOver({
         className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div
-          className={`w-screen ${width} bg-white shadow-2xl border-l border-neutral-200 flex flex-col transform transition-transform animate-in slide-in-from-right duration-200`}
+          className={`w-screen ${width} max-w-full bg-white shadow-2xl border-l border-neutral-200 flex flex-col transform transition-transform animate-in slide-in-from-right duration-200`}
         >
           {/* SlideOver Header */}
           <div className="p-6 border-b border-neutral-200 bg-neutral-50/80 flex items-center justify-between gap-4 shrink-0">

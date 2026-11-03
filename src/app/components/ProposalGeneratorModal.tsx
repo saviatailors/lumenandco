@@ -65,7 +65,7 @@ export default function ProposalGeneratorModal({
             </div>
 
             {/* Client & Agency Details */}
-            <div className="grid grid-cols-2 gap-4 bg-neutral-50 p-4 rounded-2xl border border-neutral-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-neutral-50 p-4 rounded-2xl border border-neutral-200/80">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">Prepared For</span>
                 <p className="font-bold text-sm text-neutral-900">{lead.company_name}</p>

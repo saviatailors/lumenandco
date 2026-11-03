@@ -4135,7 +4135,7 @@ export default function CrmPage() {
               {/* Assigned Clients Checkbox List */}
               <div>
                 <label className="block text-neutral-700 font-semibold mb-1.5">Assigned Client Accounts</label>
-                <div className="grid grid-cols-2 gap-2 bg-neutral-50 p-3 rounded-2xl border border-neutral-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-neutral-50 p-3 rounded-2xl border border-neutral-200">
                   {schoolClients.map((client) => {
                     const isAssigned = (editingMember.assignedClients || []).includes(client.school_name);
                     return (
@@ -4214,12 +4214,12 @@ export default function CrmPage() {
 
             <div className="overflow-y-auto space-y-4 pr-1 flex-1 text-xs">
               {/* Quick Action Dial Buttons */}
-              <div className="grid grid-cols-2 gap-3 bg-neutral-50 p-3 rounded-2xl border border-neutral-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 bg-neutral-50 p-3 rounded-2xl border border-neutral-200">
                 <a
                   href={`tel:${talkLeadModal.phone}`}
                   className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all"
                 >
-                  <PhoneCall className="h-4 w-4" /> Call {talkLeadModal.phone}
+                  <PhoneCall className="h-4 w-4 shrink-0" /> <span className="truncate">Call {talkLeadModal.phone}</span>
                 </a>
                 <a
                   href={`https://wa.me/${talkLeadModal.phone.replace(/[^0-9]/g, "")}`}
@@ -4227,7 +4227,7 @@ export default function CrmPage() {
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-sm transition-all"
                 >
-                  <MessageSquare className="h-4 w-4" /> Open WhatsApp Chat
+                  <MessageSquare className="h-4 w-4 shrink-0" /> <span>Open WhatsApp</span>
                 </a>
               </div>
 
@@ -4552,7 +4552,7 @@ export default function CrmPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-neutral-700 font-semibold mb-1">Auth Header Format</label>
                   <input
@@ -4617,8 +4617,8 @@ export default function CrmPage() {
             </div>
 
             <form onSubmit={handleAddCustomConnectorSubmit} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
                   <label className="block text-neutral-700 font-semibold mb-1">Integration Name</label>
                   <input
                     type="text"
@@ -4663,7 +4663,7 @@ export default function CrmPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-neutral-700 font-semibold mb-1">Category</label>
                   <input

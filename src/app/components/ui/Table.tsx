@@ -11,9 +11,9 @@ export function Table({
 }) {
   return (
     <div
-      className={`w-full overflow-x-auto border border-white/80 rounded-3xl bg-white/80 backdrop-blur-2xl shadow-xl shadow-black/5 ${containerClassName}`}
+      className={`w-full overflow-x-auto border border-white/80 rounded-3xl bg-white/80 backdrop-blur-2xl shadow-xl shadow-black/5 scrollbar-thin scrollbar-thumb-neutral-300 ${containerClassName}`}
     >
-      <table className={`w-full text-left text-xs ${className}`}>{children}</table>
+      <table className={`w-full min-w-[680px] text-left text-xs ${className}`}>{children}</table>
     </div>
   );
 }

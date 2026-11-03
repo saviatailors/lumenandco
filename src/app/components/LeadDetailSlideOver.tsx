@@ -141,7 +141,7 @@ export default function LeadDetailSlideOver({
           Contact & Company Info
         </h4>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-1">
             <span className="text-[10px] text-neutral-400 font-bold uppercase">Primary Contact</span>
             <p className="font-bold text-neutral-900">{lead.contact_name}</p>

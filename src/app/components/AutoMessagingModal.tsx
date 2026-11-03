@@ -142,7 +142,7 @@ export default function AutoMessagingModal({
         </div>
 
         {/* Channel Selector */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-neutral-800 font-semibold mb-1">Channel</label>
             <div className="flex items-center gap-2">

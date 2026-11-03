@@ -160,8 +160,9 @@ export default function DeliveryCalendarView({
         </div>
       </div>
 
-      {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2">
+      {/* Calendar Grid Container (scrolls smoothly on mobile, maintains structure) */}
+      <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-neutral-300 pb-2">
+        <div className="grid grid-cols-7 gap-2 min-w-[680px]">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="text-center text-[11px] font-bold text-neutral-400 uppercase py-1">
             {day}
@@ -235,6 +236,7 @@ export default function DeliveryCalendarView({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

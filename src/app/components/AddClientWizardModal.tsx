@@ -144,35 +144,35 @@ export default function AddClientWizardModal({
     >
       <div className="space-y-5 text-neutral-900">
         {/* Step Indicator Bar */}
-        <div className="flex items-center justify-between bg-neutral-100 p-2.5 rounded-2xl text-xs font-semibold border border-neutral-200">
+        <div className="flex items-center justify-between bg-neutral-100 p-2 sm:p-2.5 rounded-2xl text-[11px] sm:text-xs font-semibold border border-neutral-200 overflow-x-auto gap-1">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shrink-0 ${
               step === 1 ? "bg-[#ef4d23] text-white shadow-sm" : "text-neutral-500"
             }`}
           >
-            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px]">1</span>
+            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px] flex items-center justify-center">1</span>
             <span>Client Info</span>
           </div>
 
-          <ChevronRight className="h-4 w-4 text-neutral-400 shrink-0" />
+          <ChevronRight className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
 
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shrink-0 ${
               step === 2 ? "bg-[#ef4d23] text-white shadow-sm" : "text-neutral-500"
             }`}
           >
-            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px]">2</span>
+            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px] flex items-center justify-center">2</span>
             <span>Services & Retainer</span>
           </div>
 
-          <ChevronRight className="h-4 w-4 text-neutral-400 shrink-0" />
+          <ChevronRight className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
 
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all whitespace-nowrap shrink-0 ${
               step === 3 ? "bg-[#ef4d23] text-white shadow-sm" : "text-neutral-500"
             }`}
           >
-            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px]">3</span>
+            <span className="w-4 h-4 rounded-full bg-white/20 text-center text-[10px] flex items-center justify-center">3</span>
             <span>Review & Save</span>
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function AddClientWizardModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-neutral-700 font-bold mb-1">Campus City</label>
                 <select
@@ -223,7 +223,7 @@ export default function AddClientWizardModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-neutral-700 font-bold mb-1">Contact Person Name</label>
                 <div className="relative">
@@ -284,7 +284,7 @@ export default function AddClientWizardModal({
             <div className="space-y-5">
               <div>
                 <label className="block text-neutral-700 font-bold mb-2">Select Retainer Tier</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { tier: "Performance Starter", price: "₹45,000/mo", desc: "Meta Ads + Basic Creatives" },
                     { tier: "Growth Retainer", price: "₹75,000/mo", desc: "Performance Ads + SEO + UGC" },
@@ -317,7 +317,7 @@ export default function AddClientWizardModal({
 
               <div>
                 <label className="block text-neutral-700 font-bold mb-1">Subscribed Lumen & Co Services</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { name: "Performance Meta Ads", desc: "Facebook & Instagram Campaign Mgmt" },
                     { name: "Google Performance Max", desc: "Search, Shopping & YouTube Ads" },
@@ -353,7 +353,7 @@ export default function AddClientWizardModal({
           {/* STEP 3: BILLING & OPS SETUP */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-neutral-700 font-bold mb-1">Custom Retainer Amount (₹)</label>
                   <input
