@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck, Rocket, UserCheck, Mail } from "lucide-react";
 import EmailSenderModal from "./EmailSenderModal";
+import { useAdminAuth } from "./useAdminAuth";
 
 export default function AppSwitcher({ currentApp }: { currentApp: "crm" | "delivery" | "client" }) {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const admin = useAdminAuth();
 
   const apps = [
     {
@@ -76,7 +78,7 @@ export default function AppSwitcher({ currentApp }: { currentApp: "crm" | "deliv
           </button>
           <div className="hidden lg:flex items-center gap-1.5">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>sahitsai6@gmail.com</span>
+            <span>{admin.email || "Lumen & Co Admin"}</span>
           </div>
         </div>
       </div>

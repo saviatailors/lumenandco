@@ -166,3 +166,4 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
 
   return { advancedLead, clientBusinessLead };
 }
+

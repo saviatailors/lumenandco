@@ -244,7 +244,7 @@ export function useAdminAuth() {
         setUser(null);
         setState("denied");
         setError(
-          `Access Denied: Google account (${email}) is not authorized. Only sahitsai6@gmail.com is permitted.`
+          "We are sorry, you are not authorized as you are not a part of Lumen & Co."
         );
         clearAuthCookie();
         return false;
@@ -295,7 +295,7 @@ export function useAdminAuth() {
         setUser(null);
         setState("denied");
         setError(
-          `Access Denied: Google account (${cleanEmail}) is not authorized. Only sahitsai6@gmail.com is permitted.`
+          "We are sorry, you are not authorized as you are not a part of Lumen & Co."
         );
         clearAuthCookie();
         return false;
