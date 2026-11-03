@@ -247,6 +247,11 @@ export function useAdminAuth() {
           "We are sorry, you are not authorized as you are not a part of Lumen & Co."
         );
         clearAuthCookie();
+        if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+          try {
+            (window as any).google.accounts.id.disableAutoSelect();
+          } catch {}
+        }
         return false;
       }
 

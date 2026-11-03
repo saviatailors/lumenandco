@@ -81,7 +81,7 @@ export default function AdminGate({
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [gsiReady, setGsiReady] = useState(false);
 
-  const activeError = localError || effectiveError;
+  const isDenied = effectiveState === "denied" || !!activeError;
 
   // 1. Load Google Identity Services script
   useEffect(() => {
@@ -94,8 +94,15 @@ export default function AdminGate({
     };
   }, []);
 
-  // 2. Initialize and render native Google Identity Services button if Client ID exists
+  // 2. Initialize and render native Google Identity Services button if Client ID exists and not in denied/error state
   useEffect(() => {
+    if (isDenied || busy) {
+      if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = "";
+      }
+      return;
+    }
+
     if (!gsiReady || !effectiveClientId || !googleBtnRef.current) return;
     try {
       const g = (window as any).google?.accounts?.id;
@@ -111,8 +118,11 @@ export default function AdminGate({
             setBusy(false);
             if (!ok) {
               setLocalError(
-                "We are sorry, you are not a part of Lumen & Co."
+                "We are sorry, you are not authorized as you are not a part of Lumen & Co."
               );
+              if (googleBtnRef.current) {
+                googleBtnRef.current.innerHTML = "";
+              }
             }
           }
         },
@@ -125,14 +135,14 @@ export default function AdminGate({
         theme: "outline",
         size: "large",
         shape: "pill",
-        text: "continue_with",
+        text: "signin_with", // Displays standard "Sign in with Google", NEVER shows previously unauthorized account!
         logo_alignment: "left",
         width: 310,
       });
     } catch (e) {
       console.warn("Google GSI button initialization note:", e);
     }
-  }, [gsiReady, effectiveClientId, effectiveGoogleCredentialSignIn]);
+  }, [gsiReady, effectiveClientId, effectiveGoogleCredentialSignIn, isDenied, busy]);
 
   return (
     <div
@@ -170,19 +180,53 @@ export default function AdminGate({
           </p>
         </div>
 
-        {/* Error Notification Banner */}
-        {activeError ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50/95 p-3.5 text-left text-xs text-red-700 font-medium flex items-start gap-2.5 shadow-sm">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
-            <div className="leading-snug">{activeError}</div>
+        {/* ========================================================================= */}
+        {/* AUTHENTICATION STATE VIEWS */}
+        {/* ========================================================================= */}
+        {busy ? (
+          <div key="view-busy" className="py-6 space-y-3">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
+            <p className="text-xs text-neutral-600 font-medium">
+              Verifying Google Account Authorization…
+            </p>
           </div>
-        ) : null}
+        ) : isDenied ? (
+          /* ========================================================================= */
+          /* ACCESS DENIED STATE (NO GOOGLE ACCOUNT BUTTON SHOWN) */
+          /* ========================================================================= */
+          <div key="view-denied" className="space-y-4 py-2">
+            <div className="rounded-2xl border border-red-200 bg-red-50/95 p-5 text-left text-xs text-red-900 space-y-2 shadow-sm">
+              <div className="flex items-center gap-2 font-bold text-red-950 text-sm">
+                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                <span>Access Denied</span>
+              </div>
+              <p className="text-neutral-700 leading-relaxed">
+                We are sorry, you are not authorized as you are not a part of Lumen &amp; Co. This Command Center is accessible to company personnel only.
+              </p>
+            </div>
 
-        {/* ========================================================================= */}
-        {/* CHECKING STATE */}
-        {/* ========================================================================= */}
-        {effectiveState === "checking" ? (
-          <div className="py-6 space-y-3">
+            <button
+              type="button"
+              onClick={() => {
+                setLocalError("");
+                if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+                  try {
+                    (window as any).google.accounts.id.disableAutoSelect();
+                  } catch {}
+                }
+                effectiveSignOut();
+              }}
+              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 hover:border-neutral-400"
+            >
+              <GoogleIcon className="h-4 w-4" />
+              <span>Sign in with another Google account</span>
+            </button>
+          </div>
+        ) : effectiveState === "checking" ? (
+          /* ========================================================================= */
+          /* CHECKING STATE */
+          /* ========================================================================= */
+          <div key="view-checking" className="py-6 space-y-3">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
             <p className="text-xs text-neutral-600 font-medium">
               Verifying Google Security Token…
@@ -192,7 +236,7 @@ export default function AdminGate({
           /* ========================================================================= */
           /* SESSION EXPIRED / TIMEOUT STATE */
           /* ========================================================================= */
-          <div className="space-y-4 py-2">
+          <div key="view-expired" className="space-y-4 py-2">
             <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-left text-xs text-amber-900 space-y-2">
               <div className="flex items-center gap-2 font-bold text-amber-950">
                 <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
@@ -207,6 +251,11 @@ export default function AdminGate({
               type="button"
               onClick={() => {
                 setLocalError("");
+                if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+                  try {
+                    (window as any).google.accounts.id.disableAutoSelect();
+                  } catch {}
+                }
                 effectiveSignOut();
               }}
               className="w-full rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
@@ -215,37 +264,11 @@ export default function AdminGate({
               <span>Sign in again with Google</span>
             </button>
           </div>
-        ) : effectiveState === "denied" ? (
-          /* ========================================================================= */
-          /* ACCESS DENIED STATE */
-          /* ========================================================================= */
-          <div className="space-y-4 py-2">
-            <div className="rounded-2xl border border-red-200 bg-red-50/95 p-4 text-left text-xs text-red-900 space-y-1.5 shadow-sm">
-              <div className="flex items-center gap-2 font-bold text-red-950">
-                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
-                <span>Access Denied</span>
-              </div>
-              <p>
-                We are sorry, you are not authorized as you are not a part of Lumen & Co. This Command Center is accessible to company personnel only.
-              </p>
-            </div>
-
-            <button
-              onClick={() => {
-                setLocalError("");
-                effectiveSignOut();
-              }}
-              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <GoogleIcon className="h-4 w-4" />
-              <span>Sign in with another Google account</span>
-            </button>
-          </div>
         ) : (
           /* ========================================================================= */
           /* OFFICIAL GOOGLE OAUTH SIGN-IN */
           /* ========================================================================= */
-          <div className="pt-2 pb-1">
+          <div key="view-signin" className="pt-2 pb-1">
             <div
               ref={googleBtnRef}
               className="flex justify-center min-h-[46px] items-center"
