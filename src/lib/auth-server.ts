@@ -9,6 +9,7 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import {
   getRoleForEmail,
+  isAuthorizedEmail,
   hasPermission,
   type UserRole,
   type Permission,
@@ -69,9 +70,13 @@ export async function verifyTokenOnBackend(
       }
 
       const email = payload.email?.toLowerCase().trim();
-      if (!email) return null;
+      if (!email || !isAuthorizedEmail(email)) {
+        console.warn("[Auth Backend] Unauthorized account attempt blocked:", email);
+        return null;
+      }
 
-      const role = getRoleForEmail(email) || "admin";
+      const role = getRoleForEmail(email);
+      if (!role) return null;
 
       return {
         email,
@@ -92,15 +97,17 @@ export async function verifyTokenOnBackend(
       if (res.ok) {
         const data = await res.json();
         const email = data.email?.toLowerCase().trim();
-        if (email) {
-          const role = getRoleForEmail(email) || "admin";
-          return {
-            email,
-            role,
-            name: data.name,
-            picture: data.picture,
-            sub: data.sub,
-          };
+        if (email && isAuthorizedEmail(email)) {
+          const role = getRoleForEmail(email);
+          if (role) {
+            return {
+              email,
+              role,
+              name: data.name,
+              picture: data.picture,
+              sub: data.sub,
+            };
+          }
         }
       }
     } catch (e) {
@@ -113,16 +120,18 @@ export async function verifyTokenOnBackend(
     const decoded = Buffer.from(cleanToken, "base64url").toString("utf-8");
     const session = JSON.parse(decoded);
     if (session && session.email && session.expiresAt) {
-      if (Date.now() > session.expiresAt) {
+      if (Date.now() > session.expiresAt || !isAuthorizedEmail(session.email)) {
         return null;
       }
-      const role = getRoleForEmail(session.email) || "admin";
-      return {
-        email: session.email,
-        role,
-        name: session.name,
-        picture: session.picture,
-      };
+      const role = getRoleForEmail(session.email);
+      if (role) {
+        return {
+          email: session.email,
+          role,
+          name: session.name,
+          picture: session.picture,
+        };
+      }
     }
   } catch {}
 

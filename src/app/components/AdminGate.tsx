@@ -111,7 +111,7 @@ export default function AdminGate({
             setBusy(false);
             if (!ok) {
               setLocalError(
-                "Could not sign in with Google. Please try again."
+                "Access Denied: Only sahitsai6@gmail.com is authorized to enter."
               );
             }
           }
@@ -217,9 +217,19 @@ export default function AdminGate({
           </div>
         ) : effectiveState === "denied" ? (
           /* ========================================================================= */
-          /* SIGN OUT / RE-AUTHENTICATE */
+          /* ACCESS DENIED STATE */
           /* ========================================================================= */
           <div className="space-y-4 py-2">
+            <div className="rounded-2xl border border-red-200 bg-red-50/95 p-4 text-left text-xs text-red-900 space-y-1.5 shadow-sm">
+              <div className="flex items-center gap-2 font-bold text-red-950">
+                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                <span>Access Strictly Restricted</span>
+              </div>
+              <p>
+                This Command Center is restricted strictly to <span className="font-semibold text-neutral-900">sahitsai6@gmail.com</span>. Other accounts are not permitted.
+              </p>
+            </div>
+
             <button
               onClick={() => {
                 setLocalError("");
@@ -228,7 +238,7 @@ export default function AdminGate({
               className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <GoogleIcon className="h-4 w-4" />
-              <span>Sign in with Google</span>
+              <span>Sign in with sahitsai6@gmail.com</span>
             </button>
           </div>
         ) : (

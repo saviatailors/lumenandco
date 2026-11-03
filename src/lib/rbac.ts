@@ -25,111 +25,35 @@ export type Permission =
   | "settings:manage"
   | "super_admin:all";
 
-/** Pre-approved Google Accounts mapped to their specific roles */
-export const SUPER_ADMIN_EMAILS = [
-  "sahitsai6@gmail.com",
-];
+/** The exclusive, sole email address authorized for Lumen & Co Command Center access */
+export const EXCLUSIVE_AUTHORIZED_EMAIL = "sahitsai6@gmail.com";
 
-export const ADMIN_EMAILS_LIST = [
-  "saviatailors@gmail.com",
-  "admin@lumenandco.com",
-  "sahit@lumenandco.in",
-];
-
-export const MANAGER_EMAILS_LIST = [
-  "santhan@lumenandco.in",
-  "priya@lumenandco.in",
-];
-
-/** All permissions granted to each role */
-export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
-  super_admin: [
-    "crm:view",
-    "crm:manage_leads",
-    "crm:delete_leads",
-    "crm:manage_clients",
-    "crm:delete_clients",
-    "crm:manage_billing",
-    "crm:delete_billing",
-    "crm:manage_staff",
-    "delivery:view",
-    "delivery:manage_tasks",
-    "videos:view",
-    "videos:upload",
-    "videos:delete",
-    "settings:view",
-    "settings:manage",
-    "super_admin:all",
-  ],
-  admin: [
-    "crm:view",
-    "crm:manage_leads",
-    "crm:delete_leads",
-    "crm:manage_clients",
-    "crm:delete_clients",
-    "crm:manage_billing",
-    "crm:manage_staff",
-    "delivery:view",
-    "delivery:manage_tasks",
-    "videos:view",
-    "videos:upload",
-    "settings:view",
-    "settings:manage",
-  ],
-  manager: [
-    "crm:view",
-    "crm:manage_leads",
-    "crm:manage_clients",
-    "delivery:view",
-    "delivery:manage_tasks",
-    "videos:view",
-    "videos:upload",
-    "settings:view",
-  ],
-  employee: [
-    "delivery:view",
-    "delivery:manage_tasks",
-    "videos:view",
-  ],
-};
+export const SUPER_ADMIN_EMAILS = [EXCLUSIVE_AUTHORIZED_EMAIL];
 
 /**
  * Returns the assigned RBAC role for a given email address.
- * Defaults to 'admin' for any authenticated Google account,
- * while reserving 'super_admin' exclusively for authorized ownership.
+ * Strictly restricted to sahitsai6@gmail.com.
+ * Returns null for any other email.
  */
-export function getRoleForEmail(email?: string | null): UserRole {
-  if (!email) return "admin";
+export function getRoleForEmail(email?: string | null): UserRole | null {
+  if (!email) return null;
   const clean = email.trim().toLowerCase();
 
-  // 1. Super Admin: strictly restricted to authorized super admin email
-  if (SUPER_ADMIN_EMAILS.some((e) => e.toLowerCase() === clean)) {
+  if (clean === EXCLUSIVE_AUTHORIZED_EMAIL.toLowerCase()) {
     return "super_admin";
   }
 
-  // 2. Additional environment override for Super Admin
-  const envSuperAdmin =
-    (typeof process !== "undefined" && process.env?.["SUPER_ADMIN_EMAIL"]) ||
-    (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_SUPER_ADMIN_EMAIL);
-  if (envSuperAdmin && String(envSuperAdmin).toLowerCase().trim() === clean) {
-    return "super_admin";
-  }
-
-  // 3. Manager list
-  if (MANAGER_EMAILS_LIST.some((e) => e.toLowerCase() === clean)) {
-    return "manager";
-  }
-
-  // All other authenticated Google accounts are granted admin access
-  return "admin";
+  // Strictly no other account permitted
+  return null;
 }
 
 /**
  * Checks whether an email is authorized for Command Center access.
- * Any authenticated Google account is permitted.
+ * Strictly allows sahitsai6@gmail.com only.
  */
 export function isAuthorizedEmail(email?: string | null): boolean {
-  return typeof email === "string" && email.trim().length > 0;
+  if (!email) return false;
+  return email.trim().toLowerCase() === EXCLUSIVE_AUTHORIZED_EMAIL.toLowerCase();
 }
 
 /**
@@ -138,8 +62,7 @@ export function isAuthorizedEmail(email?: string | null): boolean {
 export function hasPermission(role: UserRole | null | undefined, permission: Permission): boolean {
   if (!role) return false;
   if (role === "super_admin") return true;
-  const permissions = ROLE_PERMISSIONS[role];
-  return permissions ? permissions.includes(permission) : false;
+  return false;
 }
 
 /**

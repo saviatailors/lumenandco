@@ -26,10 +26,6 @@ export type AdminState = "checking" | "signedOut" | "denied" | "expired" | "read
 /** Authorized Google email accounts allowed into the Command Center */
 export const DEFAULT_ALLOWED_EMAILS = [
   "sahitsai6@gmail.com",
-  "saviatailors@gmail.com",
-  "sahit@lumenandco.in",
-  "santhan@lumenandco.in",
-  "admin@lumenandco.com",
 ];
 
 /** Official Google OAuth 2.0 Web Client ID */
@@ -244,7 +240,17 @@ export function useAdminAuth() {
       }
 
       const email = payload.email.toLowerCase().trim();
-      const role = getRoleForEmail(email) || "admin";
+      if (!isAuthorizedEmail(email)) {
+        setUser(null);
+        setState("denied");
+        setError(
+          `Access Denied: Google account (${email}) is not authorized. Only sahitsai6@gmail.com is permitted.`
+        );
+        clearAuthCookie();
+        return false;
+      }
+
+      const role = getRoleForEmail(email) || "super_admin";
 
       const now = Date.now();
       const expiresAt = payload.exp ? payload.exp * 1000 : now + SESSION_MAX_TTL_MS;
@@ -285,7 +291,16 @@ export function useAdminAuth() {
     ) => {
       setError("");
       const cleanEmail = email.toLowerCase().trim();
-      const role = getRoleForEmail(cleanEmail) || "admin";
+      if (!isAuthorizedEmail(cleanEmail)) {
+        setUser(null);
+        setState("denied");
+        setError(
+          `Access Denied: Google account (${cleanEmail}) is not authorized. Only sahitsai6@gmail.com is permitted.`
+        );
+        clearAuthCookie();
+        return false;
+      }
+      const role = getRoleForEmail(cleanEmail) || "super_admin";
 
       const now = Date.now();
       const expiresAt = now + SESSION_MAX_TTL_MS;
