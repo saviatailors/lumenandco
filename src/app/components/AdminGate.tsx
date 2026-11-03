@@ -1,16 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  ShieldCheck,
   AlertTriangle,
-  Key,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
   Lock,
-  Sparkles,
-  ArrowRight,
 } from "lucide-react";
 import LiveBackgroundVideo from "./LiveBackgroundVideo";
 import {
@@ -71,7 +63,6 @@ export default function AdminGate({
   title = "Lumen & Co Internal CRM — Command Center",
   googleClientId,
   onGoogleCredential,
-  onSetGoogleClientId,
 }: AdminGateProps) {
   const auth = useAdminAuth();
 
@@ -80,16 +71,12 @@ export default function AdminGate({
   const effectiveError = error ?? auth.error;
   const effectiveSignOut = onSignOut ?? auth.signOut;
   const effectiveClientId = googleClientId ?? auth.googleClientId;
-  const effectiveSetClientId = onSetGoogleClientId ?? auth.setGoogleClientId;
   const effectiveGoogleCredentialSignIn =
     onGoogleCredential ?? auth.signInWithGoogleCredential;
   const effectiveSignIn = onSignIn ?? auth.signInWithGoogleAccount;
 
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState("");
-  const [clientIdInput, setClientIdInput] = useState(effectiveClientId || "");
-  const [showConfig, setShowConfig] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [gsiReady, setGsiReady] = useState(false);
@@ -146,14 +133,6 @@ export default function AdminGate({
       console.warn("Google GSI button initialization note:", e);
     }
   }, [gsiReady, effectiveClientId, effectiveGoogleCredentialSignIn]);
-
-  const handleSaveClientId = (e: React.FormEvent) => {
-    e.preventDefault();
-    const clean = clientIdInput.trim();
-    effectiveSetClientId(clean);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
-  };
 
   return (
     <div
@@ -256,106 +235,17 @@ export default function AdminGate({
           /* ========================================================================= */
           /* OFFICIAL GOOGLE OAUTH SIGN-IN */
           /* ========================================================================= */
-          <div className="space-y-4 pt-1">
-            <div className="space-y-2 py-1">
-              <div
-                ref={googleBtnRef}
-                className="flex justify-center min-h-[46px] items-center"
-              />
-              {!gsiReady && (
-                <div className="flex justify-center items-center py-2 text-xs text-neutral-400 gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
-                  <span>Loading Google Sign-In…</span>
-                </div>
-              )}
-              <p className="text-[11px] text-neutral-400 font-medium">
-                Official Google Identity Services OAuth 2.0
-              </p>
-            </div>
-
-            {/* Google OAuth Client ID Configuration Accordion */}
-            <div className="pt-2 border-t border-neutral-100">
-              <button
-                type="button"
-                onClick={() => setShowConfig(!showConfig)}
-                className="w-full py-1.5 text-[11px] text-neutral-500 hover:text-neutral-700 flex items-center justify-center gap-1 cursor-pointer"
-              >
-                <Key className="h-3 w-3 text-neutral-400" />
-                <span>
-                  {effectiveClientId
-                    ? "Google OAuth Client ID (Configured ✓)"
-                    : "Configure Google Cloud Client ID (Optional)"}
-                </span>
-                {showConfig ? (
-                  <ChevronUp className="h-3 w-3" />
-                ) : (
-                  <ChevronDown className="h-3 w-3" />
-                )}
-              </button>
-
-              {showConfig && (
-                <form
-                  onSubmit={handleSaveClientId}
-                  className="mt-2.5 rounded-2xl bg-neutral-50 p-3.5 text-left border border-neutral-200 space-y-2.5 text-xs text-neutral-700"
-                >
-                  <div>
-                    <label className="block text-[11px] font-semibold text-neutral-800 mb-1">
-                      Google OAuth Client ID
-                    </label>
-                    <input
-                      type="text"
-                      value={clientIdInput}
-                      onChange={(e) => setClientIdInput(e.target.value)}
-                      placeholder="e.g. 123456789-xxx.apps.googleusercontent.com"
-                      className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-mono text-neutral-900 outline-none focus:border-[#ef4d23]"
-                    />
-                  </div>
-
-                  {savedSuccess && (
-                    <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Saved! Google Identity Services button activated.
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      type="submit"
-                      className="rounded-xl px-3 py-1.5 text-xs font-bold text-white bg-[#ef4d23] hover:opacity-95 cursor-pointer shadow-xs"
-                    >
-                      Save Client ID
-                    </button>
-                    {effectiveClientId && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setClientIdInput("");
-                          effectiveSetClientId("");
-                        }}
-                        className="text-[10px] text-neutral-400 hover:text-red-500"
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="pt-2 text-[10px] text-neutral-500 leading-relaxed border-t border-neutral-200/60">
-                    <p className="font-semibold text-neutral-700">How to create a Client ID:</p>
-                    <ol className="list-decimal pl-4 mt-1 space-y-0.5">
-                      <li>Go to Google Cloud Console → APIs & Services → Credentials</li>
-                      <li>Create OAuth Client ID (Web application)</li>
-                      <li>
-                        Add Authorized JavaScript Origins:
-                        <br />
-                        <code className="text-[#ef4d23] font-mono">http://localhost:3000</code> &{" "}
-                        <code className="text-[#ef4d23] font-mono">https://www.lumenandco.com</code>
-                      </li>
-                      <li>Paste Client ID above or in <code className="font-mono">.env</code> as <code className="font-mono">VITE_GOOGLE_CLIENT_ID</code></li>
-                    </ol>
-                  </div>
-                </form>
-              )}
-            </div>
+          <div className="pt-2 pb-1">
+            <div
+              ref={googleBtnRef}
+              className="flex justify-center min-h-[46px] items-center"
+            />
+            {!gsiReady && (
+              <div className="flex justify-center items-center py-2 text-xs text-neutral-400 gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
+                <span>Loading Google Sign-In…</span>
+              </div>
+            )}
           </div>
         )}
 
