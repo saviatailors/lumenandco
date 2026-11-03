@@ -19,6 +19,7 @@ import {
   Calendar as CalendarIcon,
   ShieldCheck,
   FolderDown,
+  MessageSquare,
 } from "lucide-react";
 import NotificationCenter from "./NotificationCenter";
 import EmailSenderModal from "./EmailSenderModal";
@@ -163,6 +164,18 @@ export default function ClientLayoutShell({
             </span>
             <span>0</span>
           </div>
+
+          {/* Messenger Button */}
+          <button
+            type="button"
+            onClick={() => setIsMessengerOpen(true)}
+            className="flex items-center gap-1.5 bg-white border border-neutral-200/80 px-3 py-1.5 rounded-full text-xs font-semibold text-neutral-800 hover:text-black transition-all shadow-2xs cursor-pointer relative"
+            title="Chat with Lumen & Co Team"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-[#ef4d23]" />
+            <span className="hidden sm:inline">Messenger</span>
+            <span className="w-2 h-2 rounded-full bg-[#ef4d23] animate-pulse" />
+          </button>
 
           {/* Notification Bell */}
           <button

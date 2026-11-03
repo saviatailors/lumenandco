@@ -315,17 +315,30 @@ export default function WhatsAppMessengerView({
   isEmbeddedModal = false,
   targetCodeOrChannelId,
 }: WhatsAppMessengerViewProps) {
-  // AUTHENTICATION LOGIN STATE
+  // AUTHENTICATION LOGIN STATE (Auto-initialized to active authenticated user)
   const [authSession, setAuthSession] = useState<AuthSession | null>(() => {
     try {
       const saved = localStorage.getItem("lumen_messenger_auth_v1");
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed?.isLoggedIn && parsed?.name) {
+          return parsed;
+        }
       }
     } catch (e) {}
-    return null;
+
+    const isClient = currentUserRole === "client" || !!clientBrandId;
+    return {
+      isLoggedIn: true,
+      code: isClient ? "CLT-101" : "EMP-100",
+      name: isClient ? (clientBrandName || "Client Partner") : (currentUserName || "Sahit Sai"),
+      role: currentUserRole || (isClient ? "client" : "founder"),
+      userType: isClient ? "client" : "employee",
+      userId: currentUserId || (isClient ? "clt-1" : "staff-6"),
+    };
   });
 
+  const [isIdentityModalOpen, setIsIdentityModalOpen] = useState(false);
   const [loginCodeInput, setLoginCodeInput] = useState("");
   const [loginPasswordInput, setLoginPasswordInput] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -436,13 +449,13 @@ export default function WhatsAppMessengerView({
     setAuthSession(null);
     localStorage.removeItem("lumen_messenger_auth_v1");
   };
-  // Load saved state (defaults with AI Copilot channel & welcome message)
+  // Load saved state (defaults with rich seed channels & messages)
   const [channels, setChannels] = useState<ChatChannel[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CHANNELS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_CHAT_CHANNELS.length) {
           return parsed;
         }
       }
@@ -457,7 +470,7 @@ export default function WhatsAppMessengerView({
       const saved = localStorage.getItem(STORAGE_KEY_MESSAGES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_CHAT_MESSAGES.length) {
           return parsed;
         }
       }
@@ -908,9 +921,9 @@ export default function WhatsAppMessengerView({
     return [...staffMatches, ...clientMatches];
   }, [searchQuery]);
 
-  // Set active channel
+  // Set active channel (default to AI Copilot or first channel)
   const [activeChannelId, setActiveChannelId] = useState<string>(() => {
-    return "channel-brooklyn";
+    return "channel-ai-copilot";
   });
 
   useEffect(() => {
@@ -1406,8 +1419,8 @@ export default function WhatsAppMessengerView({
           <div className="flex flex-col items-center gap-4 pt-4">
             {/* Chat Nav Item (Active) */}
             <div className="relative group cursor-pointer" title="Chats & Messages">
-              <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[#0f83fe] rounded-r-full" />
-              <div className="p-2.5 bg-[#0f83fe]/20 text-[#0f83fe] rounded-xl border border-[#0f83fe]/30">
+              <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ef4d23] rounded-r-full" />
+              <div className="p-2.5 bg-[#ef4d23]/20 text-[#ef4d23] rounded-xl border border-[#ef4d23]/30">
                 <MessageSquare className="h-5 w-5" />
               </div>
             </div>
@@ -1417,27 +1430,20 @@ export default function WhatsAppMessengerView({
               type="button"
               onClick={() => setFilterType("internal")}
               className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-              title="Video Meetings & Calls"
+              title="Team Channels"
             >
-              <VideoIcon className="h-5 w-5" />
-            </button>
-
-            {/* Workday Planner Item */}
-            <button
-              type="button"
-              onClick={() => setFilterType("all")}
-              className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-              title="Workday Tasks"
-            >
-              <Trees className="h-5 w-5" />
+              <Users className="h-5 w-5" />
             </button>
 
             {/* Performance AI Item */}
             <button
               type="button"
-              onClick={() => setFilterType("unread")}
-              className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-              title="Performance AI Copilot"
+              onClick={() => {
+                setActiveChannelId("channel-ai-copilot");
+                setFilterType("all");
+              }}
+              className="p-2.5 text-neutral-400 hover:text-amber-400 hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+              title="Creative AI Copilot"
             >
               <Zap className="h-5 w-5" />
             </button>
@@ -1447,27 +1453,21 @@ export default function WhatsAppMessengerView({
               type="button"
               onClick={() => setIsNewContactModalOpen(true)}
               className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
-              title="Add Contact / Settings"
+              title="Start New Direct Line"
             >
-              <SettingsIcon className="h-5 w-5" />
+              <UserPlus className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Bottom User Profile Avatar & Logout */}
+        {/* Bottom User Profile Avatar & Switcher */}
         <div className="flex flex-col items-center gap-3">
-          {authSession?.isLoggedIn && (
-            <button
-              type="button"
-              onClick={handlePerformLogout}
-              className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
-              title={`Logged in as ${activeUserName} [${activeUserCode}] — Click to Logout`}
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          )}
-          <div className="relative cursor-pointer" title={`${activeUserName} [${activeUserCode}]`}>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0f83fe] to-[#8000ff] text-white font-bold flex items-center justify-center text-xs shadow-md">
+          <div
+            onClick={() => setIsIdentityModalOpen(true)}
+            className="relative cursor-pointer group"
+            title={`${activeUserName} [${activeUserCode}] — Click to Switch Identity`}
+          >
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white font-bold flex items-center justify-center text-xs shadow-md group-hover:scale-105 transition-transform">
               {activeUserName.substring(0, 2).toUpperCase()}
             </div>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#121318] absolute bottom-0 right-0" />
@@ -1481,21 +1481,26 @@ export default function WhatsAppMessengerView({
       <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-[#171821] border-r border-white/5 flex-col shrink-0 isolate`}>
         {/* Chats Header */}
         <div className="h-16 px-5 flex items-center justify-between border-b border-white/5 shrink-0">
-          <h2 className="text-xl font-extrabold text-white tracking-tight">Chats</h2>
           <div className="flex items-center gap-2">
+            <h2 className="text-xl font-extrabold text-white tracking-tight">Chats</h2>
+            <span className="px-2 py-0.5 rounded-full bg-[#ef4d23]/20 text-[#ef4d23] text-[10px] font-bold">
+              {visibleChannels.length}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setIsNewContactModalOpen(true)}
               className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
               title="Search / Start New Chat"
             >
-              <Search className="h-4 w-4" />
+              <UserPlus className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={handleClearAllChats}
               className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
-              title="Clear All Chats & History"
+              title="Reset Chat History"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -1512,27 +1517,50 @@ export default function WhatsAppMessengerView({
         </div>
 
         {/* Search Input Box */}
-        <div className="px-4 py-2 border-b border-white/5">
+        <div className="px-3.5 py-2 border-b border-white/5">
           <div className="relative">
             <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
             <input
               type="text"
-              placeholder="Search chats or codes..."
+              placeholder="Search chats, team, or codes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-[#222430] text-xs text-white placeholder:text-neutral-500 rounded-xl outline-none focus:ring-1 focus:ring-[#0f83fe] border border-white/5 transition-all"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#222430] text-xs text-white placeholder:text-neutral-500 rounded-xl outline-none focus:ring-1 focus:ring-[#ef4d23] border border-white/5 transition-all"
             />
           </div>
         </div>
 
+        {/* Category Filter Pills */}
+        <div className="px-3 py-2 flex items-center gap-1 border-b border-white/5 overflow-x-auto scrollbar-none">
+          {[
+            { id: "all", label: "All" },
+            { id: "internal", label: "⚡ Team & AI" },
+            { id: "clients", label: "🏫 Clients" },
+            { id: "unread", label: "🔴 Unread" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilterType(tab.id as any)}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                filterType === tab.id
+                  ? "bg-[#ef4d23] text-white shadow-xs"
+                  : "bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Channels & Messages List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5 scrollbar-thin">
           {/* SEARCH RESULTS DIRECTORY MATCH */}
           {directoryResults.length > 0 && (
-            <div className="space-y-2 pb-2 border-b border-white/5">
-              <div className="text-[11px] font-bold text-[#0f83fe] px-2 uppercase tracking-wider flex items-center justify-between">
-                <span>Identity Match</span>
-                <span className="text-[10px] bg-[#0f83fe]/20 px-2 py-0.5 rounded-full font-mono">{directoryResults.length}</span>
+            <div className="space-y-2 pb-2 mb-2 border-b border-white/5">
+              <div className="text-[11px] font-bold text-[#ef4d23] px-2 uppercase tracking-wider flex items-center justify-between">
+                <span>Identity Directory Match</span>
+                <span className="text-[10px] bg-[#ef4d23]/20 text-[#ef4d23] px-2 py-0.5 rounded-full font-mono">{directoryResults.length}</span>
               </div>
               <div className="space-y-1.5">
                 {directoryResults.map((item) => (
@@ -1542,10 +1570,10 @@ export default function WhatsAppMessengerView({
                       handleStartChatWithCode(item.code, item.name, item.type, item.subtext);
                       setSearchQuery("");
                     }}
-                    className="p-2.5 rounded-2xl bg-[#0f83fe]/10 hover:bg-[#0f83fe]/20 border border-[#0f83fe]/30 flex items-center justify-between cursor-pointer transition-all"
+                    className="p-2.5 rounded-2xl bg-[#ef4d23]/10 hover:bg-[#ef4d23]/20 border border-[#ef4d23]/30 flex items-center justify-between cursor-pointer transition-all"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="px-2 py-0.5 rounded bg-[#0f83fe] text-white text-[10px] font-mono font-bold shrink-0">
+                      <span className="px-2 py-0.5 rounded bg-[#ef4d23] text-white text-[10px] font-mono font-bold shrink-0">
                         {item.code}
                       </span>
                       <div className="min-w-0">
@@ -1553,100 +1581,74 @@ export default function WhatsAppMessengerView({
                         <p className="text-[10px] text-neutral-400 truncate">{item.subtext}</p>
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#0f83fe] font-bold shrink-0">Chat →</span>
+                    <span className="text-[10px] text-[#ef4d23] font-bold shrink-0">Chat →</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* SECTION 1: New Messages */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-bold text-neutral-400 px-2 uppercase tracking-wider">
-              <span>New Messages</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+          {visibleChannels.length === 0 ? (
+            <div className="text-center py-12 px-4 space-y-2 text-neutral-400">
+              <MessageSquare className="h-8 w-8 mx-auto opacity-30 text-[#ef4d23]" />
+              <p className="text-xs font-semibold text-neutral-300">No conversations found</p>
+              <p className="text-[11px] text-neutral-500">Try adjusting your search or category filter.</p>
             </div>
-
-            <div className="space-y-2">
-              {visibleChannels.slice(0, 2).map((c) => {
-                const isActive = currentActiveId === c.id;
-                return (
-                  <div
-                    key={`new-${c.id}`}
-                    onClick={() => setActiveChannelId(c.id)}
-                    className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer border ${
-                      isActive
-                        ? "bg-[#0f83fe] text-white shadow-md border-transparent"
-                        : "bg-[#222430] hover:bg-[#292b39] text-neutral-200 border-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f83fe] to-[#00c6ff] text-white font-bold flex items-center justify-center text-xs shadow-md">
-                          {c.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#222430] absolute bottom-0 right-0" />
+          ) : (
+            visibleChannels.map((c) => {
+              const isActive = currentActiveId === c.id;
+              const isAi = c.id === "channel-ai-copilot";
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => setActiveChannelId(c.id)}
+                  className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer border ${
+                    isActive
+                      ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/25 border-transparent"
+                      : "bg-[#222430] hover:bg-[#292b39] text-neutral-200 border-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="relative shrink-0">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-sm ${
+                          isActive
+                            ? "bg-white text-[#ef4d23]"
+                            : isAi
+                            ? "bg-gradient-to-tr from-[#ef4d23] to-[#ffaa00] text-white"
+                            : "bg-gradient-to-tr from-neutral-700 to-neutral-500 text-white"
+                        }`}
+                      >
+                        {isAi ? "⚡" : c.name.substring(0, 2).toUpperCase()}
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-bold truncate">{c.name}</h4>
-                        <p className={`text-[11px] truncate ${isActive ? "text-white/80" : "text-neutral-400"}`}>
-                          {c.last_message || c.description}
-                        </p>
-                      </div>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#222430] absolute bottom-0 right-0" />
                     </div>
-
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0f83fe] shrink-0 shadow-sm" />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* SECTION 2: Last Messages */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between text-[11px] font-bold text-neutral-400 px-2 uppercase tracking-wider">
-              <span>Last Messages</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-            </div>
-
-            <div className="space-y-2">
-              {visibleChannels.slice(2).map((c) => {
-                const isActive = currentActiveId === c.id;
-                return (
-                  <div
-                    key={c.id}
-                    onClick={() => setActiveChannelId(c.id)}
-                    className={`p-3.5 rounded-2xl flex items-center justify-between transition-all cursor-pointer border ${
-                      isActive
-                        ? "bg-[#0f83fe] text-white shadow-md border-transparent"
-                        : "bg-[#222430] hover:bg-[#292b39] text-neutral-200 border-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative shrink-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${
-                            isActive
-                              ? "bg-white text-[#0f83fe]"
-                              : "bg-gradient-to-tr from-neutral-700 to-neutral-500 text-white"
-                          }`}
-                        >
-                          {c.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#222430] absolute bottom-0 right-0" />
-                      </div>
-                      <div className="min-w-0">
+                    <div className="min-w-0 flex-1 pr-1">
+                      <div className="flex items-center justify-between gap-1">
                         <h4 className="text-xs font-bold truncate">{c.name}</h4>
-                        <p className={`text-[11px] truncate ${isActive ? "text-white/80" : "text-neutral-400"}`}>
-                          {c.last_message || c.description}
-                        </p>
+                        {c.last_message_time && (
+                          <span className={`text-[10px] shrink-0 font-medium ${isActive ? "text-white/85" : "text-neutral-500"}`}>
+                            {c.last_message_time}
+                          </span>
+                        )}
                       </div>
+                      <p className={`text-[11px] truncate mt-0.5 ${isActive ? "text-white/90" : "text-neutral-400"}`}>
+                        {c.last_message || c.description}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+
+                  {c.unread_count > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1.5 shrink-0 ${
+                      isActive ? "bg-white text-[#ef4d23]" : "bg-[#ef4d23] text-white shadow-xs"
+                    }`}>
+                      {c.unread_count}
+                    </span>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -1668,7 +1670,7 @@ export default function WhatsAppMessengerView({
                   <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f83fe] to-[#ff5c8d] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#ff5c8d]/50 shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#ef4d23]/40 shadow-md">
                     {activeChannel.name.substring(0, 2).toUpperCase()}
                   </div>
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#1c1d27] absolute bottom-0 right-0" />
@@ -1708,35 +1710,32 @@ export default function WhatsAppMessengerView({
             </div>
 
             {/* Message Stream Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Design System Meeting Invite Card Widget */}
-              <div className="flex justify-center my-3">
-                <div className="bg-[#272937] border border-white/10 p-4 rounded-2xl max-w-md w-full shadow-xl flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0f83fe] text-white flex items-center justify-center font-bold shadow-md">
-                      <VideoIcon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-white">Design System Meeting</h4>
-                      <p className="text-[10px] text-neutral-400 font-mono">teleport.video/anywhereworks/people</p>
-                    </div>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              {/* Channel Greeting Header Card */}
+              <div className="flex justify-center my-2">
+                <div className="bg-[#232532]/80 border border-white/10 px-4 py-2.5 rounded-2xl max-w-md w-full text-center space-y-1 shadow-sm">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-white">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>{activeChannel.name}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleInitiateCall("video")}
-                    className="bg-[#0f83fe] hover:bg-[#0075f0] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    Join
-                  </button>
+                  <p className="text-[11px] text-neutral-400 leading-relaxed">
+                    {activeChannel.description}
+                  </p>
+                  {activeChannel.code && (
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded bg-white/10 text-neutral-300 font-mono text-[10px] font-bold">
+                      Code: {activeChannel.code}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Messages Stream */}
               {activeMessages.map((msg) => {
-                const isMe = msg.sender_id === currentUserId;
+                const isMe = msg.sender_id === currentUserId || msg.sender_id === activeUserId;
+                const isAi = msg.sender_id === "ai-copilot-bot";
                 return (
                   <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 px-1">
                       <span className="text-[10px] text-neutral-400 font-semibold">{msg.sender_name}</span>
                       <span className="text-[10px] text-neutral-500">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -1746,13 +1745,15 @@ export default function WhatsAppMessengerView({
                     <div
                       className={`max-w-md sm:max-w-lg p-3.5 rounded-2xl text-xs font-medium leading-relaxed shadow-sm relative ${
                         isMe
-                          ? "bg-[#0f83fe] text-white rounded-tr-xs shadow-sm"
+                          ? "bg-[#ef4d23] text-white rounded-tr-xs shadow-md shadow-[#ef4d23]/20"
+                          : isAi
+                          ? "bg-[#232535] text-neutral-100 rounded-tl-xs border-l-4 border-l-[#ef4d23] border border-white/10"
                           : "bg-[#282a36] text-[#e0e2ed] rounded-tl-xs border border-white/5"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap pr-6 space-y-1">
+                      <div className="whitespace-pre-wrap pr-4 space-y-1.5">
                         {msg.content.includes("```") ? (
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             <div className="flex items-center justify-between text-[10px] text-amber-400 font-mono">
                               <span>⚡ GENERATED AI CODE / SCRIPT</span>
                               <button
@@ -1760,7 +1761,7 @@ export default function WhatsAppMessengerView({
                                 onClick={() => {
                                   navigator.clipboard.writeText(msg.content);
                                 }}
-                                className="text-[#0f83fe] hover:underline cursor-pointer font-bold"
+                                className="text-[#ef4d23] hover:underline cursor-pointer font-bold"
                               >
                                 Copy Output 📋
                               </button>
@@ -1772,24 +1773,45 @@ export default function WhatsAppMessengerView({
                         ) : (
                           <p>{msg.content}</p>
                         )}
+
+                        {/* Attachments */}
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            {msg.attachments.map((att) => (
+                              <div
+                                key={att.id}
+                                className="p-2 rounded-xl bg-black/30 border border-white/10 flex items-center justify-between gap-2"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <FileText className="h-4 w-4 text-[#ef4d23] shrink-0" />
+                                  <span className="font-bold truncate text-[11px] text-white">{att.name}</span>
+                                </div>
+                                <span className="text-[10px] text-neutral-400 font-mono shrink-0">{att.size}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* Reaction Badges */}
-                      <div
-                        className={`absolute -bottom-2 ${
-                          isMe ? "right-3" : "left-3"
-                        } bg-[#1b1c24] border border-white/10 rounded-full px-2 py-0.5 text-[10px] text-neutral-300 flex items-center gap-1 shadow-md`}
-                      >
-                        {isMe ? "👍 08:32 AM You" : "🔥 👌"}
-                      </div>
+                      {msg.reactions && msg.reactions.length > 0 && (
+                        <div
+                          className={`absolute -bottom-2.5 ${
+                            isMe ? "right-3" : "left-3"
+                          } bg-[#1b1c24] border border-white/10 rounded-full px-2 py-0.5 text-[10px] text-neutral-300 flex items-center gap-1 shadow-md`}
+                        >
+                          {msg.reactions.join(" ")}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
               })}
 
               {currentTypingState && (
-                <p className="text-xs text-[#ff5c8d] font-bold animate-pulse pt-2">
-                  ⚡ {currentTypingState.userName} is typing...
+                <p className="text-xs text-[#ef4d23] font-bold animate-pulse pt-2 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#ef4d23] animate-ping" />
+                  <span>⚡ {currentTypingState.userName} is typing...</span>
                 </p>
               )}
 
@@ -1797,35 +1819,35 @@ export default function WhatsAppMessengerView({
             </div>
 
             {/* Quick Creative Action Presets Bar */}
-            <div className="px-6 py-2 bg-[#1c1d27] border-t border-white/5 flex items-center gap-2 overflow-x-auto text-[11px] shrink-0 scrollbar-none">
+            <div className="px-4 sm:px-6 py-2 bg-[#1c1d27] border-t border-white/5 flex items-center gap-2 overflow-x-auto text-[11px] shrink-0 scrollbar-none">
               <span className="text-neutral-400 font-bold shrink-0 flex items-center gap-1">
-                <Sparkles className="h-3 w-3 text-[#0f83fe]" /> AI Action Prompts:
+                <Sparkles className="h-3 w-3 text-[#ef4d23]" /> AI Action Prompts:
               </span>
               <button
                 type="button"
                 onClick={() => handleQuickReply("🎬 Write Instagram Reel Script with hooks & scene directions")}
-                className="bg-[#262836] hover:bg-[#0f83fe]/25 hover:border-[#0f83fe]/50 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
               >
                 🎬 Write UGC Reel Script
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("🔥 Generate 5 High-ROAS Facebook & Meta Ad Angles")}
-                className="bg-[#262836] hover:bg-[#0f83fe]/25 hover:border-[#0f83fe]/50 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
               >
                 🔥 Generate 5 Ad Angles
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("📄 Draft Client Retainer Proposal with pricing breakdown")}
-                className="bg-[#262836] hover:bg-[#0f83fe]/25 hover:border-[#0f83fe]/50 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
               >
                 📄 Draft Client Proposal
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("📊 Analyze campaign ROAS, CPA and optimization steps")}
-                className="bg-[#262836] hover:bg-[#0f83fe]/25 hover:border-[#0f83fe]/50 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
               >
                 📊 Analyze Campaign ROAS
               </button>
@@ -1845,7 +1867,7 @@ export default function WhatsAppMessengerView({
 
                 <input
                   type="text"
-                  placeholder="Type something..."
+                  placeholder={`Message ${activeChannel.name}...`}
                   value={inputText}
                   onChange={handleInputChange}
                   className="flex-1 bg-transparent text-xs text-white placeholder:text-neutral-500 outline-none"
@@ -1854,14 +1876,50 @@ export default function WhatsAppMessengerView({
                 <button
                   type="submit"
                   disabled={!inputText.trim()}
-                  className="p-3 bg-[#0f83fe] hover:bg-[#0075f0] text-white rounded-xl shadow-md transition-all disabled:opacity-40 cursor-pointer"
+                  className="p-3 bg-[#ef4d23] hover:bg-[#d93c14] text-white rounded-xl shadow-md transition-all disabled:opacity-40 cursor-pointer"
                 >
                   <ArrowUp className="h-4 w-4 font-bold" />
                 </button>
               </form>
             </div>
           </>
-        ) : null}
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[#1c1d27] to-[#14151e] text-white">
+            <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center p-3 mb-4 shadow-xl shadow-[#ef4d23]/10">
+              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="w-full h-full object-contain brightness-0 invert scale-110" />
+            </div>
+            <h3 className="text-2xl font-bold tracking-tight text-white" style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>
+              Lumen & Co Messenger
+            </h3>
+            <p className="mt-1 text-xs text-neutral-400 max-w-sm">
+              Real-time Agency Collaboration, Client Channels & AI Creative Copilot
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-2 justify-center max-w-md">
+              <button
+                type="button"
+                onClick={() => setActiveChannelId("channel-ai-copilot")}
+                className="px-3.5 py-2 rounded-xl bg-[#ef4d23]/15 hover:bg-[#ef4d23]/25 border border-[#ef4d23]/30 text-[#ef4d23] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Zap className="h-4 w-4" /> <span>Chat with AI Copilot</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelId("channel-general")}
+                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>📢 Team Announcements</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelId("channel-growth")}
+                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>🎯 Performance Marketing</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MODAL: ADD NEW CONTACT / START CHAT BY CODE */}
@@ -2171,115 +2229,74 @@ export default function WhatsAppMessengerView({
       )}
 
       {/* ========================================================================= */}
-      {/* AUTHENTICATION LOGIN MODAL OVERLAY */}
+      {/* IDENTITY SWITCHER MODAL (Opened from avatar in left sidebar) */}
       {/* ========================================================================= */}
-      {!authSession?.isLoggedIn && (
-        <div className="absolute inset-0 z-50 bg-[#121318]/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in">
-          <div className="bg-[#1a1b24] border border-white/15 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 text-white isolate relative">
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 rounded-3xl bg-white/10 p-3 flex items-center justify-center mx-auto border border-white/25 shadow-xl overflow-hidden">
-                <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain brightness-0 invert scale-110" />
+      {isIdentityModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in">
+          <div className="bg-[#1a1b24] border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 text-white isolate relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-[#ef4d23]" />
+                <h3 className="text-base font-bold text-white">Switch Messenger Identity</h3>
               </div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-white">Lumen & Co Messenger</h2>
-              <p className="text-xs text-neutral-400">
-                Login with your assigned <span className="text-[#0f83fe] font-mono font-bold">EMP-xxx</span> or <span className="text-amber-400 font-mono font-bold">CLT-xxx</span> identity code
-              </p>
+              <button
+                type="button"
+                onClick={() => setIsIdentityModalOpen(false)}
+                className="p-1 rounded-full text-neutral-400 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
-            {loginError && (
-              <div className="p-3 bg-red-500/15 border border-red-500/30 rounded-xl text-xs text-red-300 font-medium text-center">
-                {loginError}
-              </div>
-            )}
+            <p className="text-xs text-neutral-400">
+              Current active identity: <span className="text-[#ef4d23] font-bold font-mono">[{activeUserCode}] {activeUserName}</span> ({getRoleBadgeLabel(activeUserRole)})
+            </p>
 
-            <form onSubmit={handlePerformLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Tag className="h-3.5 w-3.5 text-[#0f83fe]" />
-                  <span>Employee / Client Identity Code</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. EMP-100 or CLT-101"
-                  value={loginCodeInput}
-                  onChange={(e) => {
-                    setLoginCodeInput(e.target.value);
-                    setLoginError(null);
-                  }}
-                  className="w-full bg-[#232532] border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-[#0f83fe] outline-none font-mono uppercase font-bold"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-neutral-300 uppercase tracking-wider flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5 text-[#0f83fe]" />
-                    <span>Common Access Password</span>
-                  </span>
-                  <span className="text-[10px] text-neutral-400 font-mono">Pass: 12345678</span>
-                </label>
-                <input
-                  type="password"
-                  placeholder="Enter 12345678"
-                  value={loginPasswordInput}
-                  onChange={(e) => {
-                    setLoginPasswordInput(e.target.value);
-                    setLoginError(null);
-                  }}
-                  className="w-full bg-[#232532] border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-[#0f83fe] outline-none font-mono"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[#0f83fe] hover:bg-[#0075f0] text-white font-extrabold text-sm py-3.5 rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
-              >
-                <Key className="h-4 w-4" />
-                <span>Login with Identity Code →</span>
-              </button>
-            </form>
-
-            {/* Quick Demo 1-Click Login Chips */}
-            <div className="pt-2 border-t border-white/10 space-y-2">
-              <p className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider text-center">
-                ⚡ 1-Click Quick Demo Pass (Pass: 12345678)
-              </p>
-              <div className="flex flex-wrap gap-1.5 justify-center text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginCodeInput("EMP-100");
-                    setLoginPasswordInput("12345678");
-                    setLoginError(null);
-                  }}
-                  className="bg-[#0f83fe]/20 hover:bg-[#0f83fe]/40 border border-[#0f83fe]/50 text-[#0f83fe] font-mono font-extrabold px-2.5 py-1 rounded-xl cursor-pointer"
-                >
-                  EMP-100 (Sahit • Founder)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginCodeInput("EMP-101");
-                    setLoginPasswordInput("12345678");
-                    setLoginError(null);
-                  }}
-                  className="bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/50 text-purple-300 font-mono font-extrabold px-2.5 py-1 rounded-xl cursor-pointer"
-                >
-                  EMP-101 (Alex • Ops)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginCodeInput("CLT-101");
-                    setLoginPasswordInput("12345678");
-                    setLoginError(null);
-                  }}
-                  className="bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500/50 text-amber-300 font-mono font-extrabold px-2.5 py-1 rounded-xl cursor-pointer"
-                >
-                  CLT-101 (Northbeam • Client)
-                </button>
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
+                Quick 1-Click Role Switch:
+              </span>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { code: "EMP-100", name: "Sahit Sai", role: "founder", desc: "Founder & Super Admin" },
+                  { code: "EMP-101", name: "Priya Sharma", role: "ad_specialist", desc: "Sr Performance Ad Specialist" },
+                  { code: "EMP-102", name: "Vikram Mehta", role: "designer", desc: "Creative Director & Video Lead" },
+                  { code: "EMP-103", name: "Ananya Rao", role: "account_manager", desc: "Client Success & Operations Lead" },
+                  { code: "CLT-101", name: "Oakridge International", role: "client", desc: "Client Partner (School)" },
+                ].map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      const newSession: AuthSession = {
+                        isLoggedIn: true,
+                        code: item.code,
+                        name: item.name,
+                        role: item.role as UserRoleType,
+                        userType: item.role === "client" ? "client" : "employee",
+                        userId: item.code.toLowerCase(),
+                      };
+                      setAuthSession(newSession);
+                      try {
+                        localStorage.setItem("lumen_messenger_auth_v1", JSON.stringify(newSession));
+                      } catch {}
+                      setIsIdentityModalOpen(false);
+                    }}
+                    className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
+                      activeUserCode === item.code
+                        ? "bg-[#ef4d23]/20 border-[#ef4d23] text-white"
+                        : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold text-xs block">{item.name}</span>
+                      <span className="text-[10px] text-neutral-400">{item.desc}</span>
+                    </div>
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/10 text-[#ef4d23]">
+                      {item.code}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>

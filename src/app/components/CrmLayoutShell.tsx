@@ -193,6 +193,18 @@ export default function CrmLayoutShell({
             </Link>
           </div>
 
+          {/* Quick Messenger Button */}
+          <button
+            type="button"
+            onClick={() => setIsMessengerOpen(true)}
+            className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-semibold px-3 sm:px-3.5 py-2 rounded-full border border-white/30 transition-all cursor-pointer relative"
+            title="Open Lumen & Co Messenger"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-[#ef4d23]" />
+            <span className="hidden sm:inline">Messenger</span>
+            <span className="w-2 h-2 rounded-full bg-[#ef4d23] animate-pulse" />
+          </button>
+
           {/* Real-time Email Button */}
           <button
             onClick={() => setIsEmailModalOpen(true)}

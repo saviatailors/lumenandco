@@ -24,8 +24,8 @@ export default function BuiltInMessengerModal({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="" maxWidth="max-w-5xl">
-      <div className="-m-6 overflow-hidden rounded-3xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="" maxWidth="max-w-6xl">
+      <div className="-m-6 h-[85vh] max-h-[780px] overflow-hidden rounded-3xl flex flex-col">
         <WhatsAppMessengerView
           currentUserRole={currentUserRole}
           currentUserId={currentUserId}
