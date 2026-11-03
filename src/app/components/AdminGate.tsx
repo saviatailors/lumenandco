@@ -89,8 +89,6 @@ export default function AdminGate({
   const [localError, setLocalError] = useState("");
   const [clientIdInput, setClientIdInput] = useState(effectiveClientId || "");
   const [showConfig, setShowConfig] = useState(false);
-  const [showManualGoogle, setShowManualGoogle] = useState(false);
-  const [customEmail, setCustomEmail] = useState("");
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
@@ -148,20 +146,6 @@ export default function AdminGate({
       console.warn("Google GSI button initialization note:", e);
     }
   }, [gsiReady, effectiveClientId, effectiveGoogleCredentialSignIn]);
-
-  // Handle direct Google sign-in
-  const handleQuickGoogleSignIn = async (
-    targetEmail = "sahitsai6@gmail.com",
-    name = "Sahit Sai Pothala"
-  ) => {
-    setBusy(true);
-    setLocalError("");
-    const res = await effectiveSignIn(targetEmail, name);
-    setBusy(false);
-    if (!res) {
-      setLocalError("Could not sign in with Google account. Please try again.");
-    }
-  };
 
   const handleSaveClientId = (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,12 +226,14 @@ export default function AdminGate({
 
             <button
               type="button"
-              disabled={busy}
-              onClick={() => handleQuickGoogleSignIn("sahitsai6@gmail.com", "Sahit Sai Pothala")}
+              onClick={() => {
+                setLocalError("");
+                effectiveSignOut();
+              }}
               className="w-full rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <GoogleIcon className="h-4 w-4" />
-              <span>Re-authenticate with Google</span>
+              <span>Sign in again with Google</span>
             </button>
           </div>
         ) : effectiveState === "denied" ? (
@@ -268,99 +254,24 @@ export default function AdminGate({
           </div>
         ) : (
           /* ========================================================================= */
-          /* GOOGLE AUTHENTICATION VIEW */
+          /* OFFICIAL GOOGLE OAUTH SIGN-IN */
           /* ========================================================================= */
-          <div className="space-y-3.5 pt-1">
-            {/* Native Google Identity Services Button (if Client ID configured) */}
-            {effectiveClientId ? (
-              <div className="space-y-3">
-                <div
-                  ref={googleBtnRef}
-                  className="flex justify-center min-h-[44px] items-center"
-                />
-                <div className="relative flex py-0.5 items-center">
-                  <div className="flex-grow border-t border-neutral-200"></div>
-                  <span className="flex-shrink mx-3 text-[10px] text-neutral-400 uppercase font-semibold tracking-wider">
-                    Or Instant Access
-                  </span>
-                  <div className="flex-grow border-t border-neutral-200"></div>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-2 py-1">
+              <div
+                ref={googleBtnRef}
+                className="flex justify-center min-h-[46px] items-center"
+              />
+              {!gsiReady && (
+                <div className="flex justify-center items-center py-2 text-xs text-neutral-400 gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
+                  <span>Loading Google Sign-In…</span>
                 </div>
-              </div>
-            ) : null}
-
-            {/* Primary Google One-Click Auth Button */}
-            <div className="space-y-2">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  handleQuickGoogleSignIn("sahitsai6@gmail.com", "Sahit Sai Pothala")
-                }
-                className="w-full group relative flex items-center justify-center gap-3 rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3.5 text-xs font-bold text-neutral-800 shadow-md hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-neutral-50 via-white to-neutral-50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center gap-3">
-                  <GoogleIcon className="h-5 w-5 shrink-0" />
-                  <div className="text-left">
-                    <span className="block text-xs font-bold text-neutral-900">
-                      {busy ? "Authenticating with Google…" : "Continue with Google"}
-                    </span>
-                    <span className="block text-[10px] text-neutral-500 font-normal">
-                      sahitsai6@gmail.com (Authorized Admin)
-                    </span>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 ml-auto text-neutral-400 group-hover:text-neutral-900 group-hover:translate-x-0.5 transition-all relative" />
-              </button>
+              )}
+              <p className="text-[11px] text-neutral-400 font-medium">
+                Official Google Identity Services OAuth 2.0
+              </p>
             </div>
-
-            {/* Secondary options: Sign in with another Google account */}
-            {showManualGoogle ? (
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50/90 p-3.5 text-left space-y-2.5 animate-fadeIn">
-                <label className="block text-[11px] font-semibold text-neutral-700">
-                  Enter Google Account Email
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    placeholder="your-email@gmail.com"
-                    className="flex-1 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 outline-none focus:border-[#ef4d23]"
-                  />
-                  <button
-                    type="button"
-                    disabled={!customEmail.trim() || busy}
-                    onClick={() =>
-                      handleQuickGoogleSignIn(customEmail.trim(), customEmail.split("@")[0])
-                    }
-                    className="rounded-xl px-3.5 py-2 text-xs font-bold text-white bg-[#ef4d23] hover:opacity-90 transition-all disabled:opacity-40 cursor-pointer"
-                  >
-                    Enter
-                  </button>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleQuickGoogleSignIn("saviatailors@gmail.com", "Savia Tailors")
-                    }
-                    className="text-[10px] text-[#ef4d23] hover:underline font-semibold"
-                  >
-                    Quick sign-in: saviatailors@gmail.com
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowManualGoogle(true)}
-                className="text-[11px] text-neutral-500 hover:text-neutral-800 transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
-              >
-                <span>Sign in with another Google account</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            )}
 
             {/* Google OAuth Client ID Configuration Accordion */}
             <div className="pt-2 border-t border-neutral-100">
