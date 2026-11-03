@@ -81,6 +81,7 @@ export default function AdminGate({
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [gsiReady, setGsiReady] = useState(false);
 
+  const activeError = localError || effectiveError;
   const isDenied = effectiveState === "denied" || !!activeError;
 
   // 1. Load Google Identity Services script

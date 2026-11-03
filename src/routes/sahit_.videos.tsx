@@ -3,6 +3,7 @@ import VideoLibraryPage from "@/app/VideoLibraryPage";
 import { isAuthorizedEmail } from "@/lib/rbac";
 
 export const Route = createFileRoute("/sahit_/videos")({
+  ssr: false,
   beforeLoad: () => {
     if (typeof window !== "undefined") {
       const isAuth = localStorage.getItem("lumen_admin_auth_v2") === "true";

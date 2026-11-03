@@ -21,7 +21,8 @@ import { buildCalendlyUrl, CALENDLY_BRANDED_URL } from "./CalendlyWidget";
 
 const OPEN_EVENT = "convix:open-lead-form";
 
-export function openLeadForm(tab: "form" | "calendar" = "form") {
+export function openLeadForm(tabOrEvent?: "form" | "calendar" | React.MouseEvent | unknown) {
+  const tab = tabOrEvent === "calendar" ? "calendar" : "form";
   window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: { tab } }));
 }
 
