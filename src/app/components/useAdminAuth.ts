@@ -68,6 +68,10 @@ export function decodeGoogleJwt(token: string): any {
   }
 }
 
+/** Official Google OAuth 2.0 Web Client ID */
+export const DEFAULT_GOOGLE_CLIENT_ID =
+  "64600989630-9p4h2kl0ro7orenf9g4ndcarqj68u35u.apps.googleusercontent.com";
+
 /** Loads Google Identity Services client script dynamically */
 export function loadGoogleGsiScript(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -105,10 +109,10 @@ export function useAdminAuth() {
       return (
         localStorage.getItem("lumen_google_client_id") ||
         (import.meta.env?.VITE_GOOGLE_CLIENT_ID as string) ||
-        ""
+        DEFAULT_GOOGLE_CLIENT_ID
       );
     }
-    return "";
+    return DEFAULT_GOOGLE_CLIENT_ID;
   });
 
   const [user, setUser] = useState<AdminUser | null>(() => {

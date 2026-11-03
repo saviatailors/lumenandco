@@ -268,14 +268,18 @@ export default function AdminGate({
           <div className="space-y-3.5 pt-1">
             {/* Native Google Identity Services Button (if Client ID configured) */}
             {effectiveClientId ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div
                   ref={googleBtnRef}
                   className="flex justify-center min-h-[44px] items-center"
                 />
-                <p className="text-[10px] text-neutral-400">
-                  Secured by Google Identity Services OAuth 2.0
-                </p>
+                <div className="relative flex py-0.5 items-center">
+                  <div className="flex-grow border-t border-neutral-200"></div>
+                  <span className="flex-shrink mx-3 text-[10px] text-neutral-400 uppercase font-semibold tracking-wider">
+                    Or Instant Access
+                  </span>
+                  <div className="flex-grow border-t border-neutral-200"></div>
+                </div>
               </div>
             ) : null}
 
