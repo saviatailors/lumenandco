@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -8,11 +8,8 @@ import LiveBackgroundVideo from "./LiveBackgroundVideo";
 import {
   useAdminAuth,
   loadGoogleGsiScript,
-  DEFAULT_ALLOWED_EMAILS,
   type AdminState,
 } from "./useAdminAuth";
-
-const ORANGE = "#ef4d23";
 
 /** Google "G" Colorful SVG Icon */
 function GoogleIcon({ className = "h-5 w-5" }: { className?: string }) {
@@ -53,6 +50,11 @@ export interface AdminGateProps {
 
 /**
  * Modern Google Authentication Gate for Lumen & Co Internal Operations Hub & CRM
+ * 
+ * Features:
+ * - Always forces Google Account Chooser (`prompt: 'select_account'`) so users can switch accounts
+ * - Never displays unauthorized Google accounts on screen
+ * - Clean, single-notice Access Denied state
  */
 export default function AdminGate({
   state,
@@ -67,18 +69,13 @@ export default function AdminGate({
   const auth = useAdminAuth();
 
   const effectiveState = state ?? auth.state;
-  const effectiveEmail = email ?? auth.email;
   const effectiveError = error ?? auth.error;
   const effectiveSignOut = onSignOut ?? auth.signOut;
   const effectiveClientId = googleClientId ?? auth.googleClientId;
-  const effectiveGoogleCredentialSignIn =
-    onGoogleCredential ?? auth.signInWithGoogleCredential;
   const effectiveSignIn = onSignIn ?? auth.signInWithGoogleAccount;
 
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState("");
-
-  const googleBtnRef = useRef<HTMLDivElement>(null);
   const [gsiReady, setGsiReady] = useState(false);
 
   const activeError = localError || effectiveError;
@@ -88,62 +85,117 @@ export default function AdminGate({
   useEffect(() => {
     let active = true;
     loadGoogleGsiScript().then((ok) => {
-      if (active) setGsiReady(ok);
+      if (active) {
+        setGsiReady(ok);
+        // Explicitly disable One Tap auto-select to avoid trapping user in unauthorized account
+        if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+          try {
+            (window as any).google.accounts.id.disableAutoSelect();
+          } catch {}
+        }
+      }
     });
     return () => {
       active = false;
     };
   }, []);
 
-  // 2. Initialize and render native Google Identity Services button if Client ID exists and not in denied/error state
+  // 2. Handle OAuth token return via redirect hash if popup was blocked
   useEffect(() => {
-    if (isDenied || busy) {
-      if (googleBtnRef.current) {
-        googleBtnRef.current.innerHTML = "";
-      }
-      return;
-    }
-
-    if (!gsiReady || !effectiveClientId || !googleBtnRef.current) return;
-    try {
-      const g = (window as any).google?.accounts?.id;
-      if (!g) return;
-
-      g.initialize({
-        client_id: effectiveClientId,
-        callback: async (response: any) => {
-          if (response?.credential) {
-            setBusy(true);
-            setLocalError("");
-            const ok = await effectiveGoogleCredentialSignIn(response.credential);
-            setBusy(false);
-            if (!ok) {
-              setLocalError(
-                "We are sorry, you are not authorized as you are not a part of Lumen & Co."
-              );
-              if (googleBtnRef.current) {
-                googleBtnRef.current.innerHTML = "";
+    if (typeof window === "undefined") return;
+    if (window.location.hash.includes("access_token=")) {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = params.get("access_token");
+      if (accessToken) {
+        window.history.replaceState(null, "", window.location.pathname);
+        setBusy(true);
+        fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+          .then((res) => res.json())
+          .then(async (info) => {
+            if (info?.email) {
+              const ok = await effectiveSignIn(info.email, info.name, info.picture);
+              if (!ok) {
+                setLocalError(
+                  "We are sorry, you are not authorized as you are not a part of Lumen & Co."
+                );
               }
             }
-          }
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
-
-      googleBtnRef.current.innerHTML = "";
-      g.renderButton(googleBtnRef.current, {
-        theme: "outline",
-        size: "large",
-        shape: "pill",
-        text: "signin_with", // Displays standard "Sign in with Google", NEVER shows previously unauthorized account!
-        logo_alignment: "left",
-        width: 310,
-      });
-    } catch (e) {
-      console.warn("Google GSI button initialization note:", e);
+          })
+          .catch(() => {
+            setLocalError("Unable to verify Google credentials. Please try again.");
+          })
+          .finally(() => setBusy(false));
+      }
     }
-  }, [gsiReady, effectiveClientId, effectiveGoogleCredentialSignIn, isDenied, busy]);
+  }, [effectiveSignIn]);
+
+  // 3. Initiate Google OAuth with forced Account Chooser (`prompt: 'select_account'`)
+  const handleGoogleSignInWithSelectAccount = useCallback(() => {
+    setLocalError("");
+    setBusy(true);
+
+    if (typeof window === "undefined") return;
+
+    const google = (window as any).google;
+    if (google?.accounts?.oauth2) {
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: effectiveClientId,
+          scope: "openid email profile",
+          prompt: "select_account", // ALWAYS force Account Picker so user can choose sahitsai6@gmail.com!
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse?.error) {
+              setBusy(false);
+              if (tokenResponse.error !== "access_denied") {
+                setLocalError("Google sign-in was cancelled or encountered an error.");
+              }
+              return;
+            }
+
+            if (tokenResponse?.access_token) {
+              try {
+                const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const info = await res.json();
+                if (info?.email) {
+                  const ok = await effectiveSignIn(info.email, info.name, info.picture);
+                  if (!ok) {
+                    setLocalError(
+                      "We are sorry, you are not authorized as you are not a part of Lumen & Co."
+                    );
+                  }
+                } else {
+                  setLocalError("Unable to retrieve email from Google. Please try again.");
+                }
+              } catch (err) {
+                setLocalError("Error verifying Google account. Please try again.");
+              } finally {
+                setBusy(false);
+              }
+            } else {
+              setBusy(false);
+            }
+          },
+        });
+
+        client.requestAccessToken({ prompt: "select_account" });
+        return;
+      } catch (e) {
+        console.warn("initTokenClient fallback to redirect:", e);
+      }
+    }
+
+    // Direct OAuth 2.0 fallback with forced account selection prompt
+    const redirectUri = window.location.origin + window.location.pathname;
+    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${effectiveClientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=token&scope=openid%20email%20profile&prompt=select_account`;
+
+    window.location.href = oauthUrl;
+  }, [effectiveClientId, effectiveSignIn]);
 
   return (
     <div
@@ -193,7 +245,7 @@ export default function AdminGate({
           </div>
         ) : isDenied ? (
           /* ========================================================================= */
-          /* ACCESS DENIED STATE (NO GOOGLE ACCOUNT BUTTON SHOWN) */
+          /* ACCESS DENIED STATE (CLEAN SINGLE VIEW, NO UNAPPROVED ACCOUNTS SHOWN) */
           /* ========================================================================= */
           <div key="view-denied" className="space-y-4 py-2">
             <div className="rounded-2xl border border-red-200 bg-red-50/95 p-5 text-left text-xs text-red-900 space-y-2 shadow-sm">
@@ -216,10 +268,11 @@ export default function AdminGate({
                   } catch {}
                 }
                 effectiveSignOut();
+                handleGoogleSignInWithSelectAccount();
               }}
-              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 hover:border-neutral-400"
+              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3.5 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2.5 hover:border-neutral-400 active:scale-[0.99]"
             >
-              <GoogleIcon className="h-4 w-4" />
+              <GoogleIcon className="h-4 w-4 shrink-0" />
               <span>Sign in with another Google account</span>
             </button>
           </div>
@@ -252,14 +305,10 @@ export default function AdminGate({
               type="button"
               onClick={() => {
                 setLocalError("");
-                if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
-                  try {
-                    (window as any).google.accounts.id.disableAutoSelect();
-                  } catch {}
-                }
                 effectiveSignOut();
+                handleGoogleSignInWithSelectAccount();
               }}
-              className="w-full rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full rounded-2xl bg-white border border-neutral-300 hover:border-neutral-400 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99]"
             >
               <GoogleIcon className="h-4 w-4" />
               <span>Sign in again with Google</span>
@@ -267,17 +316,23 @@ export default function AdminGate({
           </div>
         ) : (
           /* ========================================================================= */
-          /* OFFICIAL GOOGLE OAUTH SIGN-IN */
+          /* BRANDED SIGN-IN BUTTON (NEVER SHOWS PRE-ATTACHED UNAPPROVED ACCOUNT) */
           /* ========================================================================= */
-          <div key="view-signin" className="pt-2 pb-1">
-            <div
-              ref={googleBtnRef}
-              className="flex justify-center min-h-[46px] items-center"
-            />
+          <div key="view-signin" className="pt-2 pb-1 space-y-3">
+            <button
+              type="button"
+              onClick={handleGoogleSignInWithSelectAccount}
+              disabled={!gsiReady || busy}
+              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-sm font-semibold shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60 active:scale-[0.99]"
+            >
+              <GoogleIcon className="h-5 w-5 shrink-0" />
+              <span>Sign in with Google</span>
+            </button>
+
             {!gsiReady && (
-              <div className="flex justify-center items-center py-2 text-xs text-neutral-400 gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
-                <span>Loading Google Sign-In…</span>
+              <div className="flex justify-center items-center py-1 text-xs text-neutral-400 gap-2">
+                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
+                <span>Connecting to Google…</span>
               </div>
             )}
           </div>

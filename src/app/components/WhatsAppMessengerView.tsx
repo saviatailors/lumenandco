@@ -1401,26 +1401,26 @@ export default function WhatsAppMessengerView({
 
   return (
     <div
-      className={`w-full h-full flex bg-[#16171e] text-white font-sans overflow-hidden border border-white/10 shadow-2xl relative isolate ${
+      className={`w-full h-full flex bg-white/90 backdrop-blur-2xl text-neutral-900 font-sans overflow-hidden border border-white/80 shadow-2xl relative isolate ${
         isEmbeddedModal ? "min-h-[640px] rounded-3xl" : "rounded-3xl"
       }`}
     >
       {/* ========================================================================= */}
-      {/* COLUMN 1: LEFTMOST NARROW VERTICAL ICON NAVBAR (#121318) */}
+      {/* COLUMN 1: LEFTMOST NARROW VERTICAL ICON NAVBAR (Lumen Glass) */}
       {/* ========================================================================= */}
-      <div className="hidden sm:flex w-16 bg-[#121318] border-r border-white/5 flex-col items-center justify-between py-5 shrink-0 z-20">
+      <div className="hidden sm:flex w-16 bg-neutral-100/80 backdrop-blur-xl border-r border-neutral-200/80 flex-col items-center justify-between py-5 shrink-0 z-20">
         <div className="flex flex-col items-center gap-6">
           {/* Brand Logo */}
-          <div className="w-12 h-12 rounded-2xl bg-white/10 p-1 flex items-center justify-center border border-white/25 shadow-md cursor-pointer hover:bg-white/20 transition-all overflow-hidden" title="Lumen & Co">
-            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain brightness-0 invert scale-110" />
+          <div className="w-11 h-11 rounded-2xl bg-white p-1.5 flex items-center justify-center border border-neutral-200/80 shadow-xs cursor-pointer hover:scale-105 transition-all overflow-hidden" title="Lumen & Co">
+            <img src="/lumen-and-co-logo.png" alt="Lumen & Co Logo" className="w-full h-full object-contain" />
           </div>
 
           {/* Nav Icons */}
-          <div className="flex flex-col items-center gap-4 pt-4">
+          <div className="flex flex-col items-center gap-4 pt-3">
             {/* Chat Nav Item (Active) */}
             <div className="relative group cursor-pointer" title="Chats & Messages">
               <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[#ef4d23] rounded-r-full" />
-              <div className="p-2.5 bg-[#ef4d23]/20 text-[#ef4d23] rounded-xl border border-[#ef4d23]/30">
+              <div className="p-2.5 bg-[#ef4d23] text-white rounded-xl shadow-md shadow-[#ef4d23]/30">
                 <MessageSquare className="h-5 w-5" />
               </div>
             </div>
@@ -1429,7 +1429,7 @@ export default function WhatsAppMessengerView({
             <button
               type="button"
               onClick={() => setFilterType("internal")}
-              className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+              className="p-2.5 text-neutral-500 hover:text-neutral-900 hover:bg-white rounded-xl transition-all cursor-pointer shadow-none hover:shadow-xs"
               title="Team Channels"
             >
               <Users className="h-5 w-5" />
@@ -1442,7 +1442,7 @@ export default function WhatsAppMessengerView({
                 setActiveChannelId("channel-ai-copilot");
                 setFilterType("all");
               }}
-              className="p-2.5 text-neutral-400 hover:text-amber-400 hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+              className="p-2.5 text-neutral-500 hover:text-amber-600 hover:bg-white rounded-xl transition-all cursor-pointer shadow-none hover:shadow-xs"
               title="Creative AI Copilot"
             >
               <Zap className="h-5 w-5" />
@@ -1452,7 +1452,7 @@ export default function WhatsAppMessengerView({
             <button
               type="button"
               onClick={() => setIsNewContactModalOpen(true)}
-              className="p-2.5 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+              className="p-2.5 text-neutral-500 hover:text-neutral-900 hover:bg-white rounded-xl transition-all cursor-pointer shadow-none hover:shadow-xs"
               title="Start New Direct Line"
             >
               <UserPlus className="h-5 w-5" />
@@ -1467,23 +1467,23 @@ export default function WhatsAppMessengerView({
             className="relative cursor-pointer group"
             title={`${activeUserName} [${activeUserCode}] — Click to Switch Identity`}
           >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white font-bold flex items-center justify-center text-xs shadow-md group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white font-bold flex items-center justify-center text-xs shadow-md group-hover:scale-105 transition-transform ring-2 ring-white">
               {activeUserName.substring(0, 2).toUpperCase()}
             </div>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#121318] absolute bottom-0 right-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0 shadow-xs" />
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* COLUMN 2: CONVERSATION LIST SIDEBAR ("Chats") (#171821) */}
+      {/* COLUMN 2: CONVERSATION LIST SIDEBAR ("Chats") */}
       {/* ========================================================================= */}
-      <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-[#171821] border-r border-white/5 flex-col shrink-0 isolate`}>
+      <div className={`${activeChannelId ? "hidden md:flex" : "flex"} w-full md:w-80 bg-white/70 backdrop-blur-xl border-r border-neutral-200/80 flex-col shrink-0 isolate`}>
         {/* Chats Header */}
-        <div className="h-16 px-5 flex items-center justify-between border-b border-white/5 shrink-0">
+        <div className="h-16 px-5 flex items-center justify-between border-b border-neutral-200/80 shrink-0 bg-white/40">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-extrabold text-white tracking-tight">Chats</h2>
-            <span className="px-2 py-0.5 rounded-full bg-[#ef4d23]/20 text-[#ef4d23] text-[10px] font-bold">
+            <h2 className="text-xl font-extrabold text-neutral-900 tracking-tight">Chats</h2>
+            <span className="px-2 py-0.5 rounded-full bg-[#ef4d23]/10 text-[#ef4d23] border border-[#ef4d23]/20 text-[10px] font-bold">
               {visibleChannels.length}
             </span>
           </div>
@@ -1491,7 +1491,7 @@ export default function WhatsAppMessengerView({
             <button
               type="button"
               onClick={() => setIsNewContactModalOpen(true)}
-              className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+              className="p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors cursor-pointer"
               title="Search / Start New Chat"
             >
               <UserPlus className="h-4 w-4" />
@@ -1499,7 +1499,7 @@ export default function WhatsAppMessengerView({
             <button
               type="button"
               onClick={handleClearAllChats}
-              className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
+              className="p-2 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
               title="Reset Chat History"
             >
               <Trash2 className="h-4 w-4" />
@@ -1507,7 +1507,7 @@ export default function WhatsAppMessengerView({
             {isEmbeddedModal && onCloseModal && (
               <button
                 onClick={onCloseModal}
-                className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+                className="p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors cursor-pointer"
                 title="Close Messenger"
               >
                 <X className="h-4 w-4" />
@@ -1517,21 +1517,21 @@ export default function WhatsAppMessengerView({
         </div>
 
         {/* Search Input Box */}
-        <div className="px-3.5 py-2 border-b border-white/5">
+        <div className="px-3.5 py-2.5 border-b border-neutral-200/80">
           <div className="relative">
-            <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+            <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               placeholder="Search chats, team, or codes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-[#222430] text-xs text-white placeholder:text-neutral-500 rounded-xl outline-none focus:ring-1 focus:ring-[#ef4d23] border border-white/5 transition-all"
+              className="w-full pl-8 pr-3 py-2 bg-neutral-100/90 focus:bg-white text-xs text-neutral-900 placeholder:text-neutral-400 rounded-xl outline-none focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] border border-neutral-200 transition-all font-medium"
             />
           </div>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="px-3 py-2 flex items-center gap-1 border-b border-white/5 overflow-x-auto scrollbar-none">
+        <div className="px-3 py-2 flex items-center gap-1.5 border-b border-neutral-200/80 overflow-x-auto scrollbar-none bg-neutral-50/50">
           {[
             { id: "all", label: "All" },
             { id: "internal", label: "⚡ Team & AI" },
@@ -1545,7 +1545,7 @@ export default function WhatsAppMessengerView({
               className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                 filterType === tab.id
                   ? "bg-[#ef4d23] text-white shadow-xs"
-                  : "bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
+                  : "bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 border border-neutral-200/70"
               }`}
             >
               {tab.label}
@@ -1557,10 +1557,10 @@ export default function WhatsAppMessengerView({
         <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5 scrollbar-thin">
           {/* SEARCH RESULTS DIRECTORY MATCH */}
           {directoryResults.length > 0 && (
-            <div className="space-y-2 pb-2 mb-2 border-b border-white/5">
+            <div className="space-y-2 pb-2 mb-2 border-b border-neutral-200/80">
               <div className="text-[11px] font-bold text-[#ef4d23] px-2 uppercase tracking-wider flex items-center justify-between">
                 <span>Identity Directory Match</span>
-                <span className="text-[10px] bg-[#ef4d23]/20 text-[#ef4d23] px-2 py-0.5 rounded-full font-mono">{directoryResults.length}</span>
+                <span className="text-[10px] bg-[#ef4d23]/10 text-[#ef4d23] border border-[#ef4d23]/20 px-2 py-0.5 rounded-full font-mono">{directoryResults.length}</span>
               </div>
               <div className="space-y-1.5">
                 {directoryResults.map((item) => (
@@ -1570,15 +1570,15 @@ export default function WhatsAppMessengerView({
                       handleStartChatWithCode(item.code, item.name, item.type, item.subtext);
                       setSearchQuery("");
                     }}
-                    className="p-2.5 rounded-2xl bg-[#ef4d23]/10 hover:bg-[#ef4d23]/20 border border-[#ef4d23]/30 flex items-center justify-between cursor-pointer transition-all"
+                    className="p-2.5 rounded-2xl bg-orange-50/80 hover:bg-orange-100/80 border border-orange-200/80 flex items-center justify-between cursor-pointer transition-all"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="px-2 py-0.5 rounded bg-[#ef4d23] text-white text-[10px] font-mono font-bold shrink-0">
                         {item.code}
                       </span>
                       <div className="min-w-0">
-                        <h5 className="text-xs font-bold text-white truncate">{item.name}</h5>
-                        <p className="text-[10px] text-neutral-400 truncate">{item.subtext}</p>
+                        <h5 className="text-xs font-bold text-neutral-900 truncate">{item.name}</h5>
+                        <p className="text-[10px] text-neutral-500 truncate">{item.subtext}</p>
                       </div>
                     </div>
                     <span className="text-[10px] text-[#ef4d23] font-bold shrink-0">Chat →</span>
@@ -1591,8 +1591,8 @@ export default function WhatsAppMessengerView({
           {visibleChannels.length === 0 ? (
             <div className="text-center py-12 px-4 space-y-2 text-neutral-400">
               <MessageSquare className="h-8 w-8 mx-auto opacity-30 text-[#ef4d23]" />
-              <p className="text-xs font-semibold text-neutral-300">No conversations found</p>
-              <p className="text-[11px] text-neutral-500">Try adjusting your search or category filter.</p>
+              <p className="text-xs font-semibold text-neutral-700">No conversations found</p>
+              <p className="text-[11px] text-neutral-400">Try adjusting your search or category filter.</p>
             </div>
           ) : (
             visibleChannels.map((c) => {
@@ -1605,34 +1605,34 @@ export default function WhatsAppMessengerView({
                   className={`p-3 rounded-2xl flex items-center justify-between transition-all cursor-pointer border ${
                     isActive
                       ? "bg-[#ef4d23] text-white shadow-lg shadow-[#ef4d23]/25 border-transparent"
-                      : "bg-[#222430] hover:bg-[#292b39] text-neutral-200 border-white/5"
+                      : "bg-white hover:bg-neutral-50/90 text-neutral-900 border-neutral-200/70 shadow-2xs hover:shadow-xs"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-sm ${
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-xs ${
                           isActive
                             ? "bg-white text-[#ef4d23]"
                             : isAi
                             ? "bg-gradient-to-tr from-[#ef4d23] to-[#ffaa00] text-white"
-                            : "bg-gradient-to-tr from-neutral-700 to-neutral-500 text-white"
+                            : "bg-neutral-100 border border-neutral-200 text-neutral-700"
                         }`}
                       >
                         {isAi ? "⚡" : c.name.substring(0, 2).toUpperCase()}
                       </div>
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#222430] absolute bottom-0 right-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0" />
                     </div>
                     <div className="min-w-0 flex-1 pr-1">
                       <div className="flex items-center justify-between gap-1">
-                        <h4 className="text-xs font-bold truncate">{c.name}</h4>
+                        <h4 className={`text-xs font-bold truncate ${isActive ? "text-white" : "text-neutral-900"}`}>{c.name}</h4>
                         {c.last_message_time && (
-                          <span className={`text-[10px] shrink-0 font-medium ${isActive ? "text-white/85" : "text-neutral-500"}`}>
+                          <span className={`text-[10px] shrink-0 font-medium ${isActive ? "text-white/85" : "text-neutral-400"}`}>
                             {c.last_message_time}
                           </span>
                         )}
                       </div>
-                      <p className={`text-[11px] truncate mt-0.5 ${isActive ? "text-white/90" : "text-neutral-400"}`}>
+                      <p className={`text-[11px] truncate mt-0.5 ${isActive ? "text-white/90" : "text-neutral-500"}`}>
                         {c.last_message || c.description}
                       </p>
                     </div>
@@ -1653,39 +1653,39 @@ export default function WhatsAppMessengerView({
       </div>
 
       {/* ========================================================================= */}
-      {/* COLUMN 3: MAIN CHAT WINDOW (#1c1d27) */}
+      {/* COLUMN 3: MAIN CHAT WINDOW (Lumen Canvas) */}
       {/* ========================================================================= */}
-      <div className={`${!activeChannelId ? "hidden md:flex" : "flex"} flex-1 flex-col bg-[#1c1d27] overflow-hidden relative isolate`}>
+      <div className={`${!activeChannelId ? "hidden md:flex" : "flex"} flex-1 flex-col bg-[#f9fafb] overflow-hidden relative isolate`}>
         {activeChannel ? (
           <>
             {/* Chat Header */}
-            <div className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-white/5 shrink-0 bg-[#1c1d27] z-10">
+            <div className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-neutral-200/80 shrink-0 bg-white/95 backdrop-blur-xl z-10">
               <div className="flex items-center gap-2 sm:gap-3.5">
                 <button
                   type="button"
                   onClick={() => setActiveChannelId("")}
-                  className="md:hidden p-2 text-neutral-400 hover:text-white bg-white/10 rounded-xl cursor-pointer"
+                  className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 bg-neutral-100 rounded-xl cursor-pointer"
                   title="Back to Chats"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#ef4d23]/40 shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#ef4d23] to-[#ff7b4d] text-white flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-sm">
                     {activeChannel.name.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#1c1d27] absolute bottom-0 right-0" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white tracking-tight">{activeChannel.name}</h3>
-                  <p className="text-[11px] text-emerald-400 font-semibold">Online</p>
+                  <h3 className="text-sm font-bold text-neutral-900 tracking-tight">{activeChannel.name}</h3>
+                  <p className="text-[11px] text-emerald-600 font-semibold">Online • Real-time Sync</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-neutral-400">
+              <div className="flex items-center gap-1.5 text-neutral-600">
                 <button
                   type="button"
                   onClick={() => handleInitiateCall("video")}
-                  className="p-2 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="p-2 bg-neutral-100/80 hover:bg-neutral-200/80 hover:text-neutral-900 rounded-xl transition-all cursor-pointer border border-neutral-200/60"
                   title="Video Call"
                 >
                   <VideoIcon className="h-4 w-4" />
@@ -1693,7 +1693,7 @@ export default function WhatsAppMessengerView({
                 <button
                   type="button"
                   onClick={() => handleInitiateCall("audio")}
-                  className="p-2 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="p-2 bg-neutral-100/80 hover:bg-neutral-200/80 hover:text-neutral-900 rounded-xl transition-all cursor-pointer border border-neutral-200/60"
                   title="Voice Call"
                 >
                   <Phone className="h-4 w-4" />
@@ -1701,7 +1701,7 @@ export default function WhatsAppMessengerView({
                 <button
                   type="button"
                   onClick={() => handleToggleScreenShare()}
-                  className="p-2 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="p-2 bg-neutral-100/80 hover:bg-neutral-200/80 hover:text-neutral-900 rounded-xl transition-all cursor-pointer border border-neutral-200/60"
                   title="Screen Share"
                 >
                   <Monitor className="h-4 w-4" />
@@ -1713,16 +1713,16 @@ export default function WhatsAppMessengerView({
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
               {/* Channel Greeting Header Card */}
               <div className="flex justify-center my-2">
-                <div className="bg-[#232532]/80 border border-white/10 px-4 py-2.5 rounded-2xl max-w-md w-full text-center space-y-1 shadow-sm">
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-white">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <div className="bg-white border border-neutral-200/80 px-4 py-2.5 rounded-2xl max-w-md w-full text-center space-y-1 shadow-2xs">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-neutral-900">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span>{activeChannel.name}</span>
                   </div>
-                  <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  <p className="text-[11px] text-neutral-500 leading-relaxed">
                     {activeChannel.description}
                   </p>
                   {activeChannel.code && (
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded bg-white/10 text-neutral-300 font-mono text-[10px] font-bold">
+                    <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-neutral-100 border border-neutral-200/80 text-neutral-600 font-mono text-[10px] font-bold">
                       Code: {activeChannel.code}
                     </span>
                   )}
@@ -1736,25 +1736,25 @@ export default function WhatsAppMessengerView({
                 return (
                   <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
                     <div className="flex items-center gap-2 mb-1 px-1">
-                      <span className="text-[10px] text-neutral-400 font-semibold">{msg.sender_name}</span>
-                      <span className="text-[10px] text-neutral-500">
+                      <span className="text-[10px] text-neutral-500 font-semibold">{msg.sender_name}</span>
+                      <span className="text-[10px] text-neutral-400">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
 
                     <div
-                      className={`max-w-md sm:max-w-lg p-3.5 rounded-2xl text-xs font-medium leading-relaxed shadow-sm relative ${
+                      className={`max-w-md sm:max-w-lg p-3.5 rounded-2xl text-xs font-medium leading-relaxed relative ${
                         isMe
                           ? "bg-[#ef4d23] text-white rounded-tr-xs shadow-md shadow-[#ef4d23]/20"
                           : isAi
-                          ? "bg-[#232535] text-neutral-100 rounded-tl-xs border-l-4 border-l-[#ef4d23] border border-white/10"
-                          : "bg-[#282a36] text-[#e0e2ed] rounded-tl-xs border border-white/5"
+                          ? "bg-orange-50/95 text-neutral-900 rounded-tl-xs border-l-4 border-l-[#ef4d23] border border-orange-200/80 shadow-xs"
+                          : "bg-white text-neutral-800 rounded-tl-xs border border-neutral-200/80 shadow-xs"
                       }`}
                     >
                       <div className="whitespace-pre-wrap pr-4 space-y-1.5">
                         {msg.content.includes("```") ? (
                           <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-[10px] text-amber-400 font-mono">
+                            <div className="flex items-center justify-between text-[10px] text-amber-600 font-mono">
                               <span>⚡ GENERATED AI CODE / SCRIPT</span>
                               <button
                                 type="button"
@@ -1766,7 +1766,7 @@ export default function WhatsAppMessengerView({
                                 Copy Output 📋
                               </button>
                             </div>
-                            <pre className="bg-black/60 p-3 rounded-xl border border-white/15 font-mono text-[11px] text-emerald-300 overflow-x-auto whitespace-pre-wrap select-all">
+                            <pre className="bg-neutral-900 p-3 rounded-xl border border-neutral-800 font-mono text-[11px] text-emerald-300 overflow-x-auto whitespace-pre-wrap select-all">
                               {msg.content}
                             </pre>
                           </div>
@@ -1780,13 +1780,17 @@ export default function WhatsAppMessengerView({
                             {msg.attachments.map((att) => (
                               <div
                                 key={att.id}
-                                className="p-2 rounded-xl bg-black/30 border border-white/10 flex items-center justify-between gap-2"
+                                className={`p-2.5 rounded-xl flex items-center justify-between gap-2 ${
+                                  isMe
+                                    ? "bg-white/15 border border-white/20 text-white"
+                                    : "bg-neutral-100 border border-neutral-200 text-neutral-900"
+                                }`}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <FileText className="h-4 w-4 text-[#ef4d23] shrink-0" />
-                                  <span className="font-bold truncate text-[11px] text-white">{att.name}</span>
+                                  <FileText className={`h-4 w-4 shrink-0 ${isMe ? "text-white" : "text-[#ef4d23]"}`} />
+                                  <span className="font-bold truncate text-[11px]">{att.name}</span>
                                 </div>
-                                <span className="text-[10px] text-neutral-400 font-mono shrink-0">{att.size}</span>
+                                <span className={`text-[10px] font-mono shrink-0 ${isMe ? "text-white/80" : "text-neutral-500"}`}>{att.size}</span>
                               </div>
                             ))}
                           </div>
@@ -1798,7 +1802,7 @@ export default function WhatsAppMessengerView({
                         <div
                           className={`absolute -bottom-2.5 ${
                             isMe ? "right-3" : "left-3"
-                          } bg-[#1b1c24] border border-white/10 rounded-full px-2 py-0.5 text-[10px] text-neutral-300 flex items-center gap-1 shadow-md`}
+                          } bg-white border border-neutral-200 rounded-full px-2 py-0.5 text-[10px] text-neutral-700 flex items-center gap-1 shadow-xs`}
                         >
                           {msg.reactions.join(" ")}
                         </div>
@@ -1819,47 +1823,47 @@ export default function WhatsAppMessengerView({
             </div>
 
             {/* Quick Creative Action Presets Bar */}
-            <div className="px-4 sm:px-6 py-2 bg-[#1c1d27] border-t border-white/5 flex items-center gap-2 overflow-x-auto text-[11px] shrink-0 scrollbar-none">
-              <span className="text-neutral-400 font-bold shrink-0 flex items-center gap-1">
+            <div className="px-4 sm:px-6 py-2 bg-white/95 border-t border-neutral-200/80 flex items-center gap-2 overflow-x-auto text-[11px] shrink-0 scrollbar-none">
+              <span className="text-neutral-500 font-bold shrink-0 flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-[#ef4d23]" /> AI Action Prompts:
               </span>
               <button
                 type="button"
                 onClick={() => handleQuickReply("🎬 Write Instagram Reel Script with hooks & scene directions")}
-                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-neutral-100 hover:bg-orange-50 hover:border-[#ef4d23]/40 border border-neutral-200 text-neutral-700 hover:text-[#ef4d23] px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 shadow-2xs font-semibold"
               >
                 🎬 Write UGC Reel Script
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("🔥 Generate 5 High-ROAS Facebook & Meta Ad Angles")}
-                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-neutral-100 hover:bg-orange-50 hover:border-[#ef4d23]/40 border border-neutral-200 text-neutral-700 hover:text-[#ef4d23] px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 shadow-2xs font-semibold"
               >
                 🔥 Generate 5 Ad Angles
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("📄 Draft Client Retainer Proposal with pricing breakdown")}
-                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-neutral-100 hover:bg-orange-50 hover:border-[#ef4d23]/40 border border-neutral-200 text-neutral-700 hover:text-[#ef4d23] px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 shadow-2xs font-semibold"
               >
                 📄 Draft Client Proposal
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReply("📊 Analyze campaign ROAS, CPA and optimization steps")}
-                className="bg-[#262836] hover:bg-[#ef4d23]/20 hover:border-[#ef4d23]/40 border border-white/10 text-neutral-200 hover:text-white px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1"
+                className="bg-neutral-100 hover:bg-orange-50 hover:border-[#ef4d23]/40 border border-neutral-200 text-neutral-700 hover:text-[#ef4d23] px-3 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 shadow-2xs font-semibold"
               >
                 📊 Analyze Campaign ROAS
               </button>
             </div>
 
             {/* Bottom Input Bar Footer */}
-            <div className="p-4 bg-[#1c1d27] border-t border-white/5">
-              <form onSubmit={handleSendMessage} className="bg-[#232532] border border-white/10 p-2.5 rounded-2xl flex items-center gap-3 shadow-inner">
+            <div className="p-3 sm:p-4 bg-white/95 border-t border-neutral-200/80">
+              <form onSubmit={handleSendMessage} className="bg-neutral-50/90 border border-neutral-300/80 p-2 sm:p-2.5 rounded-2xl flex items-center gap-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#ef4d23]/20 focus-within:border-[#ef4d23] transition-all shadow-xs">
                 <button
                   type="button"
                   onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-                  className="p-2.5 bg-[#2e303f] hover:bg-[#393b4d] text-neutral-300 rounded-xl transition-all cursor-pointer"
+                  className="p-2.5 bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                   title="Attach Files"
                 >
                   <Plus className="h-4 w-4" />
@@ -1870,13 +1874,13 @@ export default function WhatsAppMessengerView({
                   placeholder={`Message ${activeChannel.name}...`}
                   value={inputText}
                   onChange={handleInputChange}
-                  className="flex-1 bg-transparent text-xs text-white placeholder:text-neutral-500 outline-none"
+                  className="flex-1 bg-transparent text-xs text-neutral-900 placeholder:text-neutral-400 outline-none font-medium"
                 />
 
                 <button
                   type="submit"
                   disabled={!inputText.trim()}
-                  className="p-3 bg-[#ef4d23] hover:bg-[#d93c14] text-white rounded-xl shadow-md transition-all disabled:opacity-40 cursor-pointer"
+                  className="p-2.5 sm:p-3 bg-[#ef4d23] hover:bg-[#d93c14] text-white rounded-xl shadow-md shadow-[#ef4d23]/30 transition-all disabled:opacity-40 cursor-pointer"
                 >
                   <ArrowUp className="h-4 w-4 font-bold" />
                 </button>
@@ -1884,36 +1888,36 @@ export default function WhatsAppMessengerView({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[#1c1d27] to-[#14151e] text-white">
-            <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center p-3 mb-4 shadow-xl shadow-[#ef4d23]/10">
-              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="w-full h-full object-contain brightness-0 invert scale-110" />
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-white to-neutral-50/80 text-neutral-900">
+            <div className="w-20 h-20 rounded-3xl bg-white border border-neutral-200/80 flex items-center justify-center p-3 mb-4 shadow-lg shadow-black/5">
+              <img src="/lumen-and-co-logo.png" alt="Lumen & Co" className="w-full h-full object-contain" />
             </div>
-            <h3 className="text-2xl font-bold tracking-tight text-white" style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>
+            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900" style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>
               Lumen & Co Messenger
             </h3>
-            <p className="mt-1 text-xs text-neutral-400 max-w-sm">
+            <p className="mt-1 text-xs text-neutral-500 max-w-sm">
               Real-time Agency Collaboration, Client Channels & AI Creative Copilot
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-2 justify-center max-w-md">
+            <div className="mt-6 flex flex-wrap gap-2.5 justify-center max-w-md">
               <button
                 type="button"
                 onClick={() => setActiveChannelId("channel-ai-copilot")}
-                className="px-3.5 py-2 rounded-xl bg-[#ef4d23]/15 hover:bg-[#ef4d23]/25 border border-[#ef4d23]/30 text-[#ef4d23] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-2xl bg-[#ef4d23]/10 hover:bg-[#ef4d23]/20 border border-[#ef4d23]/30 text-[#ef4d23] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Zap className="h-4 w-4" /> <span>Chat with AI Copilot</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChannelId("channel-general")}
-                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <span>📢 Team Announcements</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChannelId("channel-growth")}
-                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <span>🎯 Performance Marketing</span>
               </button>
@@ -1924,17 +1928,17 @@ export default function WhatsAppMessengerView({
 
       {/* MODAL: ADD NEW CONTACT / START CHAT BY CODE */}
       {isNewContactModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900/95 border border-white/15 backdrop-blur-2xl rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-white animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-neutral-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-neutral-900 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-neutral-200/80 pb-3.5">
               <div className="flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-[#ef4d23]" />
-                <h3 className="text-base font-bold">Assign Code & Start Chat</h3>
+                <h3 className="text-base font-bold text-neutral-900">Assign Code & Start Chat</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsNewContactModalOpen(false)}
-                className="text-neutral-400 hover:text-white p-1 rounded-full hover:bg-white/10"
+                className="text-neutral-400 hover:text-neutral-700 p-1 rounded-full hover:bg-neutral-100"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1942,11 +1946,11 @@ export default function WhatsAppMessengerView({
 
             <form onSubmit={handleCreateNewContact} className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
+                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider flex items-center justify-between">
                   <span>Quick Select Registered Code</span>
-                  <span className="text-[10px] text-[#ef4d23]">1-Click Start</span>
+                  <span className="text-[10px] text-[#ef4d23] font-bold">1-Click Start</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-white/5 border border-white/10 rounded-xl scrollbar-thin">
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-neutral-50 border border-neutral-200 rounded-xl scrollbar-thin">
                   {SEED_STAFF.map((s) => (
                     <button
                       key={s.code}
@@ -1955,7 +1959,7 @@ export default function WhatsAppMessengerView({
                         handleStartChatWithCode(s.code, s.name, "direct_message", s.role_label);
                         setIsNewContactModalOpen(false);
                       }}
-                      className="bg-white/10 hover:bg-[#ef4d23] hover:text-white border border-[#ef4d23]/40 text-[#ef4d23] font-mono text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                      className="bg-white hover:bg-[#ef4d23] hover:text-white border border-neutral-200 hover:border-[#ef4d23] text-[#ef4d23] font-mono text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                       title={`Start Direct Chat with ${s.name}`}
                     >
                       <span>{s.code}</span>
@@ -1970,7 +1974,7 @@ export default function WhatsAppMessengerView({
                         handleStartChatWithCode(c.code, c.company_name, "client_support", c.package_tier);
                         setIsNewContactModalOpen(false);
                       }}
-                      className="bg-white/10 hover:bg-amber-600 hover:text-white border border-amber-500/40 text-amber-400 font-mono text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                      className="bg-white hover:bg-amber-600 hover:text-white border border-neutral-200 hover:border-amber-500 text-amber-700 font-mono text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                       title={`Start Client Chat with ${c.company_name}`}
                     >
                       <span>{c.code}</span>
@@ -1981,7 +1985,7 @@ export default function WhatsAppMessengerView({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1">
                   <Tag className="h-3 w-3 text-[#ef4d23]" /> Assign Identity Code (EMP-xxx / CLT-xxx)
                 </label>
                 <input
@@ -1989,12 +1993,12 @@ export default function WhatsAppMessengerView({
                   placeholder="e.g. EMP-107 or CLT-501"
                   value={newContactCode}
                   onChange={(e) => setNewContactCode(e.target.value)}
-                  className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-[#ef4d23]/50 outline-none uppercase font-mono font-bold"
+                  className="w-full bg-neutral-50/90 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none uppercase font-mono font-bold"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
                   Contact / Client Name
                 </label>
                 <input
@@ -2002,13 +2006,13 @@ export default function WhatsAppMessengerView({
                   placeholder="e.g. David Miller or Northbeam Growth"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
-                  className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-[#ef4d23]/50 outline-none"
+                  className="w-full bg-neutral-50/90 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none font-medium"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
                   Contact Phone Number
                 </label>
                 <input
@@ -2016,35 +2020,35 @@ export default function WhatsAppMessengerView({
                   placeholder="+1 (555) 019-2831 or +91 9876543210"
                   value={newContactPhone}
                   onChange={(e) => setNewContactPhone(e.target.value)}
-                  className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-[#ef4d23]/50 outline-none"
+                  className="w-full bg-neutral-50/90 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
                   Channel Type
                 </label>
                 <select
                   value={newContactType}
                   onChange={(e) => setNewContactType(e.target.value as any)}
-                  className="w-full bg-neutral-800 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:ring-2 focus:ring-[#ef4d23]/50 outline-none cursor-pointer"
+                  className="w-full bg-neutral-50/90 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 focus:bg-white focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none cursor-pointer font-medium"
                 >
                   <option value="direct_message">Employee Direct Line (EMP Code)</option>
                   <option value="client_support">Client Support Channel (CLT Code)</option>
                 </select>
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-2 border-t border-neutral-100">
                 <button
                   type="button"
                   onClick={() => setIsNewContactModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/10 text-neutral-400 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 text-xs font-bold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#ef4d23] hover:bg-[#d93c14] text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-[#ef4d23] hover:bg-[#d93c14] text-white text-xs font-bold transition-all shadow-md shadow-[#ef4d23]/30 cursor-pointer flex items-center gap-1.5"
                 >
                   <Send className="h-3.5 w-3.5" />
                   <span>Save & Open Chat</span>
@@ -2232,28 +2236,28 @@ export default function WhatsAppMessengerView({
       {/* IDENTITY SWITCHER MODAL (Opened from avatar in left sidebar) */}
       {/* ========================================================================= */}
       {isIdentityModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in">
-          <div className="bg-[#1a1b24] border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 text-white isolate relative">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in">
+          <div className="bg-white border border-neutral-200/90 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 text-neutral-900 isolate relative">
+            <div className="flex items-center justify-between border-b border-neutral-200/80 pb-3">
               <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4 text-[#ef4d23]" />
-                <h3 className="text-base font-bold text-white">Switch Messenger Identity</h3>
+                <h3 className="text-base font-bold text-neutral-900">Switch Messenger Identity</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsIdentityModalOpen(false)}
-                className="p-1 rounded-full text-neutral-400 hover:text-white hover:bg-white/10"
+                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-neutral-500">
               Current active identity: <span className="text-[#ef4d23] font-bold font-mono">[{activeUserCode}] {activeUserName}</span> ({getRoleBadgeLabel(activeUserRole)})
             </p>
 
             <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block">
                 Quick 1-Click Role Switch:
               </span>
               <div className="grid grid-cols-1 gap-2">
@@ -2284,15 +2288,15 @@ export default function WhatsAppMessengerView({
                     }}
                     className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       activeUserCode === item.code
-                        ? "bg-[#ef4d23]/20 border-[#ef4d23] text-white"
-                        : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
+                        ? "bg-orange-50/80 border-[#ef4d23] text-neutral-900 shadow-sm"
+                        : "bg-neutral-50 border-neutral-200/80 text-neutral-700 hover:bg-neutral-100/80"
                     }`}
                   >
                     <div>
-                      <span className="font-bold text-xs block">{item.name}</span>
-                      <span className="text-[10px] text-neutral-400">{item.desc}</span>
+                      <span className="font-bold text-xs block text-neutral-900">{item.name}</span>
+                      <span className="text-[10px] text-neutral-500">{item.desc}</span>
                     </div>
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/10 text-[#ef4d23]">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-[#ef4d23]">
                       {item.code}
                     </span>
                   </button>
