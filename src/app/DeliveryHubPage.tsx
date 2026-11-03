@@ -158,8 +158,10 @@ export default function DeliveryHubPage() {
         email={admin.email}
         error={admin.error}
         onSignIn={admin.signIn}
-        onPasswordSignIn={admin.signInWithPassword}
         onSignOut={admin.signOut}
+        googleClientId={admin.googleClientId}
+        onGoogleCredential={admin.signInWithGoogleCredential}
+        onSetGoogleClientId={admin.setGoogleClientId}
         title="Delivery Hub — Operations Workspace"
       />
     );

@@ -168,9 +168,11 @@ export default function VideoLibraryPage() {
         state={admin.state}
         email={admin.email}
         error={admin.error}
-        onSignIn={() => void admin.signIn()}
-        onPasswordSignIn={admin.signInWithPassword}
-        onSignOut={() => void admin.signOut()}
+        onSignIn={admin.signIn}
+        onSignOut={admin.signOut}
+        googleClientId={admin.googleClientId}
+        onGoogleCredential={admin.signInWithGoogleCredential}
+        onSetGoogleClientId={admin.setGoogleClientId}
         title="Video library"
       />
     );

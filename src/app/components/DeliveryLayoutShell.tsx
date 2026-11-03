@@ -150,27 +150,58 @@ export default function DeliveryLayoutShell({
             onClose={() => setIsNotificationsOpen(false)}
           />
 
-          {/* User Profile 👤 Priya ▾ */}
+          {/* User Profile 👤 */}
           <div className="relative">
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all text-xs font-bold text-white cursor-pointer"
             >
-              <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-[10px] font-extrabold border border-white/30">
-                P
-              </div>
-              <span className="hidden sm:inline">Priya</span>
+              {admin.user?.picture ? (
+                <img
+                  src={admin.user.picture}
+                  alt={admin.name}
+                  className="w-6 h-6 rounded-full object-cover border border-white/40 shadow-xs"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-[10px] font-extrabold border border-white/30">
+                  {(admin.name || "S")[0].toUpperCase()}
+                </div>
+              )}
+              <span className="hidden sm:inline">
+                {admin.user?.given_name || admin.name.split(" ")[0] || "Admin"}
+              </span>
               <ChevronDown className="h-3.5 w-3.5 text-white/60" />
             </button>
 
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-[#18181f]/95 backdrop-blur-2xl text-white rounded-3xl shadow-2xl border border-white/20 p-3 z-50 text-xs">
-                <div className="px-3 py-2 border-b border-white/10 mb-1">
-                  <p className="font-extrabold text-white">Priya Sharma</p>
-                  <p className="text-[10px] text-white/60 truncate">priya@lumenandco.in</p>
-                  <span className="inline-block mt-1 bg-purple-500/30 text-purple-300 border border-purple-500/40 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
-                    Senior Creative Designer
-                  </span>
+              <div className="absolute right-0 mt-2 w-64 bg-[#18181f]/95 backdrop-blur-2xl text-white rounded-3xl shadow-2xl border border-white/20 p-3 z-50 text-xs">
+                <div className="px-3 py-2.5 border-b border-white/10 mb-1.5">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    {admin.user?.picture ? (
+                      <img
+                        src={admin.user.picture}
+                        alt={admin.name}
+                        className="w-9 h-9 rounded-full object-cover border border-[#ef4d23] shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-[#ef4d23] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                        {(admin.name || "S")[0].toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-white truncate">{admin.name}</p>
+                      <p className="text-[10px] text-white/60 truncate">{admin.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block bg-purple-500/30 text-purple-300 border border-purple-500/40 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                      Operations Admin
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-medium px-2 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Google Verified
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={() => {
