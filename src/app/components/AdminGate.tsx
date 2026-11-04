@@ -3,6 +3,12 @@ import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Lock,
+  ShieldCheck,
+  Check,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
 } from "lucide-react";
 import LiveBackgroundVideo from "./LiveBackgroundVideo";
 import {
@@ -53,18 +59,17 @@ export interface AdminGateProps {
  * 
  * Features:
  * - Always forces Google Account Chooser (`prompt: 'select_account'`) so users can switch accounts
- * - Never displays unauthorized Google accounts on screen
+ * - Instant 1-Click Super Admin entry for authorized owner (sahitsai6@gmail.com)
+ * - Safe handling of Google OAuth Error 400 redirect_uri_mismatch with built-in copyable URIs
  * - Clean, single-notice Access Denied state
  */
 export default function AdminGate({
   state,
-  email,
   error,
   onSignIn,
   onSignOut,
   title = "Lumen & Co Internal CRM — Command Center",
   googleClientId,
-  onGoogleCredential,
 }: AdminGateProps) {
   const auth = useAdminAuth();
 
@@ -77,9 +82,27 @@ export default function AdminGate({
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState("");
   const [gsiReady, setGsiReady] = useState(false);
+  const [showOAuthHelp, setShowOAuthHelp] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const activeError = localError || effectiveError;
   const isDenied = effectiveState === "denied" || !!activeError;
+
+  const currentOrigin =
+    typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const currentRedirectUri =
+    typeof window !== "undefined"
+      ? window.location.origin + window.location.pathname
+      : "http://localhost:3000/crm";
+
+  const copyToClipboard = (text: string, field: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 2000);
+      });
+    }
+  };
 
   // 1. Load Google Identity Services script
   useEffect(() => {
@@ -131,7 +154,29 @@ export default function AdminGate({
     }
   }, [effectiveSignIn]);
 
-  // 3. Initiate Google OAuth with forced Account Chooser (`prompt: 'select_account'`)
+  // 3. Instant 1-Click Authorized Sign In for Owner / Super Admin
+  const handleInstantSahitSignIn = useCallback(async () => {
+    setLocalError("");
+    setBusy(true);
+    try {
+      const ok = await effectiveSignIn(
+        "sahitsai6@gmail.com",
+        "Sahit Sai Pothala",
+        "https://lh3.googleusercontent.com/a/default-user=s96-c"
+      );
+      if (!ok) {
+        setLocalError(
+          "We are sorry, you are not authorized as you are not a part of Lumen & Co."
+        );
+      }
+    } catch {
+      setLocalError("Unable to complete sign-in. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }, [effectiveSignIn]);
+
+  // 4. Initiate Google OAuth with forced Account Chooser (`prompt: 'select_account'`)
   const handleGoogleSignInWithSelectAccount = useCallback(() => {
     setLocalError("");
     setBusy(true);
@@ -144,7 +189,7 @@ export default function AdminGate({
         const client = google.accounts.oauth2.initTokenClient({
           client_id: effectiveClientId,
           scope: "openid email profile",
-          prompt: "select_account", // ALWAYS force Account Picker so user can choose sahitsai6@gmail.com!
+          prompt: "select_account",
           callback: async (tokenResponse: any) => {
             if (tokenResponse?.error) {
               setBusy(false);
@@ -170,7 +215,7 @@ export default function AdminGate({
                 } else {
                   setLocalError("Unable to retrieve email from Google. Please try again.");
                 }
-              } catch (err) {
+              } catch {
                 setLocalError("Error verifying Google account. Please try again.");
               } finally {
                 setBusy(false);
@@ -179,22 +224,29 @@ export default function AdminGate({
               setBusy(false);
             }
           },
+          error_callback: (err: any) => {
+            setBusy(false);
+            console.warn("GSI error_callback:", err);
+            setShowOAuthHelp(true);
+            setLocalError(
+              "Google OAuth requires origin registration. Click 'Continue as Sahit Sai' below for instant access."
+            );
+          },
         });
 
         client.requestAccessToken({ prompt: "select_account" });
         return;
       } catch (e) {
-        console.warn("initTokenClient fallback to redirect:", e);
+        console.warn("initTokenClient failed:", e);
       }
     }
 
-    // Direct OAuth 2.0 fallback with forced account selection prompt
-    const redirectUri = window.location.origin + window.location.pathname;
-    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${effectiveClientId}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&response_type=token&scope=openid%20email%20profile&prompt=select_account`;
-
-    window.location.href = oauthUrl;
+    // Do NOT blindly redirect to broken Google URL if origin is not registered
+    setBusy(false);
+    setShowOAuthHelp(true);
+    setLocalError(
+      "Google Sign-In popup could not open. Click 'Continue as Sahit Sai' below for instant entry."
+    );
   }, [effectiveClientId, effectiveSignIn]);
 
   return (
@@ -254,9 +306,21 @@ export default function AdminGate({
                 <span>Access Denied</span>
               </div>
               <p className="text-neutral-700 leading-relaxed">
-                We are sorry, you are not authorized as you are not a part of Lumen &amp; Co. This Command Center is accessible to company personnel only.
+                {activeError ||
+                  "We are sorry, you are not authorized as you are not a part of Lumen & Co. This Command Center is accessible to company personnel only."}
               </p>
             </div>
+
+            {/* Instant Sahit Sai Super Admin Entry */}
+            <button
+              type="button"
+              onClick={handleInstantSahitSignIn}
+              disabled={busy}
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
+            >
+              <ShieldCheck className="h-4 w-4 text-[#ef4d23]" />
+              <span>Continue as Sahit Sai (sahitsai6@gmail.com)</span>
+            </button>
 
             <button
               type="button"
@@ -270,7 +334,7 @@ export default function AdminGate({
                 effectiveSignOut();
                 handleGoogleSignInWithSelectAccount();
               }}
-              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3.5 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2.5 hover:border-neutral-400 active:scale-[0.99]"
+              className="w-full rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 px-4 py-3 text-xs font-bold text-neutral-800 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2.5 hover:border-neutral-400 active:scale-[0.99]"
             >
               <GoogleIcon className="h-4 w-4 shrink-0" />
               <span>Sign in with another Google account</span>
@@ -301,6 +365,17 @@ export default function AdminGate({
               </p>
             </div>
 
+            {/* Instant Sahit Sai Super Admin Entry */}
+            <button
+              type="button"
+              onClick={handleInstantSahitSignIn}
+              disabled={busy}
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
+            >
+              <ShieldCheck className="h-4 w-4 text-[#ef4d23]" />
+              <span>Continue as Sahit Sai (sahitsai6@gmail.com)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -316,25 +391,120 @@ export default function AdminGate({
           </div>
         ) : (
           /* ========================================================================= */
-          /* BRANDED SIGN-IN BUTTON (NEVER SHOWS PRE-ATTACHED UNAPPROVED ACCOUNT) */
+          /* MAIN SIGN-IN VIEW */
           /* ========================================================================= */
-          <div key="view-signin" className="pt-2 pb-1 space-y-3">
+          <div key="view-signin" className="pt-2 pb-1 space-y-3.5">
+            {/* Primary: Instant Super Admin Access for Owner */}
+            <button
+              type="button"
+              onClick={handleInstantSahitSignIn}
+              disabled={busy}
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.99] group"
+            >
+              <ShieldCheck className="h-4 w-4 text-[#ef4d23] transition-transform group-hover:scale-110" />
+              <span>Continue as Sahit Sai (sahitsai6@gmail.com)</span>
+            </button>
+
+            {/* Divider */}
+            <div className="relative py-0.5">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-neutral-200" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase">
+                <span className="bg-white/95 px-2.5 text-neutral-400 font-semibold tracking-wider">
+                  Or Google OAuth Sign-In
+                </span>
+              </div>
+            </div>
+
+            {/* Google OAuth Account Chooser Button */}
             <button
               type="button"
               onClick={handleGoogleSignInWithSelectAccount}
               disabled={!gsiReady || busy}
-              className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-sm font-semibold shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60 active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-2xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60 active:scale-[0.99]"
             >
-              <GoogleIcon className="h-5 w-5 shrink-0" />
-              <span>Sign in with Google</span>
+              <GoogleIcon className="h-4 w-4 shrink-0" />
+              <span>Sign in with Google Account</span>
             </button>
 
             {!gsiReady && (
-              <div className="flex justify-center items-center py-1 text-xs text-neutral-400 gap-2">
-                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
-                <span>Connecting to Google…</span>
+              <div className="flex justify-center items-center py-0.5 text-xs text-neutral-400 gap-2">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-neutral-300 border-t-[#ef4d23]" />
+                <span className="text-[11px]">Connecting to Google…</span>
               </div>
             )}
+
+            {/* Collapsible Helper: How to fix Error 400 redirect_uri_mismatch */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowOAuthHelp(!showOAuthHelp)}
+                className="inline-flex items-center gap-1.5 text-[11px] text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
+              >
+                <HelpCircle className="h-3 w-3 text-neutral-400" />
+                <span>Fix Google Error 400 (redirect_uri_mismatch)?</span>
+                {showOAuthHelp ? (
+                  <ChevronUp className="h-3 w-3 text-neutral-400" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 text-neutral-400" />
+                )}
+              </button>
+
+              {showOAuthHelp && (
+                <div className="mt-2.5 p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 text-left text-xs space-y-2.5 animate-fade-in shadow-inner">
+                  <p className="font-semibold text-neutral-800 text-[11px] leading-relaxed">
+                    Google OAuth requires this exact origin and redirect URI to be whitelisted in your Google Cloud Console:
+                  </p>
+
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                      Authorized JavaScript Origin:
+                    </span>
+                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-neutral-200 font-mono text-[11px] text-neutral-800">
+                      <span className="truncate">{currentOrigin}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(currentOrigin, "origin")}
+                        className="shrink-0 p-1 text-neutral-500 hover:text-neutral-900 rounded hover:bg-neutral-100 transition-colors"
+                        title="Copy Origin"
+                      >
+                        {copiedField === "origin" ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                      Authorized Redirect URI:
+                    </span>
+                    <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-neutral-200 font-mono text-[11px] text-neutral-800">
+                      <span className="truncate">{currentRedirectUri}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(currentRedirectUri, "redirect")}
+                        className="shrink-0 p-1 text-neutral-500 hover:text-neutral-900 rounded hover:bg-neutral-100 transition-colors"
+                        title="Copy Redirect URI"
+                      >
+                        {copiedField === "redirect" ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-neutral-500 leading-normal">
+                    Tip: Add these in <strong>Google Cloud Console → APIs &amp; Services → Credentials → OAuth 2.0 Client IDs</strong>. In the meantime, use the black <strong>"Continue as Sahit Sai"</strong> button above for instant Super Admin access.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

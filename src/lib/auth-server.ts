@@ -117,7 +117,12 @@ export async function verifyTokenOnBackend(
 
   // 2. Check for HMAC or JSON session token
   try {
-    const decoded = Buffer.from(cleanToken, "base64url").toString("utf-8");
+    let decoded = "";
+    try {
+      decoded = Buffer.from(cleanToken, "base64").toString("utf-8");
+    } catch {
+      decoded = Buffer.from(cleanToken, "base64url").toString("utf-8");
+    }
     const session = JSON.parse(decoded);
     if (session && session.email && session.expiresAt) {
       if (Date.now() > session.expiresAt || !isAuthorizedEmail(session.email)) {
