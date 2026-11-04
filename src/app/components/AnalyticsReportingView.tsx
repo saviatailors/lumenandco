@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BarChart3, Download, TrendingUp, AlertTriangle, CheckCircle2, Clock, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Deliverable, SEED_CLIENTS, SEED_STAFF } from "@/lib/delivery.functions";
-import { downloadWorkbook } from "@/lib/excelExport";
+import { downloadWorkbook, sanitizeExcelCell } from "@/lib/excelExport";
 
 export default function AnalyticsReportingView({
   deliverables,
@@ -19,16 +19,16 @@ export default function AnalyticsReportingView({
 
   const exportExcel = () => {
     const rows = deliverables.map((d) => ({
-      "Deliverable ID": d.id,
-      "Client Brand": d.client_name,
-      "Deliverable Title": d.title,
-      "Asset Type": d.type.toUpperCase(),
-      "Status": d.status.toUpperCase(),
-      "Assigned Member": d.assigned_to_name,
+      "Deliverable ID": sanitizeExcelCell(d.id),
+      "Client Brand": sanitizeExcelCell(d.client_name),
+      "Deliverable Title": sanitizeExcelCell(d.title),
+      "Asset Type": sanitizeExcelCell(d.type.toUpperCase()),
+      "Status": sanitizeExcelCell(d.status.toUpperCase()),
+      "Assigned Member": sanitizeExcelCell(d.assigned_to_name),
       "Estimated Hours": d.estimated_hours,
       "Actual Hours Logged": d.actual_hours_logged,
-      "Scope Creep Variance": d.actual_hours_logged > d.estimated_hours ? `+${Math.round(((d.actual_hours_logged - d.estimated_hours) / d.estimated_hours) * 100)}% OVER` : "ON TARGET",
-      "Due Date": d.due_date,
+      "Scope Creep Variance": sanitizeExcelCell(d.actual_hours_logged > d.estimated_hours ? `+${Math.round(((d.actual_hours_logged - d.estimated_hours) / d.estimated_hours) * 100)}% OVER` : "ON TARGET"),
+      "Due Date": sanitizeExcelCell(d.due_date),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(rows);

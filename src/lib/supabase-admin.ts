@@ -51,11 +51,23 @@ export function supabaseAdmin() {
  */
 export const requireAuth = createMiddleware({ type: "function" }).server(async ({ next }) => {
   const request = getRequest();
-  const authHeader = request?.headers.get("authorization");
-  if (!authHeader) throw new Error("Unauthorized: No authorization header provided");
+  let token = "";
 
-  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-  if (!token) throw new Error("Unauthorized: No bearer token");
+  const authHeader = request?.headers.get("authorization");
+  if (authHeader) {
+    token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  }
+
+  // Also extract from secure auth cookie if header is omitted
+  if (!token && request) {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/lumen_auth_token=([^;]+)/);
+    if (match) {
+      token = decodeURIComponent(match[1]).trim();
+    }
+  }
+
+  if (!token) throw new Error("Unauthorized: No authorization token provided");
 
   // 1. First try Google OAuth backend verification
   const googleUser = await verifyTokenOnBackend(token);

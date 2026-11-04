@@ -2,6 +2,24 @@ import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import { SchoolClient, ClientBusinessLead } from "./lumenandco.types";
 
+/**
+ * Mitigates CSV / Excel Formula Injection (CWE-1236 / OWASP ASVS 4.0 5.1.5).
+ * Any cell value starting with '=', '+', '-', '@', '\t', or '\r' can be interpreted
+ * by spreadsheet applications (Microsoft Excel, LibreOffice, Google Sheets) as executable
+ * formulas, DDE commands, or external queries.
+ * We prefix such values with a single quote (') to force spreadsheet engines to treat them
+ * strictly as literal text data.
+ */
+export function sanitizeExcelCell<T>(val: T): T | string {
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (/^[=+\-@\t\r]/.test(trimmed)) {
+      return `'${val}`;
+    }
+  }
+  return val;
+}
+
 export interface RealtimeAnalyticsExportOptions {
   clients: SchoolClient[];
   brandAnalyticsData?: Record<string, any>;
@@ -184,12 +202,12 @@ export async function exportRealtimeAnalyticsToExcel({
       const visualBar = `${"█".repeat(filledBars)}${"░".repeat(emptyBars)} ${metrics.conversionRate}%`;
 
       const row = brandSheet.addRow({
-        brand: client.school_name,
-        city: client.city,
-        contact: `${client.contact_person} (${client.contact_role})`,
-        tier: client.package_tier,
+        brand: sanitizeExcelCell(client.school_name),
+        city: sanitizeExcelCell(client.city),
+        contact: sanitizeExcelCell(`${client.contact_person} (${client.contact_role})`),
+        tier: sanitizeExcelCell(client.package_tier),
         retainer: `₹${client.monthly_retainer_rupees.toLocaleString()}`,
-        status: client.access_status.toUpperCase(),
+        status: sanitizeExcelCell(client.access_status.toUpperCase()),
         leads: metrics.totalLeads,
         conversion: `${metrics.conversionRate}%`,
         visualBar: visualBar,
@@ -197,7 +215,7 @@ export async function exportRealtimeAnalyticsToExcel({
         spend: `₹${metrics.totalAdSpendRupees.toLocaleString()}`,
         roas: `${metrics.roas}x`,
         revenue: `₹${metrics.projectedRevenueRupees.toLocaleString()}`,
-        channel: metrics.sourceBreakdown?.[0]?.source || "Meta Ads",
+        channel: sanitizeExcelCell(metrics.sourceBreakdown?.[0]?.source || "Meta Ads"),
       });
 
       row.height = 24;
@@ -239,17 +257,17 @@ export async function exportRealtimeAnalyticsToExcel({
 
       leadsToExport.forEach((lead) => {
         const row = leadSheet.addRow({
-          id: lead.id,
-          brand: lead.client_name,
-          name: lead.lead_name,
-          phone: lead.phone,
-          email: lead.email,
-          city: lead.city,
-          source: lead.campaign_source,
-          temp: lead.temperature.toUpperCase(),
+          id: sanitizeExcelCell(lead.id),
+          brand: sanitizeExcelCell(lead.client_name),
+          name: sanitizeExcelCell(lead.lead_name),
+          phone: sanitizeExcelCell(lead.phone),
+          email: sanitizeExcelCell(lead.email),
+          city: sanitizeExcelCell(lead.city),
+          source: sanitizeExcelCell(lead.campaign_source),
+          temp: sanitizeExcelCell(lead.temperature.toUpperCase()),
           deal: `₹${lead.estimated_deal_value_rupees.toLocaleString()}`,
-          staff: lead.assigned_telecaller,
-          notes: lead.notes || "N/A",
+          staff: sanitizeExcelCell(lead.assigned_telecaller),
+          notes: sanitizeExcelCell(lead.notes || "N/A"),
         });
         row.height = 24;
         row.alignment = { vertical: "middle" };
@@ -324,19 +342,19 @@ export async function exportRealtimeAnalyticsToExcel({
         };
 
         return {
-          "Client Brand": client.school_name,
-          "Market / City": client.city,
-          "Contact Person": `${client.contact_person} (${client.contact_role})`,
-          "Package Tier": client.package_tier,
+          "Client Brand": sanitizeExcelCell(client.school_name),
+          "Market / City": sanitizeExcelCell(client.city),
+          "Contact Person": sanitizeExcelCell(`${client.contact_person} (${client.contact_role})`),
+          "Package Tier": sanitizeExcelCell(client.package_tier),
           "Monthly Retainer (INR)": client.monthly_retainer_rupees,
-          "Access Status": client.access_status.toUpperCase(),
+          "Access Status": sanitizeExcelCell(client.access_status.toUpperCase()),
           "Total Campaign Leads": metrics.totalLeads,
           "Conversion Rate (%)": `${metrics.conversionRate}%`,
           "Avg CPL (INR)": metrics.avgCplRupees,
           "Total Ad Spend (INR)": metrics.totalAdSpendRupees,
           "ROAS (Multiplier)": `${metrics.roas}x`,
           "Projected Revenue (INR)": metrics.projectedRevenueRupees,
-          "Primary Channel": metrics.sourceBreakdown?.[0]?.source || "Meta Ads",
+          "Primary Channel": sanitizeExcelCell(metrics.sourceBreakdown?.[0]?.source || "Meta Ads"),
         };
       });
 
