@@ -672,23 +672,27 @@ export default function DeliveryHubPage() {
                   <h3 className="text-lg font-extrabold text-slate-900">Recent Client Review Requests & Proofing Activity</h3>
 
                   <div className="space-y-3">
-                    {[
-                      { client: "Northbeam Outdoors", task: "Q4 Performance Video Reel", time: "2h ago", text: "Approved second cut! Ready for campaign publication." },
-                      { client: "Fable Skincare", task: "Gen AI UGC Ad Concepts", time: "4h ago", text: "Requested color grading adjustment on slide 3 background." },
-                      { client: "Kite & Co", task: "Autumn Promotion Static & Carousel Banners", time: "1d ago", text: "Internal QA approved slide copy deck." },
-                    ].map((item, idx) => (
-                      <div key={idx} className="p-4 bg-white rounded-2xl border border-slate-200/90 flex items-center justify-between text-xs shadow-sm">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-slate-900 text-sm">{item.client}</span>
-                            <span className="text-slate-400">•</span>
-                            <span className="text-[#ef4d23] font-extrabold">{item.task}</span>
-                          </div>
-                          <p className="text-slate-700 font-semibold">{item.text}</p>
-                        </div>
-                        <span className="text-xs text-slate-500 font-extrabold bg-slate-100 px-3 py-1 rounded-full">{item.time}</span>
+                    {deliverables.filter((d) => d.status === "client_review" || d.status === "approved" || d.status === "client_revision").length === 0 ? (
+                      <div className="p-8 text-center text-xs text-slate-500 bg-white rounded-2xl border border-slate-200/90 font-medium">
+                        No client review requests or proofing activity pending. Deliverables submitted for approval will appear here.
                       </div>
-                    ))}
+                    ) : (
+                      deliverables
+                        .filter((d) => d.status === "client_review" || d.status === "approved" || d.status === "client_revision")
+                        .map((item) => (
+                          <div key={item.id} className="p-4 bg-white rounded-2xl border border-slate-200/90 flex items-center justify-between text-xs shadow-sm">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-slate-900 text-sm">{item.client_name}</span>
+                                <span className="text-slate-400">•</span>
+                                <span className="text-[#ef4d23] font-extrabold">{item.title}</span>
+                              </div>
+                              <p className="text-slate-700 font-semibold">{STAGE_LABELS[item.status]} • {item.brief_description || "No description provided."}</p>
+                            </div>
+                            <span className="text-xs text-slate-500 font-extrabold bg-slate-100 px-3 py-1 rounded-full">{item.publish_date || item.due_date}</span>
+                          </div>
+                        ))
+                    )}
                   </div>
                 </div>
               </div>

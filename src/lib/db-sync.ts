@@ -5,25 +5,36 @@
  */
 
 export const STORAGE_KEYS = {
-  CRM_LEADS: "lumen_crm_leads_v3",
-  CRM_CLIENTS: "lumen_crm_clients_v3",
-  CRM_CLIENT_BUSINESS_LEADS: "lumen_crm_client_business_leads_v3",
-  CRM_INVOICES: "lumen_crm_invoices_v3",
-  CRM_COMM_LOGS: "lumen_crm_comm_logs_v3",
-  CRM_TASKS: "lumen_crm_tasks_v3",
-  CRM_CATALOG: "lumen_crm_catalog_v3",
-  CRM_TEAM_MEMBERS: "lumen_crm_team_members_v3",
-  CRM_API_CONNECTORS: "lumen_api_connectors_v3",
-  DELIVERY_DELIVERABLES: "lumen_delivery_items_v3",
-  DELIVERY_STAFF: "lumen_delivery_staff_v3",
-  DELIVERY_RETAINERS: "lumen_delivery_retainers_v3",
-  DELIVERY_PROOFS: "lumen_delivery_proofs_v3",
+  CRM_LEADS: "lumen_crm_leads_v4",
+  CRM_CLIENTS: "lumen_crm_clients_v4",
+  CRM_CLIENT_BUSINESS_LEADS: "lumen_crm_client_business_leads_v4",
+  CRM_INVOICES: "lumen_crm_invoices_v4",
+  CRM_COMM_LOGS: "lumen_crm_comm_logs_v4",
+  CRM_TASKS: "lumen_crm_tasks_v4",
+  CRM_CATALOG: "lumen_crm_catalog_v4",
+  CRM_TEAM_MEMBERS: "lumen_crm_team_members_v4",
+  CRM_API_CONNECTORS: "lumen_api_connectors_v4",
+  DELIVERY_DELIVERABLES: "lumen_delivery_items_v4",
+  DELIVERY_STAFF: "lumen_delivery_staff_v4",
+  DELIVERY_RETAINERS: "lumen_delivery_retainers_v4",
+  DELIVERY_PROOFS: "lumen_delivery_proofs_v4",
 } as const;
 
-/** Automatically clear legacy v1 & v2 cached dummy storage */
+/** Automatically clear legacy v1, v2 & v3 cached dummy storage */
 if (typeof window !== "undefined") {
   try {
     const keysToRemove = [
+      "lumen_crm_clients_v3",
+      "lumen_crm_leads_v3",
+      "lumen_crm_invoices_v3",
+      "lumen_crm_comm_logs_v3",
+      "lumen_crm_tasks_v3",
+      "lumen_crm_team_members_v3",
+      "lumen_crm_client_business_leads_v3",
+      "lumen_delivery_items_v3",
+      "lumen_delivery_staff_v3",
+      "lumen_delivery_retainers_v3",
+      "lumen_delivery_proofs_v3",
       "lumen_crm_clients_v2",
       "lumen_crm_leads_v2",
       "lumen_crm_invoices_v2",

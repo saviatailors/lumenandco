@@ -2,53 +2,8 @@ import { useState } from "react";
 import { HeartPulse, AlertTriangle, TrendingUp, ShieldAlert, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
 import { CompositeHealthScore } from "@/lib/crm.functions";
 
-export default function ChurnIntelligenceView() {
-  const compositeScores: CompositeHealthScore[] = [
-    {
-      client_id: "client-1",
-      company_name: "Northbeam Outdoors",
-      execution_score: 92,
-      financial_score: 100, // Invoice paid on time
-      engagement_score: 95,
-      composite_score: 95,
-      churn_risk_level: "low",
-      contributing_factors: ["High on-time delivery (92%)", "Invoices paid on schedule", "Frequent founder contact"],
-      suggested_retention_action: "Candidate for Retainer Expansion ($8,500/mo Scale Tier)",
-    },
-    {
-      client_id: "client-2",
-      company_name: "Fable Skincare",
-      execution_score: 75,
-      financial_score: 40, // Invoice overdue!
-      engagement_score: 60,
-      composite_score: 58,
-      churn_risk_level: "high",
-      contributing_factors: ["Invoice INV-2026-002 overdue by 5 days", "Multiple revision requests (22%)"],
-      suggested_retention_action: "Schedule Founder Sync & follow up on invoice INV-2026-002",
-    },
-    {
-      client_id: "client-3",
-      company_name: "Kite & Co",
-      execution_score: 95,
-      financial_score: 100,
-      engagement_score: 90,
-      composite_score: 94,
-      churn_risk_level: "low",
-      contributing_factors: ["Zero SLA breaches", "Paid on time"],
-      suggested_retention_action: "Pitch Video Reel add-on package",
-    },
-    {
-      client_id: "client-4",
-      company_name: "Verda Organics",
-      execution_score: 90,
-      financial_score: 85,
-      engagement_score: 80,
-      composite_score: 86,
-      churn_risk_level: "low",
-      contributing_factors: ["Consistent technical SEO output"],
-      suggested_retention_action: "Standard quarterly review",
-    },
-  ];
+export default function ChurnIntelligenceView({ scores = [] }: { scores?: CompositeHealthScore[] }) {
+  const compositeScores = scores;
 
   return (
     <div className="space-y-6">
@@ -77,7 +32,7 @@ export default function ChurnIntelligenceView() {
             <div>
               <p className="font-bold text-sm">High Churn Risk Account Detected</p>
               <p className="text-red-700 mt-0.5">
-                Fable Skincare composite health score dropped to 58% due to overdue invoice & high revision frequency.
+                {compositeScores.find((c) => c.churn_risk_level === "high" || c.churn_risk_level === "critical")?.company_name || "Client"} composite health score dropped below safety threshold.
               </p>
             </div>
           </div>
@@ -88,9 +43,20 @@ export default function ChurnIntelligenceView() {
         </div>
       )}
 
-      {/* Composite Health Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {compositeScores.map((c) => (
+      {/* Composite Health Cards Grid or Clean Empty State */}
+      {compositeScores.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-neutral-200 p-12 text-center shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
+            <HeartPulse className="h-6 w-6" />
+          </div>
+          <h4 className="text-base font-bold text-neutral-900">No Active Clients for Churn Scoring</h4>
+          <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
+            When client accounts are created, composite relationship health scores and retention recommendations will appear here automatically.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {compositeScores.map((c) => (
           <div
             key={c.client_id}
             className={`bg-white rounded-3xl border p-6 shadow-sm space-y-4 transition-all ${
@@ -144,6 +110,7 @@ export default function ChurnIntelligenceView() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -51,9 +51,9 @@ interface DocumentVaultViewProps {
 
 export default function DocumentVaultView({
   isClientView = false,
-  clientName = "Mark Davis",
-  clientCompany = "Northbeam E-Commerce",
-  clientEmail = "mark@northbeam.io",
+  clientName = "",
+  clientCompany = "",
+  clientEmail = "",
 }: DocumentVaultViewProps) {
   const [documents, setDocuments] = useState<VaultDocument[]>(INITIAL_DOCUMENTS);
 
@@ -100,7 +100,7 @@ export default function DocumentVaultView({
   const [editCampaignTargets, setEditCampaignTargets] = useState("150 leads / month");
   const [editCostPerLead, setEditCostPerLead] = useState("₹38 / lead");
   const [editReachTarget, setEditReachTarget] = useState("250,000 Impressions");
-  const [editSignatoryName, setEditSignatoryName] = useState("Mark Davis");
+  const [editSignatoryName, setEditSignatoryName] = useState("");
   const [editSignatoryTitle, setEditSignatoryTitle] = useState("Managing Director");
   const [editAuditSummary, setEditAuditSummary] = useState("4k followers, posting twice a month, no paid ads running currently, most enquiries come from word of mouth.");
   const [editPainPoint1, setEditPainPoint1] = useState("Organic reach under 10% of total followers; no dedicated reels strategy.");
@@ -119,16 +119,13 @@ export default function DocumentVaultView({
     company: string;
     email: string;
   }>({
-    name: "Mark Davis",
-    company: "Northbeam E-Commerce",
-    email: "mark@northbeam.io",
+    name: "Sahit Sai",
+    company: "Lumen & Co Master",
+    email: "sahitsai7@gmail.com",
   });
   const [sendSuccessToast, setSendSuccessToast] = useState<string | null>(null);
 
   const CLIENT_ACCOUNTS = [
-    { name: "Mark Davis", company: "Northbeam E-Commerce", email: "mark@northbeam.io", plan: "Scale Retainer" },
-    { name: "Ananya Roy", company: "Bloom Skincare", email: "ananya@bloomskincare.in", plan: "Growth Retainer" },
-    { name: "Rahul Verma", company: "UrbanFit Fitness", email: "rahul@urbanfit.in", plan: "Starter Retainer" },
     { name: "Sahit Sai", company: "Lumen & Co Master", email: "sahitsai7@gmail.com", plan: "Founder Account" },
   ];
 
@@ -395,7 +392,7 @@ export default function DocumentVaultView({
     setEditCampaignTargets(doc.customPlaceholders?.CAMPAIGN_TARGETS || "150 leads / month");
     setEditCostPerLead(doc.customPlaceholders?.COST_PER_LEAD || "₹38 / lead");
     setEditReachTarget(doc.customPlaceholders?.REACH_TARGET || "250,000 Impressions");
-    setEditSignatoryName(doc.customPlaceholders?.SIGNATORY_NAME || doc.clientName.split(" ")[0] || "Mark Davis");
+    setEditSignatoryName(doc.customPlaceholders?.SIGNATORY_NAME || doc.clientName.split(" ")[0] || "Authorized Signatory");
     setEditSignatoryTitle(doc.customPlaceholders?.SIGNATORY_TITLE || "Managing Director");
     setEditAuditSummary(doc.customPlaceholders?.AUDIT_SUMMARY || "4k followers, posting twice a month, no paid ads running currently, most enquiries come from word of mouth.");
     setEditPainPoint1(doc.customPlaceholders?.PAIN_POINT_1 || "Organic reach under 10% of total followers; no dedicated reels strategy.");

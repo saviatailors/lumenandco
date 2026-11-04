@@ -538,9 +538,9 @@ export default function CrmLayoutShell({
       <CommandPalette
         isOpen={isCmdPaletteOpen}
         onClose={() => setIsCmdPaletteOpen(false)}
-        clients={clients.length > 0 ? clients : INITIAL_SCHOOL_CLIENTS}
-        clientLeads={clientLeads.length > 0 ? clientLeads : INITIAL_CLIENT_BUSINESS_LEADS}
-        deliverables={deliverables.length > 0 ? deliverables : INITIAL_DELIVERABLES}
+        clients={clients}
+        clientLeads={clientLeads}
+        deliverables={deliverables}
         onCreateNew={onQuickAction}
         onNavigateTab={(tab) => onTabChange(tab as CrmTab)}
       />

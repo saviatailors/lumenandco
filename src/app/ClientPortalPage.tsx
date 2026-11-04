@@ -78,21 +78,21 @@ export default function ClientPortalPage() {
   const toast = useToast();
 
   // Auth State
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [currentTab, setCurrentTab] = useState<ClientTab>("overview");
   const [step, setStep] = useState<"email" | "code">("email");
-  const [emailInput, setEmailInput] = useState("mark@northbeam.io");
-  const [passwordInput, setPasswordInput] = useState("••••••••••••");
-  const [otpInput, setOtpInput] = useState("123456");
+  const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [otpInput, setOtpInput] = useState("");
 
   // Client Identity State
-  const [userId, setUserId] = useState("user-mark-101");
-  const [clientId, setClientId] = useState("client-101");
-  const [clientName, setClientName] = useState("Mark Davis");
-  const [clientCompany, setClientCompany] = useState("Northbeam E-Commerce");
-  const [userEmail, setUserEmail] = useState("mark@northbeam.io");
+  const [userId, setUserId] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [clientCompany, setClientCompany] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   // Consent Audit & Login History State
   const [consentRecords, setConsentRecords] = useState<UserConsentRecord[]>(INITIAL_USER_CONSENT_RECORDS);
@@ -130,26 +130,7 @@ export default function ClientPortalPage() {
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
 
   // Business Leads State
-  const [businessLeads, setBusinessLeads] = useState<ClientBusinessLead[]>([
-    ...INITIAL_CLIENT_BUSINESS_LEADS,
-    {
-      id: "clead-103",
-      client_id: "client-101",
-      client_name: "Northbeam E-Commerce",
-      lead_name: "Rohan Kapoor",
-      phone: "+91 99887 76655",
-      email: "rohan.k@techcorp.in",
-      city: "Mumbai",
-      campaign_source: "Instagram Reel - Q4 Festival Offer",
-      temperature: "hot",
-      assigned_telecaller: "Sahit Sai (Sales Lead)",
-      estimated_deal_value_rupees: 85000,
-      last_contacted_at: "2026-09-10T11:00:00Z",
-      created_at: "2026-09-10T08:30:00Z",
-      notes: "High intent corporate buyer. Wants custom pricing for 500 units.",
-      call_history: [],
-    },
-  ]);
+  const [businessLeads, setBusinessLeads] = useState<ClientBusinessLead[]>(INITIAL_CLIENT_BUSINESS_LEADS);
   const [leadSearchQuery, setLeadSearchQuery] = useState("");
   const [leadFilterTemp, setLeadFilterTemp] = useState<string>("all");
   const [leadFilterDate, setLeadFilterDate] = useState<string>("all");
@@ -165,65 +146,40 @@ export default function ClientPortalPage() {
   const [supportMessage, setSupportMessage] = useState("");
 
   // Notifications Feed State
-  const [notifications, setNotifications] = useState([
-    {
-      id: "notif-1",
-      title: "New High-Intent Business Lead Received",
-      desc: "Rohan Kapoor (+91 99887 76655) submitted lead form via Instagram Reel - Q4 Festival Offer.",
-      time: "10 mins ago",
-      type: "lead",
-      read: false,
-    },
-    {
-      id: "notif-2",
-      title: "Creative Revision Resubmitted for Approval",
-      desc: "v2 cut of 'Q4 Festive Season UGC Unboxing Reel (Hook A)' is ready for your review.",
-      time: "2 hours ago",
-      type: "approval",
-      read: false,
-    },
-    {
-      id: "notif-3",
-      title: "Privacy Policy v1.0 Consent Verified",
-      desc: "Your consent record for DPDP Act 2023 compliance is active under version 1.0.",
-      time: "1 day ago",
-      type: "policy",
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<
+    { id: string; title: string; desc: string; time: string; type: string; read: boolean }[]
+  >([]);
 
-  // Handle Initial Load and Dev Auto Login
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Check if current user email has accepted consent record
-      const existingConsent = consentRecords.find(
-        (r) => r.user_email.toLowerCase() === userEmail.toLowerCase() && r.policy_version === CURRENT_POLICY_VERSION
-      );
-      setSignedIn(true);
-      setConsentAccepted(!!existingConsent);
-      setChecking(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, []);
+  // Sign In Submission
+  const handlePerformSignIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput.trim()) {
+      toast.show("Please enter a valid account email address.", "error");
+      return;
+    }
 
-  // Demo Login Quick Switcher Handler
-  const handleSelectDemoAccount = (account: {
-    userId: string;
-    clientId: string;
-    name: string;
-    company: string;
-    email: string;
-  }) => {
-    setUserId(account.userId);
-    setClientId(account.clientId);
-    setClientName(account.name);
-    setClientCompany(account.company);
-    setUserEmail(account.email);
-    setEmailInput(account.email);
+    const cleanEmail = emailInput.trim();
+    const domainPart = cleanEmail.split("@")[1]?.split(".")[0] || "Client";
+    const compName = domainPart.charAt(0).toUpperCase() + domainPart.slice(1);
+    const userNamePart = cleanEmail.split("@")[0] || "Client";
+    const derivedName = userNamePart.charAt(0).toUpperCase() + userNamePart.slice(1);
 
-    // Check if demo account has accepted consent for CURRENT_POLICY_VERSION
+    const clientAcc = {
+      userId: `user-${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`,
+      clientId: `client-${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`,
+      name: derivedName,
+      company: compName,
+      email: cleanEmail,
+    };
+
+    setUserId(clientAcc.userId);
+    setClientId(clientAcc.clientId);
+    setClientName(clientAcc.name);
+    setClientCompany(clientAcc.company);
+    setUserEmail(clientAcc.email);
+
     const hasAccepted = consentRecords.some(
-      (r) => r.user_email.toLowerCase() === account.email.toLowerCase() && r.policy_version === CURRENT_POLICY_VERSION
+      (r) => r.user_email.toLowerCase() === clientAcc.email.toLowerCase() && r.policy_version === CURRENT_POLICY_VERSION
     );
 
     setSignedIn(true);
@@ -232,58 +188,18 @@ export default function ClientPortalPage() {
     setTermsChecked(false);
     setConsentTab("privacy");
 
-    // Log Login Attempt
     const newLog = buildLoginHistoryRecord({
-      userId: account.userId,
-      userEmail: account.email,
+      userId: clientAcc.userId,
+      userEmail: clientAcc.email,
       status: hasAccepted ? "success" : "consent_pending",
     });
     setLoginHistory((prev) => [newLog, ...prev]);
 
     if (hasAccepted) {
-      toast.show(`Welcome back, ${account.name}! Logged into ${account.company}.`, "success");
+      toast.show(`Welcome back, ${clientAcc.name}! Logged into ${clientAcc.company}.`, "success");
     } else {
-      toast.show(`Logged in as ${account.name}. Please complete mandatory consent gate to proceed.`, "info");
+      toast.show(`Logged in as ${clientAcc.name}. Please complete mandatory consent gate to proceed.`, "info");
     }
-  };
-
-  // Sign In Submission
-  const handlePerformSignIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput) {
-      toast.show("Please enter a valid account email address.", "error");
-      return;
-    }
-
-    // Default to Mark Davis if custom email isn't in pre-seeded demo
-    const emailLower = emailInput.trim().toLowerCase();
-    let selectedAcc = {
-      userId: "user-mark-101",
-      clientId: "client-101",
-      name: "Mark Davis",
-      company: "Northbeam E-Commerce",
-      email: emailInput,
-    };
-
-    if (emailLower.includes("bloom")) {
-      selectedAcc = {
-        userId: "user-ananya-102",
-        clientId: "client-102",
-        name: "Ananya Roy",
-        company: "Bloom Skincare",
-        email: emailInput,
-      };
-    } else if (emailLower.includes("fit")) {
-      selectedAcc = {
-        userId: "user-rahul-104",
-        clientId: "client-104",
-        name: "Rahul Verma",
-        company: "UrbanFit Fitness",
-        email: emailInput,
-      };
-    }
-
-    handleSelectDemoAccount(selectedAcc);
   };
 
   // Accept Consent Gate Action
@@ -550,71 +466,6 @@ export default function ClientPortalPage() {
             </button>
           </form>
 
-          {/* 1-Click Demo Accounts Quick Switcher */}
-          <div className="pt-4 border-t border-white/15 space-y-3">
-            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest block text-center">
-              Instant Demo Accounts (Select to Test)
-            </span>
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  handleSelectDemoAccount({
-                    userId: "user-mark-101",
-                    clientId: "client-101",
-                    name: "Mark Davis",
-                    company: "Northbeam E-Commerce",
-                    email: "mark@northbeam.io",
-                  })
-                }
-                className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-2xl border border-white/20 text-left transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-xl bg-[#ef4d23] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#ef4d23]/30">
-                    N
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white group-hover:text-[#ef4d23] transition-colors">
-                      Mark Davis
-                    </p>
-                    <p className="text-[10px] text-white/60">Northbeam E-Commerce (Scale Retainer)</p>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">
-                  Active
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  handleSelectDemoAccount({
-                    userId: "user-ananya-102",
-                    clientId: "client-102",
-                    name: "Ananya Roy",
-                    company: "Bloom Skincare",
-                    email: "ananya@bloomskincare.in",
-                  })
-                }
-                className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-2xl border border-white/20 text-left transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                    B
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white group-hover:text-[#ef4d23] transition-colors">
-                      Ananya Roy
-                    </p>
-                    <p className="text-[10px] text-white/60">Bloom Skincare (Growth Retainer)</p>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-bold">
-                  Consent Gate Pending
-                </span>
-              </button>
-            </div>
-          </div>
 
           <div className="text-center pt-2">
             <p className="text-[10px] text-white/50">

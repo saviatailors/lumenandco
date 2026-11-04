@@ -62,8 +62,8 @@ import {
 import { supabase } from "@/lib/supabase-client";
 import { SEED_STAFF, SEED_CLIENTS } from "@/lib/delivery.functions";
 
-const STORAGE_KEY_CHANNELS = "lumen_chat_channels_v5";
-const STORAGE_KEY_MESSAGES = "lumen_chat_messages_v5";
+const STORAGE_KEY_CHANNELS = "lumen_chat_channels_v6";
+const STORAGE_KEY_MESSAGES = "lumen_chat_messages_v6";
 
 function playNotificationChime() {
   try {
@@ -449,13 +449,13 @@ export default function WhatsAppMessengerView({
     setAuthSession(null);
     localStorage.removeItem("lumen_messenger_auth_v1");
   };
-  // Load saved state (defaults with rich seed channels & messages)
+  // Load saved state (defaults with clean seed channels & messages)
   const [channels, setChannels] = useState<ChatChannel[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CHANNELS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_CHAT_CHANNELS.length) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
@@ -470,7 +470,7 @@ export default function WhatsAppMessengerView({
       const saved = localStorage.getItem(STORAGE_KEY_MESSAGES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_CHAT_MESSAGES.length) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
@@ -2001,7 +2001,7 @@ export default function WhatsAppMessengerView({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. David Miller or Northbeam Growth"
+                  placeholder="e.g. Santhan Kumar or Client Brand"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
                   className="w-full bg-neutral-50/90 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none font-medium"

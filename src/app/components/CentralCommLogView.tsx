@@ -158,8 +158,8 @@ export default function CentralCommLogView({
     }
 
     const matchedClient = clients.find((c) => c.id === formClientId);
-    const clientName = matchedClient ? matchedClient.school_name : "Bloom Skincare";
-    const clientId = formClientId || matchedClient?.id || "client-101";
+    const clientName = matchedClient ? matchedClient.school_name : "Direct Client Outreach";
+    const clientId = formClientId || matchedClient?.id || "outreach";
 
     const newEntry: CommLogEntry = {
       id: `comm-${Date.now()}`,

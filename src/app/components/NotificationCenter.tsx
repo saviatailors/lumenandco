@@ -25,50 +25,9 @@ export type NotificationItem = {
 
 import { supabase } from "@/lib/supabase-client";
 
-export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "notif-1",
-    staff_id: "staff-3",
-    type: "revision",
-    title: "Client Revision Requested",
-    body: "Mark (Northbeam Founder) requested revisions on 'Q4 Performance Video Reel & Hook Cuts'.",
-    deliverable_id: "del-101",
-    read: false,
-    created_at: "2026-09-08T09:12:00Z",
-  },
-  {
-    id: "notif-2",
-    staff_id: "staff-3",
-    type: "sla_warning",
-    title: "SLA Breach Alert (Overdue)",
-    body: "Deliverable 'Q4 Performance Video Reel' passed its due date on 2026-09-08.",
-    deliverable_id: "del-101",
-    read: false,
-    created_at: "2026-09-08T10:00:00Z",
-  },
-  {
-    id: "notif-3",
-    staff_id: "staff-3",
-    type: "comment",
-    title: "Mentioned in Internal Comment",
-    body: "Sarah Chen tagged you: '@David Miller hook timing is sharp! Sent to client for final approval.'",
-    deliverable_id: "del-101",
-    read: true,
-    created_at: "2026-09-07T15:00:00Z",
-  },
-  {
-    id: "notif-4",
-    staff_id: "staff-3",
-    type: "assigned",
-    title: "New Task Assigned",
-    body: "Alex Rivers assigned you to 'Gen AI UGC Ad Concepts (Set 4)'.",
-    deliverable_id: "del-102",
-    read: true,
-    created_at: "2026-09-08T11:00:00Z",
-  },
-];
+export const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
 
-const STORAGE_KEY_NOTIFS = "lumen_realtime_notifications_v2";
+const STORAGE_KEY_NOTIFS = "lumen_realtime_notifications_v3";
 
 export default function NotificationCenter({
   isOpen,

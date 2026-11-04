@@ -85,10 +85,6 @@ export const PREMADE_EMAIL_TEMPLATES: EmailTemplate[] = [
 
 export const QUICK_RECIPIENTS = [
   { label: "Sahit Sai (Owner)", email: "sahitsai7@gmail.com" },
-  { label: "Northbeam E-Commerce", email: "mark@northbeam.io" },
-  { label: "Bloom Skincare", email: "sneha@bloomskin.in" },
-  { label: "UrbanFit Apparel", email: "arjun@urbanfit.co" },
-  { label: "ABC School", email: "admin@abcschool.edu" },
 ];
 
 export default function EmailSenderModal({
