@@ -105,6 +105,7 @@ import ClientOnboardingView from "./components/ClientOnboardingView";
 import CentralCommLogView from "./components/CentralCommLogView";
 import SiteCreativesManagerView from "./components/SiteCreativesManagerView";
 import { exportRealtimeAnalyticsToExcel } from "@/lib/excelExport";
+import { sendRealtimeEmail } from "@/lib/email.functions";
 
 export interface TeamMember {
   id: string;
@@ -1085,7 +1086,7 @@ export default function CrmPage() {
     );
   };
 
-  const handleSendMessage = (entry: CommLogEntry) => {
+  const handleSendMessage = async (entry: CommLogEntry) => {
     setCommLogs([entry, ...commLogs]);
     setInvoices((prev) =>
       prev.map((inv) =>
@@ -1094,6 +1095,39 @@ export default function CrmPage() {
           : inv
       )
     );
+
+    if (entry.channel === "email" && entry.recipient && entry.recipient.includes("@")) {
+      try {
+        const emailSubject = entry.content.startsWith("[Subject:")
+          ? entry.content.split("]")[0].replace("[Subject:", "").trim()
+          : `Lumen & Co Reminder — ${entry.school_name}`;
+        const emailBody = entry.content.includes("]")
+          ? entry.content.split("]").slice(1).join("]").trim()
+          : entry.content;
+
+        await sendRealtimeEmail({
+          data: {
+            to: entry.recipient,
+            subject: emailSubject,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+                <h2 style="color: #ef4d23; margin: 0 0 16px 0;">Lumen &amp; Co</h2>
+                <div style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;">${emailBody}</div>
+                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8;">
+                  Sent from Lumen &amp; Co Agency Dispatch • Hyderabad &amp; Visakhapatnam
+                </div>
+              </div>
+            `,
+            text: emailBody,
+          },
+        });
+        toast.success(`Payment reminder email sent live to ${entry.recipient}!`);
+        return;
+      } catch (err) {
+        console.warn("Real-time email dispatch notice:", err);
+      }
+    }
+
     toast.success(`Payment Reminder dispatched via ${entry.channel.toUpperCase()} & logged!`);
   };
 

@@ -6,6 +6,7 @@ import { STORAGE_KEYS, loadStoredData, saveStoredData } from "@/lib/db-sync";
 import { AdvancedLead } from "@/lib/crm.functions";
 import { ClientBusinessLead } from "@/lib/lumenandco.types";
 import { supabase } from "@/lib/supabase-client";
+import { sendLeadAutomationEmails } from "@/lib/email.functions";
 
 export interface InboundLeadPayload {
   name: string;
@@ -162,6 +163,24 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
     });
   } catch (err) {
     console.warn("[LeadCapture] Supabase remote sync notice (offline or skipped):", err);
+  }
+
+  // 6. Automated Lead Confirmation (to Client) & Real-time Alert (to Team / sahitsai6@gmail.com)
+  try {
+    await sendLeadAutomationEmails({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        company: payload.company,
+        website: payload.website,
+        budget: payload.budget,
+        goal: payload.goal,
+        message: payload.message || (payload.scheduled_meeting_date ? `Reserved slot: ${payload.scheduled_meeting_date}` : undefined),
+      },
+    });
+  } catch (emailErr) {
+    console.warn("[LeadCapture] Automated lead email dispatch notice:", emailErr);
   }
 
   return { advancedLead, clientBusinessLead };
