@@ -28,6 +28,7 @@ import {
   FolderDown,
   PanelLeft,
   PanelLeftClose,
+  Film,
 } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import NotificationCenter from "./NotificationCenter";
@@ -43,6 +44,7 @@ export type CrmTab =
   | "codes"
   | "dashboard"
   | "documents"
+  | "creatives"
   | "planner"
   | "onboarding"
   | "stage"
@@ -112,6 +114,7 @@ export default function CrmLayoutShell({
     { id: "codes", label: "Code Library", icon: KeyRound, badge: "Codes" },
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "documents", label: "Documents", icon: FolderDown, badge: "Vault" },
+    { id: "creatives", label: "Site Creatives & Reels", icon: Film, badge: "Site" },
     { id: "planner", label: "My Workday Planner", icon: CheckSquare, badge: "My Tasks" },
     { id: "onboarding", label: "Client Onboarding", icon: Rocket, badge: "New" },
     { id: "stage", label: "Performance", icon: Sparkles, badge: "AI" },

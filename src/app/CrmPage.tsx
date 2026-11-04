@@ -103,6 +103,7 @@ import WhatsAppMessengerView from "./components/WhatsAppMessengerView";
 import CodeLibraryView from "./components/CodeLibraryView";
 import ClientOnboardingView from "./components/ClientOnboardingView";
 import CentralCommLogView from "./components/CentralCommLogView";
+import SiteCreativesManagerView from "./components/SiteCreativesManagerView";
 import { exportRealtimeAnalyticsToExcel } from "@/lib/excelExport";
 
 export interface TeamMember {
@@ -1201,6 +1202,13 @@ export default function CrmPage() {
           clientName="Agency Internal Team"
           clientCompany="Lumen & Co Master Accounts"
         />
+      )}
+
+      {/* ========================================================================= */}
+      {/* SCREEN: PUBLIC SITE CREATIVES & VIDEO REEL STUDIO */}
+      {/* ========================================================================= */}
+      {currentTab === "creatives" && (
+        <SiteCreativesManagerView />
       )}
 
       {/* ========================================================================= */}

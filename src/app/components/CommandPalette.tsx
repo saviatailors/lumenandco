@@ -146,6 +146,15 @@ export default function CommandPalette({
         onClose();
       },
     },
+    {
+      id: "creatives",
+      label: "Manage Public Creatives & Video Reels",
+      icon: Video,
+      action: () => {
+        if (onNavigateTab) onNavigateTab("creatives");
+        onClose();
+      },
+    },
   ];
 
   return (

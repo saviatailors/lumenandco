@@ -39,7 +39,19 @@ export function useSiteMedia(
   kind: "reel" | "creative",
   fallback: { src: string; title?: string; subtitle?: string; poster?: string }[],
 ) {
-  const [items, setItems] = useState<MediaItem[] | null>(null);
+  const [items, setItems] = useState<MediaItem[] | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("lumen_site_media_cache");
+        if (cached) {
+          const list = JSON.parse(cached) as MediaItem[];
+          const filtered = list.filter((i) => i.kind === kind);
+          if (filtered.length > 0) return filtered;
+        }
+      } catch {}
+    }
+    return null;
+  });
 
   useEffect(() => {
     let alive = true;
