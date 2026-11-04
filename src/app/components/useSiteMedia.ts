@@ -3,13 +3,83 @@ import { supabase } from "@/lib/supabase-client";
 
 export type MediaItem = {
   id: string;
-  kind: "reel" | "creative";
+  kind: "reel" | "creative" | "brand";
   src: string;
   title: string;
   subtitle: string;
   poster: string;
   sort_order: number;
 };
+
+export type BrandItem = {
+  id: string;
+  name: string;
+  logo?: string;
+  category?: string;
+  sort_order: number;
+};
+
+export const DEFAULT_BRAND_NAMES = [
+  "Northbeam",
+  "Fable",
+  "Kite&Co",
+  "Lumen",
+  "Orbit",
+  "Verda",
+  "Nimbus",
+  "Pulse",
+  "Aurora",
+];
+
+export function useSiteBrands(): BrandItem[] {
+  const [brands, setBrands] = useState<BrandItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("lumen_site_brands_cache");
+        if (cached) {
+          const list = JSON.parse(cached) as BrandItem[];
+          if (list.length > 0) return list;
+        }
+      } catch {}
+    }
+    return DEFAULT_BRAND_NAMES.map((name, i) => ({
+      id: `default-brand-${i}`,
+      name,
+      sort_order: (i + 1) * 10,
+    }));
+  });
+
+  useEffect(() => {
+    let alive = true;
+    void supabase
+      .from("site_media")
+      .select("id,kind,src,title,subtitle,sort_order")
+      .eq("kind", "brand")
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (!data || !data.length) return;
+        const mapped: BrandItem[] = data.map((d) => ({
+          id: d.id,
+          name: d.title,
+          logo: d.src || undefined,
+          category: d.subtitle || undefined,
+          sort_order: d.sort_order,
+        }));
+        if (alive && mapped.length > 0) {
+          setBrands(mapped);
+          try {
+            localStorage.setItem("lumen_site_brands_cache", JSON.stringify(mapped));
+          } catch {}
+        }
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return brands;
+}
 
 export const DEFAULT_POSTER =
   "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=700&fit=crop";

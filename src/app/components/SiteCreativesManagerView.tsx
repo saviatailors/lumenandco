@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Film,
   Image as ImageIcon,
+  Building2,
   Plus,
   Trash2,
   Edit3,
@@ -12,25 +13,24 @@ import {
   ArrowUp,
   ArrowDown,
   ExternalLink,
-  Sparkles,
-  Eye,
   RotateCcw,
   Volume2,
   VolumeX,
   Search,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
   X,
+  Eye,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase-client";
-import { resolveMediaSrc, DEFAULT_POSTER, VIDEO_BUCKET, STORAGE_PREFIX } from "./useSiteMedia";
+import { resolveMediaSrc, DEFAULT_POSTER, VIDEO_BUCKET, STORAGE_PREFIX, DEFAULT_BRAND_NAMES } from "./useSiteMedia";
 import { REELS, CREATIVES } from "./HomeSections";
 
 export type SiteMediaItem = {
   id: string;
-  kind: "reel" | "creative";
+  kind: "reel" | "creative" | "brand";
   src: string;
   title: string;
   subtitle: string;
@@ -39,19 +39,17 @@ export type SiteMediaItem = {
   created_at?: string;
 };
 
-const ORANGE = "#ef4d23";
-
 export default function SiteCreativesManagerView() {
   const [items, setItems] = useState<SiteMediaItem[]>([]);
   const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"reels" | "creatives" | "preview">("reels");
+  const [activeTab, setActiveTab] = useState<"reels" | "creatives" | "brands" | "preview">("reels");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modal State for Add / Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SiteMediaItem | null>(null);
-  const [formKind, setFormKind] = useState<"reel" | "creative">("reel");
+  const [formKind, setFormKind] = useState<"reel" | "creative" | "brand">("reel");
   const [formTitle, setFormTitle] = useState("");
   const [formSubtitle, setFormSubtitle] = useState("");
   const [formSrc, setFormSrc] = useState("");
@@ -82,6 +80,7 @@ export default function SiteCreativesManagerView() {
         const sorted = data as SiteMediaItem[];
         setItems(sorted);
         resolveUrls(sorted);
+        syncBrandsCache(sorted);
         try {
           localStorage.setItem("lumen_site_media_cache", JSON.stringify(sorted));
         } catch {}
@@ -92,8 +91,8 @@ export default function SiteCreativesManagerView() {
           const parsed = JSON.parse(cached);
           setItems(parsed);
           resolveUrls(parsed);
+          syncBrandsCache(parsed);
         } else {
-          // Initialize empty
           setItems([]);
         }
       }
@@ -104,12 +103,31 @@ export default function SiteCreativesManagerView() {
     }
   };
 
+  const syncBrandsCache = (list: SiteMediaItem[]) => {
+    const brandList = list.filter((i) => i.kind === "brand").map((b) => ({
+      id: b.id,
+      name: b.title,
+      logo: b.src || undefined,
+      category: b.subtitle || undefined,
+      sort_order: b.sort_order,
+    }));
+    if (brandList.length > 0) {
+      try {
+        localStorage.setItem("lumen_site_brands_cache", JSON.stringify(brandList));
+      } catch {}
+    }
+  };
+
   const resolveUrls = async (list: SiteMediaItem[]) => {
     const map: Record<string, string> = {};
     for (const item of list) {
-      try {
-        map[item.id] = await resolveMediaSrc(item.src);
-      } catch {
+      if (item.kind === "reel") {
+        try {
+          map[item.id] = await resolveMediaSrc(item.src);
+        } catch {
+          map[item.id] = item.src;
+        }
+      } else {
         map[item.id] = item.src;
       }
     }
@@ -123,8 +141,11 @@ export default function SiteCreativesManagerView() {
   // Filtered items
   const reels = items.filter((i) => i.kind === "reel");
   const creatives = items.filter((i) => i.kind === "creative");
+  const brands = items.filter((i) => i.kind === "brand");
 
-  const currentList = activeTab === "reels" ? reels : creatives;
+  const currentList =
+    activeTab === "reels" ? reels : activeTab === "creatives" ? creatives : brands;
+
   const filteredList = currentList.filter((item) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
@@ -136,13 +157,25 @@ export default function SiteCreativesManagerView() {
   });
 
   // Open modal for Create
-  const handleOpenCreate = (kind: "reel" | "creative") => {
-    const list = kind === "reel" ? reels : creatives;
+  const handleOpenCreate = (kind: "reel" | "creative" | "brand") => {
+    const list = kind === "reel" ? reels : kind === "creative" ? creatives : brands;
     const maxOrder = list.reduce((max, i) => Math.max(max, i.sort_order), 0);
     setEditingItem(null);
     setFormKind(kind);
-    setFormTitle(kind === "reel" ? "New Performance Reel" : "New Ad Creative");
-    setFormSubtitle(kind === "reel" ? "1.2M views • 4.5x ROAS" : "Meta Ad Campaign");
+    setFormTitle(
+      kind === "reel"
+        ? "New Performance Reel"
+        : kind === "creative"
+        ? "New Ad Creative"
+        : "Brand Name (e.g. Northbeam)"
+    );
+    setFormSubtitle(
+      kind === "reel"
+        ? "1.2M views • 4.5x ROAS"
+        : kind === "creative"
+        ? "Meta Ad Campaign"
+        : "Growth Partner"
+    );
     setFormSrc("");
     setFormPoster("");
     setFormSortOrder(maxOrder + 10);
@@ -169,14 +202,13 @@ export default function SiteCreativesManagerView() {
     setIsUploading(true);
     setUploadProgress(10);
     try {
-      const isVideo = file.type.startsWith("video/");
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-60);
       const filePath = `${Date.now()}-${safeName}`;
 
       setUploadProgress(30);
 
       // Attempt upload to Supabase site-videos bucket
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from(VIDEO_BUCKET)
         .upload(filePath, file, {
           cacheControl: "3600",
@@ -184,7 +216,6 @@ export default function SiteCreativesManagerView() {
         });
 
       if (error) {
-        // Fallback: create object URL or base64 data for local session
         console.warn("Storage upload note, falling back to blob URL:", error);
         const objectUrl = URL.createObjectURL(file);
         setFormSrc(objectUrl);
@@ -198,7 +229,7 @@ export default function SiteCreativesManagerView() {
       }
 
       setUploadProgress(100);
-      if (!formTitle) {
+      if (!formTitle || formTitle.startsWith("New ") || formTitle.startsWith("Brand Name")) {
         setFormTitle(file.name.replace(/\.[^.]+$/, "").slice(0, 80));
       }
     } catch (err) {
@@ -212,8 +243,12 @@ export default function SiteCreativesManagerView() {
 
   // Save / Update Item
   const handleSaveItem = async () => {
-    if (!formSrc.trim()) {
+    if (formKind !== "brand" && !formSrc.trim()) {
       toast.error("Please provide a valid video or image URL/file.");
+      return;
+    }
+    if (formKind === "brand" && !formTitle.trim()) {
+      toast.error("Please provide a brand name.");
       return;
     }
 
@@ -222,7 +257,9 @@ export default function SiteCreativesManagerView() {
       const itemData = {
         kind: formKind,
         src: formSrc.trim(),
-        title: formTitle.trim() || (formKind === "reel" ? "Performance Reel" : "Brand Creative"),
+        title:
+          formTitle.trim() ||
+          (formKind === "reel" ? "Performance Reel" : formKind === "creative" ? "Brand Creative" : "Brand"),
         subtitle: formSubtitle.trim(),
         poster: formPoster.trim(),
         sort_order: Number(formSortOrder) || 0,
@@ -230,20 +267,17 @@ export default function SiteCreativesManagerView() {
 
       if (editingItem && editingItem.id) {
         // Update existing
-        const { error } = await supabase
+        await supabase
           .from("site_media")
           .update(itemData)
           .eq("id", editingItem.id);
-
-        if (error) {
-          console.warn("Supabase update error:", error);
-        }
 
         const updatedList = items.map((i) =>
           i.id === editingItem.id ? { ...i, ...itemData } : i
         );
         setItems(updatedList);
         resolveUrls(updatedList);
+        syncBrandsCache(updatedList);
         localStorage.setItem("lumen_site_media_cache", JSON.stringify(updatedList));
         toast.success(`Updated "${itemData.title}"!`);
       } else {
@@ -255,7 +289,7 @@ export default function SiteCreativesManagerView() {
           created_at: new Date().toISOString(),
         };
 
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("site_media")
           .insert([itemData])
           .select();
@@ -264,6 +298,7 @@ export default function SiteCreativesManagerView() {
         const updatedList = [...items, createdItem].sort((a, b) => a.sort_order - b.sort_order);
         setItems(updatedList);
         resolveUrls(updatedList);
+        syncBrandsCache(updatedList);
         localStorage.setItem("lumen_site_media_cache", JSON.stringify(updatedList));
         toast.success(`Added "${itemData.title}" to public site!`);
       }
@@ -284,12 +319,13 @@ export default function SiteCreativesManagerView() {
     }
 
     try {
-      if (item.id && !item.id.startsWith("fallback-")) {
+      if (item.id && !item.id.startsWith("fallback-") && !item.id.startsWith("seed-")) {
         await supabase.from("site_media").delete().eq("id", item.id);
       }
 
       const updated = items.filter((i) => i.id !== item.id);
       setItems(updated);
+      syncBrandsCache(updated);
       localStorage.setItem("lumen_site_media_cache", JSON.stringify(updated));
       toast.success(`Removed "${item.title}" from website.`);
     } catch (err) {
@@ -307,12 +343,10 @@ export default function SiteCreativesManagerView() {
     const currentItem = list[index];
     const targetItem = list[targetIndex];
 
-    // Swap sort orders
     const tempOrder = currentItem.sort_order;
     currentItem.sort_order = targetItem.sort_order;
     targetItem.sort_order = tempOrder;
 
-    // If both have same order, make them distinct
     if (currentItem.sort_order === targetItem.sort_order) {
       if (direction === "up") {
         currentItem.sort_order = Math.max(0, currentItem.sort_order - 10);
@@ -328,9 +362,9 @@ export default function SiteCreativesManagerView() {
     }).sort((a, b) => a.sort_order - b.sort_order);
 
     setItems(updatedItems);
+    syncBrandsCache(updatedItems);
     localStorage.setItem("lumen_site_media_cache", JSON.stringify(updatedItems));
 
-    // Save to Supabase in background
     try {
       if (currentItem.id && !currentItem.id.startsWith("fallback-")) {
         await supabase.from("site_media").update({ sort_order: currentItem.sort_order }).eq("id", currentItem.id);
@@ -345,7 +379,7 @@ export default function SiteCreativesManagerView() {
 
   // Seed / Populate Default Site Assets
   const handleSeedDefaults = async () => {
-    if (!confirm("This will load the official Lumen & Co reels and creative assets into the site media manager. Proceed?")) {
+    if (!confirm("This will load the official Lumen & Co reels, creatives, and scrolling partner brands into the database. Proceed?")) {
       return;
     }
 
@@ -368,10 +402,17 @@ export default function SiteCreativesManagerView() {
           poster: "",
           sort_order: (i + 1) * 10,
         })),
+        ...DEFAULT_BRAND_NAMES.map((name, i) => ({
+          kind: "brand" as const,
+          src: "",
+          title: name,
+          subtitle: "Growth Partner",
+          poster: "",
+          sort_order: (i + 1) * 10,
+        })),
       ];
 
-      // Try bulk inserting into Supabase
-      const { data, error } = await supabase.from("site_media").insert(defaultRows).select();
+      const { data } = await supabase.from("site_media").insert(defaultRows).select();
 
       let finalItems: SiteMediaItem[];
       if (data && data.length > 0) {
@@ -386,8 +427,9 @@ export default function SiteCreativesManagerView() {
 
       setItems(finalItems);
       resolveUrls(finalItems);
+      syncBrandsCache(finalItems);
       localStorage.setItem("lumen_site_media_cache", JSON.stringify(finalItems));
-      toast.success("Loaded default Lumen & Co creatives and video reels!");
+      toast.success("Loaded default Lumen & Co creatives, reels, and scrolling partner brands!");
     } catch (err) {
       console.error("Seed error:", err);
       toast.error("Could not load default assets.");
@@ -404,17 +446,17 @@ export default function SiteCreativesManagerView() {
       <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-white/80 shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ef4d23]/10 border border-[#ef4d23]/20 text-[#ef4d23] text-xs font-bold uppercase tracking-wider">
-            <Film className="h-3.5 w-3.5" />
+            <Sparkles className="h-3.5 w-3.5" />
             <span>Public Website Asset Studio</span>
           </div>
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight"
             style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
           >
-            Site Creatives &amp; Reel Studio
+            Site Creatives, Reels &amp; Scrolling Brands
           </h1>
           <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed">
-            Manage the high-converting 9:16 vertical video reels and brand creative banners shown on the Lumen &amp; Co homepage, Work page, and service showcases.
+            Manage public-facing performance reels, creative ad showcases, and the scrolling partner brands strip shown on the Lumen &amp; Co website.
           </p>
 
           {/* Stat Pills */}
@@ -426,6 +468,10 @@ export default function SiteCreativesManagerView() {
             <span className="px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
               <ImageIcon className="h-3.5 w-3.5 text-blue-600" />
               <span>{creatives.length} Visual Creatives</span>
+            </span>
+            <span className="px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 text-purple-600" />
+              <span>{brands.length} Scrolling Brands</span>
             </span>
             <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -459,11 +505,26 @@ export default function SiteCreativesManagerView() {
 
           <button
             type="button"
-            onClick={() => handleOpenCreate(activeTab === "creatives" ? "creative" : "reel")}
+            onClick={() =>
+              handleOpenCreate(
+                activeTab === "brands"
+                  ? "brand"
+                  : activeTab === "creatives"
+                  ? "creative"
+                  : "reel"
+              )
+            }
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#ef4d23] hover:bg-[#d93c14] text-white text-xs font-bold shadow-md shadow-[#ef4d23]/25 transition-all cursor-pointer"
           >
             <Plus className="h-4 w-4" />
-            <span>Add {activeTab === "creatives" ? "Creative" : "Video Reel"}</span>
+            <span>
+              Add{" "}
+              {activeTab === "brands"
+                ? "Brand"
+                : activeTab === "creatives"
+                ? "Creative"
+                : "Video Reel"}
+            </span>
           </button>
         </div>
       </div>
@@ -473,11 +534,11 @@ export default function SiteCreativesManagerView() {
       {/* ========================================================================= */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/70 backdrop-blur-xl p-2.5 rounded-2xl border border-neutral-200/80 shadow-xs">
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 bg-neutral-100/80 p-1 rounded-xl">
+        <div className="flex items-center gap-1 bg-neutral-100/80 p-1 rounded-xl overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("reels")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
               activeTab === "reels"
                 ? "bg-white text-neutral-900 shadow-xs"
                 : "text-neutral-500 hover:text-neutral-900"
@@ -493,7 +554,7 @@ export default function SiteCreativesManagerView() {
           <button
             type="button"
             onClick={() => setActiveTab("creatives")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
               activeTab === "creatives"
                 ? "bg-white text-neutral-900 shadow-xs"
                 : "text-neutral-500 hover:text-neutral-900"
@@ -508,8 +569,24 @@ export default function SiteCreativesManagerView() {
 
           <button
             type="button"
+            onClick={() => setActiveTab("brands")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              activeTab === "brands"
+                ? "bg-white text-neutral-900 shadow-xs"
+                : "text-neutral-500 hover:text-neutral-900"
+            }`}
+          >
+            <Building2 className="h-3.5 w-3.5 text-purple-600" />
+            <span>Scrolling Partner Brands</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-neutral-200 text-neutral-700 text-[10px]">
+              {brands.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("preview")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
               activeTab === "preview"
                 ? "bg-white text-neutral-900 shadow-xs"
                 : "text-neutral-500 hover:text-neutral-900"
@@ -527,7 +604,7 @@ export default function SiteCreativesManagerView() {
               <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
-                placeholder={`Search ${activeTab === "reels" ? "reels" : "creatives"}...`}
+                placeholder={`Search ${activeTab}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 bg-white text-xs text-neutral-900 placeholder:text-neutral-400 rounded-xl outline-none border border-neutral-200 focus:border-[#ef4d23] transition-all"
@@ -648,7 +725,6 @@ export default function SiteCreativesManagerView() {
 
                     {/* Metadata & Controls Footer */}
                     <div className="p-3.5 bg-white border-t border-neutral-100 flex items-center justify-between gap-2">
-                      {/* Move Order */}
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
@@ -670,7 +746,6 @@ export default function SiteCreativesManagerView() {
                         </button>
                       </div>
 
-                      {/* Edit & Delete */}
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -743,22 +818,17 @@ export default function SiteCreativesManagerView() {
                     key={item.id}
                     className="bg-white/95 rounded-3xl overflow-hidden border border-neutral-200/90 shadow-sm hover:shadow-md transition-all flex flex-col group"
                   >
-                    {/* Image Preview Container */}
                     <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden">
                       <img
                         src={mediaUrl}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-
-                      {/* Top Overlay Badge */}
                       <div className="absolute top-2.5 left-2.5 z-10">
                         <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-mono font-bold">
                           #{item.sort_order}
                         </span>
                       </div>
-
-                      {/* Bottom Gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white pointer-events-none">
                         <h4 className="text-xs font-bold truncate">{item.title}</h4>
@@ -768,9 +838,7 @@ export default function SiteCreativesManagerView() {
                       </div>
                     </div>
 
-                    {/* Metadata & Controls Footer */}
                     <div className="p-3 bg-white border-t border-neutral-100 flex items-center justify-between gap-1">
-                      {/* Move Order */}
                       <div className="flex items-center gap-0.5">
                         <button
                           type="button"
@@ -792,7 +860,6 @@ export default function SiteCreativesManagerView() {
                         </button>
                       </div>
 
-                      {/* Edit & Delete */}
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
@@ -822,7 +889,168 @@ export default function SiteCreativesManagerView() {
       )}
 
       {/* ========================================================================= */}
-      {/* 5. LIVE SITE PREVIEW SIMULATION TAB */}
+      {/* 5. MAIN CONTENT: SCROLLING PARTNER BRANDS */}
+      {/* ========================================================================= */}
+      {activeTab === "brands" && (
+        <div className="space-y-6">
+          {/* Live Marquee Preview Box */}
+          <div className="bg-neutral-900 text-white rounded-3xl p-5 border border-white/10 shadow-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live Marquee Ticker Preview ("Trusted by growth teams at")
+              </span>
+              <span className="text-[11px] text-[#ef4d23] font-bold">
+                {brands.length} Brands In Rotation
+              </span>
+            </div>
+
+            <div className="relative marquee-mask overflow-hidden py-3 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex w-max animate-marquee items-center gap-10 sm:gap-14 px-4">
+                {(brands.length > 0 ? [...brands, ...brands] : DEFAULT_BRAND_NAMES.map((n, i) => ({ id: `p-${i}`, title: n, src: "", subtitle: "", sort_order: i * 10, kind: "brand" as const, poster: "" }))).map((b, i) => (
+                  <div key={`${b.id || b.title}-${i}`} className="shrink-0 flex items-center gap-2.5">
+                    {b.src ? (
+                      <img
+                        src={b.src}
+                        alt={b.title}
+                        className="h-6 w-auto max-w-[120px] object-contain opacity-75"
+                      />
+                    ) : null}
+                    <span
+                      className="text-neutral-300 font-bold tracking-tight text-lg"
+                      style={{ letterSpacing: "-0.02em" }}
+                    >
+                      {b.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Brands Management Cards */}
+          {loading ? (
+            <div className="bg-white/90 rounded-3xl p-12 text-center text-neutral-400 flex flex-col items-center justify-center gap-2">
+              <Loader2 className="h-6 w-6 animate-spin text-[#ef4d23]" />
+              <p className="text-xs font-semibold">Loading partner brands from database…</p>
+            </div>
+          ) : filteredList.length === 0 ? (
+            <div className="bg-white/90 rounded-3xl p-12 text-center space-y-3 border border-neutral-200/80">
+              <Building2 className="h-10 w-10 text-neutral-300 mx-auto" />
+              <h3 className="text-base font-bold text-neutral-800">No Brands Configured In Database</h3>
+              <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+                The public website is currently using the 9 default built-in brands. Click below to load them into the database so you can edit, add, or replace them.
+              </p>
+              <div className="pt-2 flex justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSeedDefaults}
+                  className="px-4 py-2 bg-orange-50 text-[#ef4d23] border border-orange-200 rounded-2xl text-xs font-bold hover:bg-orange-100 transition-all cursor-pointer"
+                >
+                  Load 9 Default Partner Brands
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreate("brand")}
+                  className="px-4 py-2 bg-[#ef4d23] text-white rounded-2xl text-xs font-bold hover:bg-[#d93c14] transition-all cursor-pointer"
+                >
+                  + Add Partner Brand
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredList.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="bg-white/95 rounded-3xl p-4 border border-neutral-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 group"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-0.5 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-600 text-[10px] font-mono font-bold">
+                        #{item.sort_order}
+                      </span>
+                      {item.subtitle && (
+                        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-semibold">
+                          {item.subtitle}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Brand Display Visual */}
+                    <div className="h-14 bg-neutral-50 rounded-2xl border border-neutral-200/70 flex items-center justify-center p-3">
+                      {item.src ? (
+                        <img
+                          src={item.src}
+                          alt={item.title}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-neutral-800 font-extrabold text-base tracking-tight truncate">
+                          {item.title}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-bold text-neutral-900 truncate">{item.title}</h4>
+                      <p className="text-[11px] text-neutral-500">
+                        {item.src ? "Logo image uploaded" : "Text brand display"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="pt-2 border-t border-neutral-100 flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveOrder(index, "up")}
+                        disabled={index === 0}
+                        className="p-1 text-neutral-400 hover:text-neutral-800 disabled:opacity-30 hover:bg-neutral-100 rounded-lg cursor-pointer"
+                        title="Move Earlier in Marquee"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveOrder(index, "down")}
+                        disabled={index === filteredList.length - 1}
+                        className="p-1 text-neutral-400 hover:text-neutral-800 disabled:opacity-30 hover:bg-neutral-100 rounded-lg cursor-pointer"
+                        title="Move Later in Marquee"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(item)}
+                        className="px-2.5 py-1 text-xs font-bold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteItem(item)}
+                        className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                        title="Delete Brand"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6. LIVE SITE PREVIEW SIMULATION TAB */}
       {/* ========================================================================= */}
       {activeTab === "preview" && (
         <div className="bg-[#0c0d12] text-white rounded-3xl p-6 sm:p-8 space-y-8 border border-white/10 shadow-2xl">
@@ -844,8 +1072,36 @@ export default function SiteCreativesManagerView() {
             </a>
           </div>
 
-          {/* Vertical Video Carousel Strip */}
+          {/* Scrolling Brand Logos Marquee */}
           <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+              Trusted By Growth Teams At (Live Marquee):
+            </h4>
+            <div className="relative marquee-mask overflow-hidden py-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex w-max animate-marquee items-center gap-10 sm:gap-14 px-4">
+                {(brands.length > 0 ? [...brands, ...brands] : DEFAULT_BRAND_NAMES.map((n, i) => ({ id: `p-${i}`, title: n, src: "", subtitle: "", sort_order: i * 10, kind: "brand" as const, poster: "" }))).map((b, i) => (
+                  <div key={`${b.id || b.title}-${i}`} className="shrink-0 flex items-center gap-2.5">
+                    {b.src ? (
+                      <img
+                        src={b.src}
+                        alt={b.title}
+                        className="h-6 w-auto max-w-[120px] object-contain opacity-75"
+                      />
+                    ) : null}
+                    <span
+                      className="text-neutral-300 font-bold tracking-tight text-lg"
+                      style={{ letterSpacing: "-0.02em" }}
+                    >
+                      {b.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Video Carousel Strip */}
+          <div className="space-y-3 pt-4 border-t border-white/10">
             <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
               Vertical Reel Carousel ("Results we can prove"):
             </h4>
@@ -900,7 +1156,7 @@ export default function SiteCreativesManagerView() {
       )}
 
       {/* ========================================================================= */}
-      {/* 6. ADD / EDIT MEDIA MODAL */}
+      {/* 7. ADD / EDIT MEDIA MODAL */}
       {/* ========================================================================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
@@ -909,14 +1165,22 @@ export default function SiteCreativesManagerView() {
             <div className="flex items-center justify-between border-b border-neutral-200/80 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-[#ef4d23]/10 text-[#ef4d23] rounded-xl border border-[#ef4d23]/20">
-                  {formKind === "reel" ? <Film className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
+                  {formKind === "reel" ? (
+                    <Film className="h-5 w-5" />
+                  ) : formKind === "creative" ? (
+                    <ImageIcon className="h-5 w-5" />
+                  ) : (
+                    <Building2 className="h-5 w-5" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-neutral-900">
-                    {editingItem ? `Edit ${formKind === "reel" ? "Reel" : "Creative"}` : `Add New ${formKind === "reel" ? "Vertical Reel" : "Creative"}`}
+                    {editingItem
+                      ? `Edit ${formKind === "reel" ? "Reel" : formKind === "creative" ? "Creative" : "Partner Brand"}`
+                      : `Add New ${formKind === "reel" ? "Vertical Reel" : formKind === "creative" ? "Creative" : "Partner Brand"}`}
                   </h3>
                   <p className="text-xs text-neutral-500">
-                    Will appear live on the public website results strip.
+                    Will appear live on the public website.
                   </p>
                 </div>
               </div>
@@ -937,40 +1201,92 @@ export default function SiteCreativesManagerView() {
                 {/* Kind Picker */}
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Media Kind
+                    Asset Kind
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setFormKind("reel")}
-                      className={`p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      className={`p-2 rounded-xl border text-center font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                         formKind === "reel"
                           ? "bg-orange-50 border-[#ef4d23] text-[#ef4d23]"
                           : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
                       <Film className="h-4 w-4" />
-                      <span>9:16 Video Reel</span>
+                      <span className="text-[11px]">9:16 Reel</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormKind("creative")}
-                      className={`p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      className={`p-2 rounded-xl border text-center font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                         formKind === "creative"
                           ? "bg-orange-50 border-[#ef4d23] text-[#ef4d23]"
                           : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
                       <ImageIcon className="h-4 w-4" />
-                      <span>Visual Creative</span>
+                      <span className="text-[11px]">Creative</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormKind("brand")}
+                      className={`p-2 rounded-xl border text-center font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                        formKind === "brand"
+                          ? "bg-orange-50 border-[#ef4d23] text-[#ef4d23]"
+                          : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                      }`}
+                    >
+                      <Building2 className="h-4 w-4" />
+                      <span className="text-[11px]">Brand Logo</span>
                     </button>
                   </div>
+                </div>
+
+                {/* Title / Name */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+                    {formKind === "brand" ? "Brand Name *" : "Title / Caption *"}
+                  </label>
+                  <input
+                    type="text"
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    placeholder={
+                      formKind === "brand"
+                        ? "e.g. Northbeam, Oakridge International"
+                        : formKind === "reel"
+                        ? "e.g. Paid Social Reel"
+                        : "e.g. Meta ROAS Campaign"
+                    }
+                    className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 focus:border-[#ef4d23] outline-none text-xs text-neutral-900 bg-white"
+                  />
+                </div>
+
+                {/* Subtitle / Category */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+                    {formKind === "brand"
+                      ? "Industry / Category Tag (optional)"
+                      : "Subtitle / Metric (e.g. 1.2M views • 4.8x ROAS)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={formSubtitle}
+                    onChange={(e) => setFormSubtitle(e.target.value)}
+                    placeholder={
+                      formKind === "brand"
+                        ? "e.g. School Partner, E-commerce, SaaS"
+                        : "e.g. 1.2M views • 4.8x ROAS"
+                    }
+                    className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 focus:border-[#ef4d23] outline-none text-xs text-neutral-900 bg-white"
+                  />
                 </div>
 
                 {/* Direct File Upload */}
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Upload {formKind === "reel" ? "Video File (.mp4, .mov)" : "Image File (.png, .jpg)"}
+                    Upload {formKind === "reel" ? "Video File (.mp4)" : formKind === "brand" ? "Brand Logo Image (optional)" : "Creative Image"}
                   </label>
                   <label className="border-2 border-dashed border-neutral-300 hover:border-[#ef4d23] bg-neutral-50/80 hover:bg-orange-50/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all">
                     <Upload className="h-5 w-5 text-neutral-400" />
@@ -978,7 +1294,7 @@ export default function SiteCreativesManagerView() {
                       {isUploading ? "Uploading to Cloud Storage…" : "Click or drag to upload media"}
                     </span>
                     <span className="text-[10px] text-neutral-400">
-                      {formKind === "reel" ? "MP4, WebM up to 50MB" : "PNG, JPG, WebP up to 10MB"}
+                      {formKind === "reel" ? "MP4, WebM up to 50MB" : "PNG, SVG, JPG up to 10MB"}
                     </span>
                     <input
                       type="file"
@@ -998,42 +1314,18 @@ export default function SiteCreativesManagerView() {
                 {/* Direct Link Input */}
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Or Direct URL Link
+                    {formKind === "brand" ? "Or Direct Logo Image URL (optional)" : "Or Direct URL Link"}
                   </label>
                   <input
                     type="text"
                     value={formSrc}
                     onChange={(e) => setFormSrc(e.target.value)}
-                    placeholder={formKind === "reel" ? "https://.../video.mp4" : "https://images.unsplash.com/..."}
+                    placeholder={
+                      formKind === "reel"
+                        ? "https://.../video.mp4"
+                        : "https://.../logo.png"
+                    }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:border-[#ef4d23] focus:ring-2 focus:ring-[#ef4d23]/20 outline-none text-xs text-neutral-900 bg-white"
-                  />
-                </div>
-
-                {/* Title */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Title / Caption
-                  </label>
-                  <input
-                    type="text"
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder={formKind === "reel" ? "e.g. Paid Social Reel" : "e.g. Meta ROAS Campaign"}
-                    className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 focus:border-[#ef4d23] outline-none text-xs text-neutral-900 bg-white"
-                  />
-                </div>
-
-                {/* Subtitle / Metric */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Subtitle / Metric (e.g. "1.2M views • 4.8x ROAS")
-                  </label>
-                  <input
-                    type="text"
-                    value={formSubtitle}
-                    onChange={(e) => setFormSubtitle(e.target.value)}
-                    placeholder="e.g. 1.2M views • 4.8x ROAS"
-                    className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 focus:border-[#ef4d23] outline-none text-xs text-neutral-900 bg-white"
                   />
                 </div>
 
@@ -1056,7 +1348,7 @@ export default function SiteCreativesManagerView() {
                 {/* Sort Order */}
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
-                    Display Sort Order (Lower numbers appear first)
+                    Display Sort Order (Lower numbers appear earlier)
                   </label>
                   <input
                     type="number"
@@ -1070,7 +1362,7 @@ export default function SiteCreativesManagerView() {
               {/* Right Column: Live Card Preview */}
               <div className="space-y-2">
                 <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block text-center">
-                  Live Card Preview
+                  Live Preview
                 </span>
 
                 <div className="mx-auto max-w-[220px] rounded-3xl overflow-hidden border border-neutral-200/90 shadow-lg bg-neutral-900 relative">
@@ -1089,7 +1381,7 @@ export default function SiteCreativesManagerView() {
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-neutral-500">
                           <Film className="h-8 w-8 mb-2 opacity-40 text-white" />
-                          <p className="text-[10px]">Upload a video or paste a link to see preview</p>
+                          <p className="text-[10px]">Upload a video or paste a link</p>
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
@@ -1098,7 +1390,7 @@ export default function SiteCreativesManagerView() {
                         <p className="text-[10px] text-white/70">{formSubtitle || "Metric subtitle"}</p>
                       </div>
                     </div>
-                  ) : (
+                  ) : formKind === "creative" ? (
                     <div className="relative aspect-[4/5] bg-neutral-100">
                       {formSrc ? (
                         <img src={formSrc} alt="" className="w-full h-full object-cover" />
@@ -1113,6 +1405,25 @@ export default function SiteCreativesManagerView() {
                         <p className="font-bold text-xs truncate">{formTitle || "Creative Title"}</p>
                         <p className="text-[10px] text-white/70 truncate">{formSubtitle || "Ad Tag"}</p>
                       </div>
+                    </div>
+                  ) : (
+                    /* Brand Preview */
+                    <div className="p-6 bg-white text-center space-y-3">
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">
+                        Marquee Display
+                      </span>
+                      <div className="h-16 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-3">
+                        {formSrc ? (
+                          <img src={formSrc} alt="" className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-neutral-800 font-extrabold text-lg tracking-tight">
+                            {formTitle || "Brand Name"}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-neutral-500">
+                        {formSubtitle || "Trusted Partner"}
+                      </p>
                     </div>
                   )}
                 </div>

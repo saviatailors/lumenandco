@@ -16,7 +16,7 @@ import { goToSection } from "./nav";
 import reel1 from "@/assets/reel-1.mp4.asset.json";
 import reel2 from "@/assets/reel-2.mp4.asset.json";
 import reel3 from "@/assets/reel-3.mp4.asset.json";
-import { useSiteMedia, DEFAULT_POSTER, type MediaItem } from "./useSiteMedia";
+import { useSiteMedia, useSiteBrands, DEFAULT_POSTER, type MediaItem } from "./useSiteMedia";
 
 
 const ORANGE = "#ef4d23";
@@ -70,10 +70,9 @@ export function Title({
   );
 }
 
-const LOGOS = ["Northbeam", "Fable", "Kite&Co", "Lumen", "Orbit", "Verda", "Nimbus", "Pulse", "Aurora"];
-
 function LogoStrip() {
-  const items = [...LOGOS, ...LOGOS];
+  const brands = useSiteBrands();
+  const items = [...brands, ...brands];
   return (
     <section className="mt-8 sm:mt-12 bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl py-6 overflow-hidden">
       <p
@@ -84,14 +83,22 @@ function LogoStrip() {
       </p>
       <div className="relative marquee-mask overflow-hidden">
         <div className="flex w-max animate-marquee items-center gap-10 sm:gap-14 px-4">
-          {items.map((l, i) => (
-            <span
-              key={`${l}-${i}`}
-              className="text-neutral-400 shrink-0"
-              style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em" }}
-            >
-              {l}
-            </span>
+          {items.map((b, i) => (
+            <div key={`${b.id || b.name}-${i}`} className="shrink-0 flex items-center gap-2.5">
+              {b.logo ? (
+                <img
+                  src={b.logo}
+                  alt={b.name}
+                  className="h-6 sm:h-7 w-auto max-w-[130px] object-contain opacity-70 hover:opacity-100 transition-opacity"
+                />
+              ) : null}
+              <span
+                className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0"
+                style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em" }}
+              >
+                {b.name}
+              </span>
+            </div>
           ))}
         </div>
       </div>
