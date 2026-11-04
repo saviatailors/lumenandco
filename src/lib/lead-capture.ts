@@ -3,7 +3,7 @@
  * Persists leads across local CRM storage, cross-window events, and remote database.
  */
 import { STORAGE_KEYS, loadStoredData, saveStoredData } from "@/lib/db-sync";
-import { AdvancedLead } from "@/lib/crm.functions";
+import type { AdvancedLead } from "@/lib/crm.functions";
 import { ClientBusinessLead } from "@/lib/lumenandco.types";
 import { supabase } from "@/lib/supabase-client";
 import { sendLeadAutomationEmails } from "@/lib/email.functions";
@@ -68,7 +68,11 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
     website: payload.website || undefined,
     budget: payload.budget || undefined,
     goal: payload.goal || undefined,
-    notes: payload.message || (payload.scheduled_meeting_date ? `Reserved slot: ${payload.scheduled_meeting_date}` : undefined),
+    notes:
+      payload.message ||
+      (payload.scheduled_meeting_date
+        ? `Reserved slot: ${payload.scheduled_meeting_date}`
+        : undefined),
     scheduled_meeting_date: payload.scheduled_meeting_date || undefined,
   };
 
@@ -96,7 +100,9 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
       payload.goal ? `Goal: ${payload.goal}` : null,
       payload.message ? `Message: ${payload.message}` : null,
       payload.scheduled_meeting_date ? `Meeting: ${payload.scheduled_meeting_date}` : null,
-    ].filter(Boolean).join(" • "),
+    ]
+      .filter(Boolean)
+      .join(" • "),
     call_history: [
       {
         id: `ch-${dateNum}`,
@@ -121,7 +127,7 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
 
       const currentClientLeads = loadStoredData<ClientBusinessLead[]>(
         STORAGE_KEYS.CRM_CLIENT_BUSINESS_LEADS,
-        []
+        [],
       );
       const updatedClientLeads = [
         clientBusinessLead,
@@ -139,7 +145,7 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
       window.dispatchEvent(
         new CustomEvent("lumen:new-lead", {
           detail: { advancedLead, clientBusinessLead },
-        })
+        }),
       );
       // Trigger storage event so other open tabs/windows update
       window.dispatchEvent(new Event("storage"));
@@ -176,7 +182,11 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
         website: payload.website,
         budget: payload.budget,
         goal: payload.goal,
-        message: payload.message || (payload.scheduled_meeting_date ? `Reserved slot: ${payload.scheduled_meeting_date}` : undefined),
+        message:
+          payload.message ||
+          (payload.scheduled_meeting_date
+            ? `Reserved slot: ${payload.scheduled_meeting_date}`
+            : undefined),
       },
     });
   } catch (emailErr) {
@@ -185,4 +195,3 @@ export async function captureInboundLead(payload: InboundLeadPayload): Promise<{
 
   return { advancedLead, clientBusinessLead };
 }
-

@@ -46,23 +46,31 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 /**
  * Applies defense-in-depth HTTP security headers to all SSR responses (OWASP ASVS 4.0 14.4).
+ * Safely guards against immutable responses and null-body HTTP statuses (204, 304).
  */
 function applySecurityHeaders(res: Response): Response {
-  const headers = new Headers(res.headers);
-  headers.set("X-Content-Type-Options", "nosniff");
-  headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
-  headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  headers.delete("Server");
-  headers.delete("X-Powered-By");
+  try {
+    const headers = new Headers(res.headers);
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "SAMEORIGIN");
+    headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    headers.delete("Server");
+    headers.delete("X-Powered-By");
 
-  return new Response(res.body, {
-    status: res.status,
-    statusText: res.statusText,
-    headers,
-  });
+    // Web Fetch standard: Responses with null-body statuses must not have a body
+    const body = [101, 204, 205, 304].includes(res.status) ? null : res.body;
+
+    return new Response(body, {
+      status: res.status,
+      headers,
+    });
+  } catch (err) {
+    console.warn("[applySecurityHeaders] Response clone bypassed:", err);
+    return res;
+  }
 }
 
 export default {
