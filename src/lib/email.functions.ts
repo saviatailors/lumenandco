@@ -27,6 +27,8 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
       from?: string;
       replyTo?: string;
       preferredProvider?: "resend" | "smtp";
+      resendApiKey?: string;
+      smtpPass?: string;
     }) =>
       z
         .object({
@@ -37,6 +39,8 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
           from: z.string().max(120).optional(),
           replyTo: z.string().max(120).optional(),
           preferredProvider: z.enum(["resend", "smtp"]).optional(),
+          resendApiKey: z.string().max(200).optional(),
+          smtpPass: z.string().max(200).optional(),
         })
         .parse(data),
   )
@@ -59,6 +63,8 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
         from: data.from,
         replyTo: data.replyTo,
         preferredProvider: data.preferredProvider,
+        resendApiKey: data.resendApiKey,
+        smtpPass: data.smtpPass,
       });
 
       return {

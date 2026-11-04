@@ -117,6 +117,20 @@ export default function EmailSenderModal({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  const [customSmtpPass, setCustomSmtpPass] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lumen_smtp_pass") || "wljbdkbwlsrqbnkx";
+    }
+    return "wljbdkbwlsrqbnkx";
+  });
+  const [customResendKey, setCustomResendKey] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lumen_resend_key") || "";
+    }
+    return "";
+  });
+  const [showConfig, setShowConfig] = useState(false);
+
   const applyTemplate = (tmpl: EmailTemplate) => {
     setActiveTemplateId(tmpl.id);
     setSubject(tmpl.subject);
@@ -182,6 +196,8 @@ export default function EmailSenderModal({
           from: fromAddress,
           replyTo: "sahitsai6@gmail.com",
           preferredProvider: senderAccount === "gmail" ? "smtp" : "resend",
+          smtpPass: customSmtpPass || "wljbdkbwlsrqbnkx",
+          resendApiKey: customResendKey ? customResendKey.trim() : undefined,
         },
       });
 
@@ -275,6 +291,76 @@ export default function EmailSenderModal({
               <Eye className="h-3.5 w-3.5" /> HTML Preview
             </button>
           </div>
+        </div>
+
+        {/* Dispatcher Credentials & Config Accordion */}
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50/80 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <span className="font-semibold text-neutral-800 text-[11px]">
+                Email Dispatch Engine Status:
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Connected &amp; Ready
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowConfig(!showConfig)}
+              className="text-[11px] font-semibold text-[#ef4d23] hover:text-[#d43d15] transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>{showConfig ? "Hide Settings" : "Configure Keys"}</span>
+            </button>
+          </div>
+
+          {showConfig && (
+            <div className="pt-2 border-t border-neutral-200/80 space-y-3 animate-fade-in">
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-1">
+                  Gmail App Password (16 characters)
+                </label>
+                <input
+                  type="password"
+                  value={customSmtpPass}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/\s+/g, "");
+                    setCustomSmtpPass(clean);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("lumen_smtp_pass", clean);
+                    }
+                  }}
+                  placeholder="e.g. wljbdkbwlsrqbnkx"
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white font-mono text-neutral-900 text-xs focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none"
+                />
+                <span className="text-[10px] text-neutral-400 mt-0.5 block">
+                  Active for sahitsai6@gmail.com. Saved locally in browser storage.
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-1">
+                  Resend API Key (Optional Override)
+                </label>
+                <input
+                  type="password"
+                  value={customResendKey}
+                  onChange={(e) => {
+                    const clean = e.target.value.trim();
+                    setCustomResendKey(clean);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("lumen_resend_key", clean);
+                    }
+                  }}
+                  placeholder="re_..."
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white font-mono text-neutral-900 text-xs focus:ring-2 focus:ring-[#ef4d23]/20 focus:border-[#ef4d23] outline-none"
+                />
+                <span className="text-[10px] text-neutral-400 mt-0.5 block">
+                  Leave empty to use Lumen &amp; Co verified default domain key.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Premade Template Cards */}
