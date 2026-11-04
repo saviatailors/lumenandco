@@ -32,21 +32,14 @@ export default function LiveBackgroundVideo({
     const video = videoRef.current;
     if (!video) return;
 
-    // Respect reduced motion accessibility
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
+    let isDisposed = false;
 
-    // Modern browsers (WebKit / Blink) require the DOM property (not just HTML attribute)
-    // to be explicitly set to muted for autoplay to succeed without a user gesture.
+    // Strict DOM property configuration required by WebKit & Chromium for permanent unblocked looping
     video.defaultMuted = true;
     video.muted = true;
+    video.volume = 0;
     video.playsInline = true;
-
-    let isDisposed = false;
+    video.loop = true;
 
     const markPlaying = () => {
       if (!isDisposed) {
@@ -55,7 +48,7 @@ export default function LiveBackgroundVideo({
     };
 
     const tryPlay = () => {
-      if (!video) return;
+      if (!video || isDisposed) return;
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise
@@ -63,11 +56,9 @@ export default function LiveBackgroundVideo({
             markPlaying();
           })
           .catch((err) => {
-            // Autoplay was blocked by browser power-saving or autoplay policy.
-            // Recover transparently on the first user interaction anywhere on the page.
-            console.warn("Live background autoplay paused. Waiting for interaction:", err);
+            // Autoplay policy paused it — recover silently on the very first user interaction
             const kickstart = () => {
-              if (videoRef.current) {
+              if (videoRef.current && !isDisposed) {
                 videoRef.current.play().then(markPlaying).catch(() => {});
               }
               window.removeEventListener("pointerdown", kickstart);
@@ -75,6 +66,7 @@ export default function LiveBackgroundVideo({
               window.removeEventListener("scroll", kickstart);
               window.removeEventListener("keydown", kickstart);
               window.removeEventListener("mousemove", kickstart);
+              window.removeEventListener("wheel", kickstart);
             };
 
             window.addEventListener("pointerdown", kickstart, { once: true, passive: true });
@@ -82,41 +74,126 @@ export default function LiveBackgroundVideo({
             window.addEventListener("scroll", kickstart, { once: true, passive: true });
             window.addEventListener("keydown", kickstart, { once: true, passive: true });
             window.addEventListener("mousemove", kickstart, { once: true, passive: true });
+            window.addEventListener("wheel", kickstart, { once: true, passive: true });
           });
       }
     };
 
+    // 1. Initial play attempt
     if (video.readyState === 0) {
       video.load();
     }
-
-    // Attempt playback immediately upon mounting
     tryPlay();
 
-    // Also attach listeners to handle buffering and loading states
+    // 2. Playback lifecycle event listeners
     video.addEventListener("playing", markPlaying);
     video.addEventListener("canplay", tryPlay);
     video.addEventListener("loadeddata", tryPlay);
 
-    const handleVisibility = () => {
+    // 3. Prevent loop stutter: seamless rewind before reaching end-of-file
+    let isRewinding = false;
+    const handleTimeUpdate = () => {
+      if (
+        !isRewinding &&
+        video.duration > 0 &&
+        video.currentTime >= video.duration - 0.2
+      ) {
+        isRewinding = true;
+        video.currentTime = 0;
+        tryPlay();
+        setTimeout(() => {
+          isRewinding = false;
+        }, 400);
+      }
+    };
+    video.addEventListener("timeupdate", handleTimeUpdate);
+
+    // 4. Force restart on 'ended' event if native loop attribute misses a cycle
+    const handleEnded = () => {
+      video.currentTime = 0;
+      tryPlay();
+    };
+    video.addEventListener("ended", handleEnded);
+
+    // 5. Automatic recovery if browser power management pauses background video
+    const handlePause = () => {
+      if (!isDisposed && document.visibilityState === "visible") {
+        tryPlay();
+      }
+    };
+    video.addEventListener("pause", handlePause);
+
+    // 6. Network stall recovery
+    const handleStalled = () => {
+      if (!isDisposed && document.visibilityState === "visible") {
+        tryPlay();
+      }
+    };
+    video.addEventListener("stalled", handleStalled);
+
+    // 7. Source error fallback to CloudFront CDN
+    const handleError = () => {
+      if (fallbackSrc && video.currentSrc !== fallbackSrc && !isDisposed) {
+        video.src = fallbackSrc;
+        video.load();
+        tryPlay();
+      }
+    };
+    video.addEventListener("error", handleError);
+
+    // 8. Foreground wakeups (tab switch, desktop minimize, mobile app switch)
+    const handleWakeup = () => {
       if (document.visibilityState === "visible") {
         tryPlay();
       }
     };
-    document.addEventListener("visibilitychange", handleVisibility);
+    document.addEventListener("visibilitychange", handleWakeup);
+    window.addEventListener("focus", handleWakeup);
+    window.addEventListener("pageshow", handleWakeup);
+
+    // 9. Active Heartbeat Watchdog: Checks every 1.5s to ensure the background is permanently live
+    let lastTime = -1;
+    let stuckCount = 0;
+    const watchdog = setInterval(() => {
+      if (isDisposed) return;
+      if (document.visibilityState === "visible" && video) {
+        if (video.paused || video.ended) {
+          tryPlay();
+        } else if (video.currentTime === lastTime && video.readyState >= 2) {
+          stuckCount++;
+          if (stuckCount >= 2) {
+            // Frame is frozen despite playing status: nudge video time forward and resume
+            video.currentTime = video.currentTime + 0.05;
+            tryPlay();
+            stuckCount = 0;
+          }
+        } else {
+          lastTime = video.currentTime;
+          stuckCount = 0;
+        }
+      }
+    }, 1500);
 
     return () => {
       isDisposed = true;
+      clearInterval(watchdog);
       video.removeEventListener("playing", markPlaying);
       video.removeEventListener("canplay", tryPlay);
       video.removeEventListener("loadeddata", tryPlay);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("stalled", handleStalled);
+      video.removeEventListener("error", handleError);
+      document.removeEventListener("visibilitychange", handleWakeup);
+      window.removeEventListener("focus", handleWakeup);
+      window.removeEventListener("pageshow", handleWakeup);
     };
-  }, []);
+  }, [fallbackSrc]);
 
   return (
     <div className={containerClassName}>
-      {/* High-quality poster rendered underneath for instant zero-CLS paint */}
+      {/* High-quality poster underneath for zero-CLS immediate visual presentation */}
       {poster && (
         <img
           src={poster}
@@ -124,17 +201,16 @@ export default function LiveBackgroundVideo({
           aria-hidden="true"
           loading="eager"
           decoding="async"
-          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-1000 ${
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-700 ${
             isPlaying ? "opacity-0" : "opacity-100"
           }`}
         />
       )}
 
-      {/* Live Video with smooth fade-in once active */}
+      {/* Live Background Video: Continuous high-frame-rate playback */}
       <video
         ref={videoRef}
-        src={mp4Src}
-        className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-1000 ${
+        className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-700 ${
           isPlaying ? "opacity-100" : "opacity-0"
         } ${className}`}
         autoPlay
@@ -142,16 +218,17 @@ export default function LiveBackgroundVideo({
         muted
         playsInline
         preload="auto"
+        disablePictureInPicture
         disableRemotePlayback
         poster={poster}
         aria-hidden={ariaHidden}
         {...({ "webkit-playsinline": "true", "x5-playsinline": "true" } as any)}
       >
-        {/* Optimized local high-performance MP4 first */}
-        {mp4Src && <source src={mp4Src} type="video/mp4" />}
-        {/* Next-gen VP9 WebM */}
+        {/* Optimized local VP9 WebM first (smooth, lightweight, zero-audio) */}
         {webmSrc && <source src={webmSrc} type="video/webm" />}
-        {/* Original CloudFront fallback */}
+        {/* Universal local H.264 MP4 */}
+        {mp4Src && <source src={mp4Src} type="video/mp4" />}
+        {/* Remote CDN fallback */}
         {fallbackSrc && <source src={fallbackSrc} type="video/mp4" />}
       </video>
 

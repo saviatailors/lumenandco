@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   Search,
   Megaphone,
@@ -286,10 +287,47 @@ export function useCreatives() {
 }
 
 export function ReelCard({ item }: { item: MediaItem }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+
+    const tryPlay = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {});
+      }
+    };
+
+    tryPlay();
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        tryPlay();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("canplay", tryPlay);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [item.src]);
+
   return (
     <div className="snap-start shrink-0 w-[170px] sm:w-[220px]">
       <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-neutral-900 shadow-lg">
         <video
+          ref={videoRef}
           src={item.src}
           className="absolute inset-0 w-full h-full object-cover"
           autoPlay
@@ -298,9 +336,8 @@ export function ReelCard({ item }: { item: MediaItem }) {
           playsInline
           preload="auto"
           disableRemotePlayback
-          webkit-playsinline="true"
-          x5-playsinline="true"
           poster={item.poster || DEFAULT_POSTER}
+          {...({ "webkit-playsinline": "true", "x5-playsinline": "true" } as any)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
         <div className="absolute bottom-3 left-3 right-3 text-white">
