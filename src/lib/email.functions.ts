@@ -21,13 +21,15 @@ export interface SendMailOptions {
   text?: string;
   from?: string;
   replyTo?: string;
+  preferredProvider?: "resend" | "smtp";
 }
 
 /**
  * High-reliability multi-tier email dispatcher.
- * Priority 1: Resend API (Direct HTTPS, verified domain @lumenandco.in)
- * Priority 2: Gmail SMTP via Nodemailer
- * Priority 3: Mock logger fallback
+ * Intelligently routes:
+ * - If from is sahitsai6@gmail.com or preferredProvider is "smtp" -> Uses Gmail SMTP (Google SSL Socket)
+ * - If from is @lumenandco.in or preferredProvider is "resend" -> Uses Resend API
+ * - Provides seamless automatic fallback if either service is unreachable.
  */
 export async function sendEmailMessage(options: SendMailOptions): Promise<{
   success: boolean;
@@ -35,54 +37,22 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
   messageId?: string;
   message: string;
 }> {
-  const resendApiKey = process.env["RESEND_API_KEY"];
-  const defaultFrom = process.env["RESEND_FROM_EMAIL"] || "Lumen & Co <hello@lumenandco.in>";
   const toList = Array.isArray(options.to) ? options.to : [options.to];
-
-  // Tier 1: Resend REST API (Instant delivery via verified lumenandco.in domain)
-  if (resendApiKey) {
-    try {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendApiKey.trim()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: options.from || defaultFrom,
-          to: toList,
-          subject: options.subject,
-          html: options.html,
-          text: options.text || options.html.replace(/<[^>]*>?/gm, ""),
-          reply_to: options.replyTo || "sahitsai6@gmail.com",
-        }),
-      });
-
-      if (response.ok) {
-        const json = (await response.json()) as { id?: string };
-        return {
-          success: true,
-          provider: "resend",
-          messageId: json.id,
-          message: `Email successfully delivered via Resend from ${options.from || defaultFrom} to ${toList.join(", ")}!`,
-        };
-      } else {
-        const errText = await response.text();
-        console.warn(`[Resend Dispatch Notice] HTTP ${response.status}, attempting SMTP fallback:`, errText);
-      }
-    } catch (resendErr) {
-      console.warn("[Resend Dispatch Notice] Connection failed, attempting SMTP fallback:", resendErr);
-    }
-  }
-
-  // Tier 2: Gmail SMTP Fallback
   const fromEmail = process.env["SMTP_USER"] || "sahitsai6@gmail.com";
+  const isGmailSender = options.from && options.from.includes("@gmail.com");
+  const preferSmtp = options.preferredProvider === "smtp" || isGmailSender;
+
+  const resendApiKey = process.env["RESEND_API_KEY"];
+  const verifiedDomainFrom = process.env["RESEND_FROM_EMAIL"] || "Lumen & Co <hello@lumenandco.in>";
+
   const rawPass = process.env["SMTP_PASS"] || process.env["GMAIL_APP_PASSWORD"] || "";
   const smtpPass = rawPass.replace(/\s+/g, "");
   const smtpHost = process.env["SMTP_HOST"] || "smtp.gmail.com";
   const smtpPort = Number(process.env["SMTP_PORT"] || 465);
 
-  if (smtpPass) {
+  // Helper 1: Gmail SMTP via Nodemailer
+  const trySmtp = async (senderAddress?: string) => {
+    if (!smtpPass) return null;
     try {
       const transporter = nodemailer.createTransport({
         host: smtpHost,
@@ -94,8 +64,9 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
         },
       });
 
+      const finalFrom = senderAddress || options.from || `Sahit Sai | Lumen & Co <${fromEmail}>`;
       const info = await transporter.sendMail({
-        from: options.from || `Lumen & Co Agency <${fromEmail}>`,
+        from: finalFrom,
         to: options.to,
         subject: options.subject,
         text: options.text || options.html.replace(/<[^>]*>?/gm, ""),
@@ -105,13 +76,73 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
 
       return {
         success: true,
-        provider: "smtp",
+        provider: "smtp" as const,
         messageId: info.messageId,
-        message: `Email successfully delivered via Gmail SMTP from ${fromEmail} to ${toList.join(", ")}!`,
+        message: `Email successfully delivered via Gmail SMTP from ${finalFrom} to ${toList.join(", ")}!`,
       };
     } catch (smtpErr) {
       console.warn("[SMTP Notice] Nodemailer failed:", smtpErr);
+      return null;
     }
+  };
+
+  // Helper 2: Resend REST API
+  const tryResend = async (senderAddress?: string) => {
+    if (!resendApiKey) return null;
+    const resendFrom =
+      senderAddress && !senderAddress.includes("@gmail.com")
+        ? senderAddress
+        : verifiedDomainFrom;
+
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey.trim()}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: resendFrom,
+          to: toList,
+          subject: options.subject,
+          html: options.html,
+          text: options.text || options.html.replace(/<[^>]*>?/gm, ""),
+          reply_to: options.replyTo || fromEmail,
+        }),
+      });
+
+      if (response.ok) {
+        const json = (await response.json()) as { id?: string };
+        return {
+          success: true,
+          provider: "resend" as const,
+          messageId: json.id,
+          message: `Email successfully delivered via Resend from ${resendFrom} to ${toList.join(", ")}!`,
+        };
+      } else {
+        const errText = await response.text();
+        console.warn(`[Resend Notice] HTTP ${response.status}:`, errText);
+        return null;
+      }
+    } catch (fetchErr) {
+      console.warn("[Resend Notice] Connection failed:", fetchErr);
+      return null;
+    }
+  };
+
+  // Execute in prioritized order
+  if (preferSmtp) {
+    const smtpRes = await trySmtp();
+    if (smtpRes) return smtpRes;
+
+    const resendRes = await tryResend();
+    if (resendRes) return resendRes;
+  } else {
+    const resendRes = await tryResend(options.from);
+    if (resendRes) return resendRes;
+
+    const smtpRes = await trySmtp();
+    if (smtpRes) return smtpRes;
   }
 
   // Tier 3: Mock / Offline fallback
@@ -123,7 +154,15 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
 }
 
 export const sendRealtimeEmail = createServerFn({ method: "POST" })
-  .validator((data: { to: string; subject: string; html: string; text?: string; from?: string; replyTo?: string }) =>
+  .validator((data: {
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
+    from?: string;
+    replyTo?: string;
+    preferredProvider?: "resend" | "smtp";
+  }) =>
     z
       .object({
         to: z.string().email("Invalid recipient email address"),
@@ -132,6 +171,7 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
         text: z.string().optional(),
         from: z.string().optional(),
         replyTo: z.string().optional(),
+        preferredProvider: z.enum(["resend", "smtp"]).optional(),
       })
       .parse(data),
   )
@@ -144,6 +184,7 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
         text: data.text,
         from: data.from,
         replyTo: data.replyTo,
+        preferredProvider: data.preferredProvider,
       });
 
       return {
@@ -159,7 +200,8 @@ export const sendRealtimeEmail = createServerFn({ method: "POST" })
   });
 
 /**
- * Sends automated confirmation email to client and instant lead alert to team
+ * Sends automated confirmation email to client directly from sahitsai6@gmail.com
+ * and instant lead alert to team / admin.
  */
 export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
   .validator((data: {
@@ -189,11 +231,13 @@ export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
     const results = { clientDelivered: false, teamDelivered: false };
     const adminEmail = process.env["SMTP_USER"] || "sahitsai6@gmail.com";
 
-    // 1. Send Auto-Confirmation to Client
+    // 1. Send Auto-Confirmation to Client DIRECTLY FROM sahitsai6@gmail.com
     try {
       const clientRes = await sendEmailMessage({
-        from: "Lumen & Co <hello@lumenandco.in>",
+        from: `Sahit Sai | Lumen & Co <${adminEmail}>`,
         to: data.email,
+        replyTo: adminEmail,
+        preferredProvider: "smtp",
         subject: `✨ Growth Audit Inquiry Received — Lumen & Co`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background: #ffffff; border: 1px solid #e5e5e5; border-radius: 20px;">
@@ -205,7 +249,7 @@ export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
             <p style="font-size: 15px; color: #333333; line-height: 1.6;">Hello <strong>${data.name}</strong>,</p>
             
             <p style="font-size: 14px; color: #555555; line-height: 1.6;">
-              Thank you for reaching out to <strong>Lumen &amp; Co</strong>. We have successfully received your inquiry regarding <strong>${data.goal || "Growth Audit & Performance Scaling"}</strong>.
+              Thank you for reaching out to <strong>Lumen &amp; Co</strong>. I have personally received your inquiry regarding <strong>${data.goal || "Growth Audit & Performance Scaling"}</strong>.
             </p>
             
             <div style="background: #f9f9fb; border-left: 4px solid #ef4d23; padding: 16px; border-radius: 8px; margin: 20px 0;">
@@ -218,12 +262,21 @@ export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
             </div>
             
             <p style="font-size: 14px; color: #555555; line-height: 1.6;">
-              Our strategic growth team is reviewing your digital channels and preparing actionable performance insights. Sahit Sai or an account specialist will reach out to you within 24 hours.
+              Our growth strategists and I are reviewing your brand and digital channels to prepare actionable performance insights. I will personally reach out to you within 24 hours.
             </p>
+
+            <div style="margin-top: 24px; padding: 16px; background: #fafaf9; border-radius: 12px; border: 1px solid #f0f0ee;">
+              <p style="margin: 0; font-size: 13px; font-weight: 700; color: #1c1917;">Sahit Sai</p>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: #78716c;">Founder &amp; Growth Partner • Lumen &amp; Co</p>
+              <p style="margin: 4px 0 0 0; font-size: 12px; color: #ef4d23;">
+                <a href="mailto:${adminEmail}" style="color: #ef4d23; text-decoration: none;">${adminEmail}</a> • 
+                <a href="https://www.lumenandco.in" style="color: #ef4d23; text-decoration: none;">www.lumenandco.in</a>
+              </p>
+            </div>
             
             <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #eeeeee; text-align: center; color: #888888; font-size: 12px;">
               <p style="margin: 0;">Lumen &amp; Co Digital Private Limited</p>
-              <p style="margin: 4px 0 0 0;">Hyderabad &amp; Visakhapatnam • <a href="https://www.lumenandco.in" style="color: #ef4d23; text-decoration: none;">www.lumenandco.in</a></p>
+              <p style="margin: 4px 0 0 0;">Hyderabad &amp; Visakhapatnam • India</p>
             </div>
           </div>
         `,
@@ -238,6 +291,7 @@ export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
       const teamRes = await sendEmailMessage({
         from: "Lumen Lead Alerts <hello@lumenandco.in>",
         to: adminEmail,
+        replyTo: data.email,
         subject: `🔥 New Inbound Website Lead: ${data.name} (${data.company || "Direct Inquiry"})`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 16px;">
