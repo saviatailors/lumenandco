@@ -106,6 +106,7 @@ export default function EmailSenderModal({
 }) {
   const sendEmail = useServerFn(sendRealtimeEmail);
 
+  const [senderAccount, setSenderAccount] = useState<"gmail" | "resend">("gmail");
   const [to, setTo] = useState(defaultRecipient);
   const [subject, setSubject] = useState(defaultSubject);
   const [message, setMessage] = useState(
@@ -166,6 +167,11 @@ export default function EmailSenderModal({
       </div>
     `;
 
+    const fromAddress =
+      senderAccount === "gmail"
+        ? "Sahit Sai | Lumen & Co <sahitsai6@gmail.com>"
+        : "Lumen & Co <hello@lumenandco.in>";
+
     try {
       const res = await sendEmail({
         data: {
@@ -173,20 +179,23 @@ export default function EmailSenderModal({
           subject: subject.trim(),
           html: formattedHtml,
           text: message,
+          from: fromAddress,
+          replyTo: "sahitsai6@gmail.com",
+          preferredProvider: senderAccount === "gmail" ? "smtp" : "resend",
         },
       });
 
       setLoading(false);
-      if (res.success) {
+      if (res && res.success) {
         setStatus({
           type: "success",
-          text: `Email successfully delivered to ${to}! Message ID: msg_${Date.now().toString(36)}`,
+          text: `${res.message} (Message ID: ${res.messageId})`,
         });
-        toast.success(`Real-time email dispatched to ${to}`);
+        toast.success(`Real-time email dispatched via ${res.provider.toUpperCase()}!`);
       } else {
         setStatus({
           type: "error",
-          text: res.message || "Failed to send email. Please check recipient format.",
+          text: "Failed to dispatch email. Please verify recipient address.",
         });
       }
     } catch (err: unknown) {
@@ -196,7 +205,7 @@ export default function EmailSenderModal({
         type: "error",
         text: `Dispatch Error: ${errMsg}`,
       });
-      toast.error("Error dispatching real-time email.");
+      toast.error(errMsg);
     }
   };
 
@@ -218,7 +227,30 @@ export default function EmailSenderModal({
                   LIVE API ACTIVE
                 </span>
               </div>
-              <p className="font-extrabold text-base text-white mt-0.5">sahitsai6@gmail.com</p>
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setSenderAccount("gmail")}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer border ${
+                    senderAccount === "gmail"
+                      ? "bg-[#ef4d23] text-white border-transparent shadow-md"
+                      : "bg-white/5 text-neutral-300 border-white/10 hover:text-white"
+                  }`}
+                >
+                  Gmail: sahitsai6@gmail.com
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSenderAccount("resend")}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer border ${
+                    senderAccount === "resend"
+                      ? "bg-[#ef4d23] text-white border-transparent shadow-md"
+                      : "bg-white/5 text-neutral-300 border-white/10 hover:text-white"
+                  }`}
+                >
+                  Resend: hello@lumenandco.in
+                </button>
+              </div>
             </div>
           </div>
 
@@ -432,7 +464,7 @@ export default function EmailSenderModal({
         {/* Footer Actions */}
         <div className="pt-2 flex items-center justify-between border-t border-neutral-200">
           <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 font-medium">
-            <Zap className="h-3.5 w-3.5 text-[#ef4d23]" /> Real-time Node Mailer Service Active
+            <Zap className="h-3.5 w-3.5 text-[#ef4d23]" /> Live Dual Engine: Gmail SMTP + Resend API
           </div>
 
           <div className="flex items-center gap-2">

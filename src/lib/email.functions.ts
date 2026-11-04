@@ -1,17 +1,43 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import nodemailer from "nodemailer";
+import fs from "node:fs";
+import path from "node:path";
 
-// Attempt to load .env.local if available in local Node environment
-try {
-  if (
-    typeof process !== "undefined" &&
-    typeof (process as unknown as { loadEnvFile?: (path: string) => void }).loadEnvFile === "function"
-  ) {
-    (process as unknown as { loadEnvFile: (path: string) => void }).loadEnvFile(".env.local");
+/**
+ * Robust environment variable resolver that reads process.env, 
+ * parses .env.local dynamically from disk, and provides verified defaults.
+ */
+function getEnvVar(name: string, fallback: string = ""): string {
+  if (typeof process !== "undefined" && process.env && process.env[name]) {
+    return process.env[name]!.trim();
   }
-} catch {
-  // .env.local already loaded or non-existent in production
+
+  try {
+    const cwd = typeof process !== "undefined" && process.cwd ? process.cwd() : ".";
+    const localEnvPath = path.resolve(cwd, ".env.local");
+    if (fs.existsSync(localEnvPath)) {
+      const content = fs.readFileSync(localEnvPath, "utf-8");
+      for (const line of content.split("\n")) {
+        const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+        if (match && match[1] === name) {
+          let val = (match[2] || "").trim();
+          if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+          }
+          if (val) return val.trim();
+        }
+      }
+    }
+  } catch {
+    // Ignore file read error in edge/browser runtimes
+  }
+
+  // Default fallbacks for non-secret configuration
+  if (name === "SMTP_USER") return "sahitsai6@gmail.com";
+  if (name === "RESEND_FROM_EMAIL") return "Lumen & Co <hello@lumenandco.in>";
+
+  return fallback;
 }
 
 export interface SendMailOptions {
@@ -25,34 +51,39 @@ export interface SendMailOptions {
 }
 
 /**
- * High-reliability multi-tier email dispatcher.
+ * High-reliability real-time email dispatcher.
  * Intelligently routes:
- * - If from is sahitsai6@gmail.com or preferredProvider is "smtp" -> Uses Gmail SMTP (Google SSL Socket)
- * - If from is @lumenandco.in or preferredProvider is "resend" -> Uses Resend API
- * - Provides seamless automatic fallback if either service is unreachable.
+ * - If sender is @gmail.com or preferredProvider is "smtp" -> Uses Gmail SMTP (Google SSL Socket)
+ * - If sender is @lumenandco.in or preferredProvider is "resend" -> Uses Resend API
+ * - Provides seamless automatic fallback if either service encounters an error.
  */
 export async function sendEmailMessage(options: SendMailOptions): Promise<{
   success: boolean;
-  provider: "resend" | "smtp" | "mock";
-  messageId?: string;
+  provider: "resend" | "smtp";
+  messageId: string;
   message: string;
 }> {
   const toList = Array.isArray(options.to) ? options.to : [options.to];
-  const fromEmail = process.env["SMTP_USER"] || "sahitsai6@gmail.com";
-  const isGmailSender = options.from && options.from.includes("@gmail.com");
+  const fromEmail = getEnvVar("SMTP_USER", "sahitsai6@gmail.com");
+  const isGmailSender = Boolean(options.from && options.from.includes("@gmail.com"));
   const preferSmtp = options.preferredProvider === "smtp" || isGmailSender;
 
-  const resendApiKey = process.env["RESEND_API_KEY"];
-  const verifiedDomainFrom = process.env["RESEND_FROM_EMAIL"] || "Lumen & Co <hello@lumenandco.in>";
+  const resendApiKey = getEnvVar("RESEND_API_KEY");
+  const verifiedDomainFrom = getEnvVar("RESEND_FROM_EMAIL", "Lumen & Co <hello@lumenandco.in>");
 
-  const rawPass = process.env["SMTP_PASS"] || process.env["GMAIL_APP_PASSWORD"] || "";
+  const rawPass = getEnvVar("SMTP_PASS") || getEnvVar("GMAIL_APP_PASSWORD");
   const smtpPass = rawPass.replace(/\s+/g, "");
-  const smtpHost = process.env["SMTP_HOST"] || "smtp.gmail.com";
-  const smtpPort = Number(process.env["SMTP_PORT"] || 465);
+  const smtpHost = getEnvVar("SMTP_HOST", "smtp.gmail.com");
+  const smtpPort = Number(getEnvVar("SMTP_PORT", "465"));
 
-  // Helper 1: Gmail SMTP via Nodemailer
+  const errors: string[] = [];
+
+  // 1. Gmail SMTP Dispatcher
   const trySmtp = async (senderAddress?: string) => {
-    if (!smtpPass) return null;
+    if (!smtpPass) {
+      errors.push("Gmail App Password not found");
+      return null;
+    }
     try {
       const transporter = nodemailer.createTransport({
         host: smtpHost,
@@ -75,20 +106,25 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
       });
 
       return {
-        success: true,
+        success: true as const,
         provider: "smtp" as const,
         messageId: info.messageId,
-        message: `Email successfully delivered via Gmail SMTP from ${finalFrom} to ${toList.join(", ")}!`,
+        message: `Delivered live via Gmail SMTP (${finalFrom}) to ${toList.join(", ")}`,
       };
     } catch (smtpErr) {
-      console.warn("[SMTP Notice] Nodemailer failed:", smtpErr);
+      const msg = smtpErr instanceof Error ? smtpErr.message : String(smtpErr);
+      console.warn("[SMTP Notice] Nodemailer failed:", msg);
+      errors.push(`SMTP: ${msg}`);
       return null;
     }
   };
 
-  // Helper 2: Resend REST API
+  // 2. Resend REST API Dispatcher
   const tryResend = async (senderAddress?: string) => {
-    if (!resendApiKey) return null;
+    if (!resendApiKey) {
+      errors.push("Resend API Key not found");
+      return null;
+    }
     const resendFrom =
       senderAddress && !senderAddress.includes("@gmail.com")
         ? senderAddress
@@ -114,23 +150,26 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
       if (response.ok) {
         const json = (await response.json()) as { id?: string };
         return {
-          success: true,
+          success: true as const,
           provider: "resend" as const,
-          messageId: json.id,
-          message: `Email successfully delivered via Resend from ${resendFrom} to ${toList.join(", ")}!`,
+          messageId: json.id || `resend_${Date.now()}`,
+          message: `Delivered live via Resend (${resendFrom}) to ${toList.join(", ")}`,
         };
       } else {
         const errText = await response.text();
         console.warn(`[Resend Notice] HTTP ${response.status}:`, errText);
+        errors.push(`Resend HTTP ${response.status}: ${errText}`);
         return null;
       }
     } catch (fetchErr) {
-      console.warn("[Resend Notice] Connection failed:", fetchErr);
+      const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+      console.warn("[Resend Notice] Connection failed:", msg);
+      errors.push(`Resend: ${msg}`);
       return null;
     }
   };
 
-  // Execute in prioritized order
+  // Dispatch in prioritized order
   if (preferSmtp) {
     const smtpRes = await trySmtp();
     if (smtpRes) return smtpRes;
@@ -145,12 +184,7 @@ export async function sendEmailMessage(options: SendMailOptions): Promise<{
     if (smtpRes) return smtpRes;
   }
 
-  // Tier 3: Mock / Offline fallback
-  return {
-    success: true,
-    provider: "mock",
-    message: `Mail payload queued in local mock buffer for ${toList.join(", ")}.`,
-  };
+  throw new Error(`Real-time email dispatch failed: ${errors.join(" | ")}`);
 }
 
 export const sendRealtimeEmail = createServerFn({ method: "POST" })
@@ -229,7 +263,7 @@ export const sendLeadAutomationEmails = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const results = { clientDelivered: false, teamDelivered: false };
-    const adminEmail = process.env["SMTP_USER"] || "sahitsai6@gmail.com";
+    const adminEmail = getEnvVar("SMTP_USER", "sahitsai6@gmail.com");
 
     // 1. Send Auto-Confirmation to Client DIRECTLY FROM sahitsai6@gmail.com
     try {
